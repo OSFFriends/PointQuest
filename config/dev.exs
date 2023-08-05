@@ -29,7 +29,12 @@ config :point_quest, PointQuestWeb.Endpoint,
     tailwind: {Tailwind, :install_and_run, [:default, ~w(--watch)]}
   ]
 
-config :point_quest, Infra.Linear, api_key: System.get_env("LINEAR_API_KEY", nil)
+config :point_quest, Infra.Linear,
+  api_key: System.get_env("LINEAR_API_KEY", nil),
+  team_name: "PAYME",
+  client_id: "a79e5ef8c1c5084c6caed995243bd21c",
+  client_secret: System.get_env("LINEAR_CLIENT_SECRET", nil)
+
 # ## SSL Support
 #
 # In order to use HTTPS in development, a self-signed
