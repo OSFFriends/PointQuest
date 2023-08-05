@@ -1,0 +1,8 @@
+{ 
+  teams { 
+    nodes { 
+      id 
+      name 
+    }
+  }
+}
