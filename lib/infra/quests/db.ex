@@ -2,26 +2,27 @@ defmodule Infra.Quests.Db do
   @moduledoc """
   In-memory DB system
   """
-
   alias PointQuest.Quests.Quest
 
-  @spec create(quest :: Ecto.Changeset.t(PointQuest.Quests.Quest)) :: Quest.t()
-  def create(quest) do
-    with {:ok, quest} <- Ecto.Changeset.apply_action(quest, :insert) do
+  @spec create(Ecto.Changeset.t(Quest.t())) :: Quest.t()
+  def create(quest_changeset) do
+    with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
       quest = Map.put(quest, :id, Ecto.UUID.generate())
       {:ok, _pid} = Infra.Quests.QuestServer.start_link(quest)
       quest
     end
   end
 
-  def update(quest) do
-    with {:ok, quest} <- Ecto.Changeset.apply_action(quest, :update) do
+  @spec update(Ecto.Changeset.t(Quest.t())) :: {:ok, Quest.t()}
+  def update(quest_changeset) do
+    with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :update) do
       server = lookup_quest_server(quest.id)
       :ok = Agent.update(server, fn _q -> quest end)
       {:ok, quest}
     end
   end
 
+  @spec get_quest_by_id(quest_id :: String.t()) :: {:ok, Quest.t()} | {:error, :quest_not_found}
   def get_quest_by_id(quest_id) do
     case lookup_quest_server(quest_id) do
       nil ->
@@ -32,6 +33,7 @@ defmodule Infra.Quests.Db do
     end
   end
 
+  @spec lookup_quest_server(quest_id :: String.t()) :: pid() | nil
   defp lookup_quest_server(quest_id) do
     case Registry.lookup(Infra.Quests.Registry, quest_id) do
       [{pid, _state}] ->
