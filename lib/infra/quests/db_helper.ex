@@ -6,38 +6,50 @@ defmodule Infra.Quests.DbHelper do
   the changeset shape for each component of a quest
   """
   alias PointQuest.Quests
+  alias PointQuest.Quests.Adventurer
   alias PointQuest.Quests.Quest
 
   @spec create_quest(
           name :: String.t(),
           party_leader :: String.t(),
           lead_from_the_front? :: boolean(),
-          adventurers :: [String.t()]
+          adventurer_names :: [String.t()]
         ) :: Quest.t()
-  def create_quest(name, party_leader, lead_from_the_front? \\ false, adventurers \\ []) do
+  def create_quest(name, party_leader, lead_from_the_front? \\ false, adventurer_names \\ []) do
+    adventurers =
+      for adv <- adventurer_names, reduce: [] do
+        acc ->
+          a =
+            Infra.Quests.Db.create_adventurer(
+              Adventurer.create_changeset(%Adventurer{}, %{name: adv})
+            )
+
+          [%{id: a.id, name: a.name} | acc]
+      end
+
+    %Adventurer{id: pl_id, name: pl_name} =
+      Infra.Quests.Db.create_adventurer(
+        Adventurer.create_changeset(%Adventurer{}, %{name: party_leader})
+      )
+
     params = %{
       name: name,
-      party_leader: %{name: party_leader},
+      party_leader: %{id: pl_id, name: pl_name},
       lead_from_the_front: lead_from_the_front?
     }
 
     quest = Quests.create(params)
 
-    result =
-      if length(Enum.filter(adventurers, fn adv -> adv != party_leader end)) > 0 do
+    case length(Enum.filter(adventurers, fn adv -> adv != party_leader end)) > 0 do
+      true ->
         for adventurer <- adventurers, reduce: quest do
           acc ->
-            adv_params = %{
-              name: adventurer
-            }
-
-            {:ok, quest} = Quests.add_adventurer_to_party(acc.id, adv_params)
+            {:ok, quest} = Quests.add_adventurer_to_party(acc.id, adventurer)
             quest
         end
-      else
-        quest
-      end
 
-    result
+      false ->
+        quest
+    end
   end
 end

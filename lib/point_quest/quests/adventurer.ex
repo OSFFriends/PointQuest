@@ -13,7 +13,7 @@ defmodule PointQuest.Quests.Adventurer do
 
   def create_changeset(adventurer, params \\ %{}) do
     adventurer
-    |> cast(params, [:name])
+    |> cast(params, [:id, :name])
     |> validate_required([:name])
   end
 end
