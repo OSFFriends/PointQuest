@@ -18,7 +18,8 @@ defmodule PointQuestWeb.Linear do
         strategy: Strategy.AuthCode,
         client_id: @linear_config[:client_id],
         client_secret: @linear_config[:client_secret],
-        site: "https://linear.app"
+        site: "https://linear.app",
+        redirect_uri: "https://localhost:4000/linear/auth/callback"
       )
 
     socket = assign(socket, client: client)
