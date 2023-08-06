@@ -12,6 +12,8 @@ defmodule PointQuest.Application do
       PointQuestWeb.Telemetry,
       # Start the Ecto repository
       PointQuest.Repo,
+      # Registry for managing quest processes
+      {Registry, keys: :unique, name: Infra.Quests.Registry},
       # Start the PubSub system
       {Phoenix.PubSub, name: PointQuest.PubSub},
       # Start Finch
