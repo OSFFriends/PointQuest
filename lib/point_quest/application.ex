@@ -14,6 +14,8 @@ defmodule PointQuest.Application do
       PointQuest.Repo,
       # Registry for managing quest processes
       {Registry, keys: :unique, name: Infra.Quests.Registry},
+      # Registry for managing adventurers
+      {Registry, keys: :unique, name: Infra.Adventurers.Registry},
       # Start the PubSub system
       {Phoenix.PubSub, name: PointQuest.PubSub},
       # Start Finch
