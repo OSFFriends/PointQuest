@@ -6,7 +6,6 @@ defmodule Infra.Linear do
   """
   use Tesla
 
-  alias Infra.Linear.Records.Issue
   alias Infra.Linear.Records.Team
   alias PointQuest.QueryParser
 
@@ -49,9 +48,5 @@ defmodule Infra.Linear do
 
     # map_issues(issues)
     Infra.LinearObject.load(Team, team)
-  end
-
-  defp map_issues(issues) do
-    Enum.map(issues, &Ecto.embedded_load(Issue, &1, :json))
   end
 end
