@@ -4,7 +4,6 @@ defmodule PointQuest.Quests do
   """
 
   alias PointQuest.Quests.Quest
-  alias PointQuest.Quests.Adventurer
 
   def create(quest_params) do
     %Quest{}
