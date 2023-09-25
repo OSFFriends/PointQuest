@@ -211,7 +211,7 @@ defmodule Infra.LinearObject do
   """
   def get(record, []) do
     record
-  end  
+  end
 
   def get(record, [head | rest]) when is_list(record) and is_integer(head) do
     get(Enum.at(record, head), rest)
