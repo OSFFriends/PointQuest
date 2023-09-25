@@ -16,6 +16,6 @@ defmodule Infra.Linear.Records.Team do
   object do
     field :id, :string
     field :name, :string
-    nodes :issues, Issue
+    nodes(:issues, Issue)
   end
 end
