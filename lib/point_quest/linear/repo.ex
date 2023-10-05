@@ -1,8 +1,6 @@
 defmodule PointQuest.Linear.Repo do
   @behaviour PointQuest.Behaviour.Linear.Repo
 
-  import Ecto.Query
-
   alias PointQuest.Repo
   alias Infra.Linear.Records.Token
 

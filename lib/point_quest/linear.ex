@@ -27,5 +27,6 @@ defmodule PointQuest.Linear do
       provider: "Linear"
     })
     repo().insert_token(insert_changeset)
+    :ok
   end
 end
