@@ -21,6 +21,7 @@ config :point_quest, PointQuestWeb.Endpoint,
   live_view: [signing_salt: "Qx76kENh"]
 
 # Configures dependency injection
+config :point_quest, PointQuest.Behaviour.Linear, PointQuest.Linear
 config :point_quest, PointQuest.Behaviour.Linear.Client, PointQuest.Linear.Client
 config :point_quest, PointQuest.Behaviour.Linear.Repo, PointQuest.Linear.Repo
 config :point_quest, PointQuest.Behaviour.Quest, PointQuest.Quests
