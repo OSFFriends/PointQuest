@@ -2,7 +2,9 @@ defmodule PointQuest.Linear do
   @moduledoc """
   Interface module for the Linear resources
   """
+  alias Infra.Linear.Records.Team
   alias Infra.Linear.Records.Token
+  alias PointQuest.QueryParser
 
   @spec repo() :: module()
   def repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Linear.Repo)
@@ -11,11 +13,21 @@ defmodule PointQuest.Linear do
   def has_token?(email) do
     with %PointQuest.Accounts.User{} = user <- PointQuest.Accounts.get_user_by_email(email),
          %Token{} <- repo().get_token_for_user(user.id) do
-      :ok
+      true
     else
       nil ->
-        {:error, :token_not_found}
+        false
     end
+  end
+
+  @spec list_teams(user_id :: String.t()) :: [map()]
+  def list_teams(user_id) do
+    body = %{query: QueryParser.list_teams([])}
+
+    {:ok, %Tesla.Env{body: %{"data" => %{"teams" => %{"nodes" => teams}}}}} =
+      client().post(body, user_id)
+
+    teams
   end
 
   def redeem_code(redirect_uri, code, user_id) do

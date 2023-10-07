@@ -11,7 +11,7 @@ defmodule PointQuest.Linear.Client do
 
   def post(query, user_id) do
     client(user_id)
-    |> Tesla.post("/graphql", %{query: query})
+    |> Tesla.post("/graphql", query, headers: [{"content-type", "application/json"}])
   end
 
   @impl Client
@@ -39,7 +39,7 @@ defmodule PointQuest.Linear.Client do
   end
 
   def client(user_id) do
-    {:ok, %{token: token}} = repo().get_token_for_user(user_id)
+    %{token: token} = repo().get_token_for_user(user_id)
 
     middleware = [
       {Tesla.Middleware.BaseUrl, "https://api.linear.app"},
