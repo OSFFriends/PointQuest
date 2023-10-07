@@ -38,12 +38,11 @@ defmodule PointQuest.Linear do
   def list_issues(team_id, user_id) do
     body = %{query: QueryParser.list_issues_for_team(id: team_id)}
 
-    {:ok, %Tesla.Env{body: %{"data" => %{"team" => %{"issues" => %{"nodes" => issues}}}}}} =
+    {:ok, %Tesla.Env{body: %{"data" => %{"team" => team}}}} =
       client().post(body, user_id)
 
-    # map_issues(issues)
-    # Infra.LinearObject.load(Team, team)
-    issues
+    team = Infra.LinearObject.load(Infra.Linear.Records.Team, team)
+    team.issues
   end
 
   @impl PointQuest.Behaviour.Linear
