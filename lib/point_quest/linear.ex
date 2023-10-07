@@ -19,14 +19,16 @@ defmodule PointQuest.Linear do
   end
 
   def redeem_code(redirect_uri, code, user_id) do
-    token = client().token_from_code(redirect_uri, code)
-    {:ok, insert_changeset} = Token.insert_changeset(%Token{}, %{
-      user_id: user_id, 
-      token: token.token,
-      expiration: token.expiration,
-      provider: "Linear"
-    })
-    repo().insert_token(insert_changeset)
-    :ok
+    with token <- client().token_from_code(redirect_uri, code),
+         insert_changeset <-
+           Token.insert_changeset(%Token{}, %{
+             user_id: user_id,
+             token: token["access_token"],
+             expiration: DateTime.utc_now() |> Timex.shift(seconds: token["expires_in"]),
+             provider: "Linear"
+           }),
+         %Token{} <- repo().insert_token(insert_changeset) do
+      :ok
+    end
   end
 end

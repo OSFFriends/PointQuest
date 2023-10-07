@@ -4,8 +4,6 @@ defmodule PointQuest.Linear.Client do
   """
   alias PointQuest.Behaviour.Linear.Client
 
-  @linear_config Application.compile_env(:point_quest, Infra.Linear)
-
   @behaviour Client
 
   @spec repo() :: module()
@@ -18,18 +16,24 @@ defmodule PointQuest.Linear.Client do
 
   @impl Client
   def token_from_code(redirect_uri, code) do
+    linear_config = Application.get_env(:point_quest, Infra.Linear)
+
     body = %{
       code: code,
       redirect_uri: redirect_uri,
-      client_id: @linear_config[:client_id],
-      client_secret: @linear_config[:client_secret],
+      client_id: linear_config[:client_id],
+      client_secret: linear_config[:client_secret],
       grant_type: "authorization_code"
     }
 
     {:ok, %{body: response}} =
-      Tesla.client([Tesla.Middleware.FormUrlencoded])
-      |> Tesla.post("/oauth/token", body)
-      |> dbg
+      Tesla.client([
+        {Tesla.Middleware.BaseUrl, "https://api.linear.app"},
+        Tesla.Middleware.FormUrlencoded
+      ])
+      |> Tesla.post("/oauth/token", body,
+        headers: ["content-type": "application/x-www-form-urlencoded"]
+      )
 
     Jason.decode!(response)
   end
