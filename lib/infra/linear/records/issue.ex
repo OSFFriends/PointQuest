@@ -24,9 +24,9 @@ defmodule Infra.Linear.Records.Issue do
   object do
     field :id, :string
     field :branchName, :string
-    nodes :comments, Comment
+    nodes(:comments, Comment)
     field :createdAt, :utc_datetime
-    embed :creator, User
+    embed(:creator, User)
     field :description, :string
     field :estimate, :float
     field :priority, :float

@@ -2,6 +2,7 @@ defmodule PointQuestWeb.Router do
   use PointQuestWeb, :router
 
   import PointQuestWeb.UserAuth
+  import PointQuestWeb.LinearAuthPlug
 
   pipeline :browser do
     plug :accepts, ["html"]
@@ -15,6 +16,11 @@ defmodule PointQuestWeb.Router do
 
   pipeline :api do
     plug :accepts, ["json"]
+  end
+
+  pipeline :linear_auth do
+    plug :handle_linear_code
+    plug :require_linear_token
   end
 
   scope "/", PointQuestWeb do
@@ -62,12 +68,28 @@ defmodule PointQuestWeb.Router do
   end
 
   scope "/", PointQuestWeb do
-    pipe_through [:browser, :require_authenticated_user]
+    pipe_through [
+      :browser,
+      :require_authenticated_user
+    ]
 
     live_session :require_authenticated_user,
       on_mount: [{PointQuestWeb.UserAuth, :ensure_authenticated}] do
       live "/users/settings", UserSettingsLive, :edit
       live "/users/settings/confirm_email/:token", UserSettingsLive, :confirm_email
+    end
+  end
+
+  scope "/", PointQuestWeb do
+    pipe_through [
+      :browser,
+      :require_authenticated_user,
+      :linear_auth
+    ]
+
+    live_session :require_linear_token,
+      on_mount: [{PointQuestWeb.UserAuth, :ensure_authenticated}] do
+      live "/quest", Quest
     end
   end
 

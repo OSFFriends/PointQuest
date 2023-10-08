@@ -113,3 +113,9 @@ if config_env() == :prod do
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 end
+
+config :point_quest, Infra.Linear,
+  api_key: System.get_env("LINEAR_API_KEY", nil),
+  team_name: "PAYME",
+  client_id: "a79e5ef8c1c5084c6caed995243bd21c",
+  client_secret: System.get_env("LINEAR_CLIENT_SECRET", nil)
