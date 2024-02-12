@@ -13,15 +13,16 @@ defmodule PointQuestWeb.Quest do
     <div :if={!is_nil(@team)} class="flex flex-col items-start self-stretch order-none gap-y-5">
       <div>
         <h2 class="text-2xl">Teams</h2>
-        <%= for %{"name" => name, "id" => id} <- @teams do %>
-          <p><%= name %> - <%= id %></p>
-        <% end %>
+        <p :for={%{"name" => name, "id" => id} <- @teams}><%= name %> - <%= id %></p>
       </div>
-      <div>
-        <h2 class="text-2xl">Issues</h2>
-        <%= for issue <- linear().list_issues(@team["id"], @current_user.id) do %>
-          <p>Issue: <%= issue.id %></p>
-        <% end %>
+      <div id="lists" class="grid sm:grid-cols-1 md:grid-cols-3 gap-2">
+        <.live_component
+          id="1"
+          module={PointQuestWeb.Live.Components.List}
+          list={@issues}
+          list_name="Issues"
+          session={@session}
+        />
       </div>
     </div>
     """
@@ -30,9 +31,12 @@ defmodule PointQuestWeb.Quest do
   def mount(_params, _session, socket) do
     socket =
       if connected?(socket) do
-        teams = linear().list_teams(socket.assigns.current_user.id)
+        session_id = "12242ljl"
+        current_user = socket.assigns.current_user.id
+        teams = linear().list_teams(current_user)
         team = List.first(teams)
-        assign(socket, teams: teams, team: team)
+        issues = linear().list_issues(team["id"], current_user)
+        assign(socket, teams: teams, team: team, issues: issues, session: session_id)
       else
         socket
         |> assign_new(:teams, fn -> [] end)

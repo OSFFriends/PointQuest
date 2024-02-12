@@ -8,8 +8,27 @@ defmodule Infra.Linear.Records.Issue do
   alias Infra.Linear.Records.Comment
   alias Infra.Linear.Records.User
 
+  # assignee: User
+  # attachments (linked issues?): [Issue]
+  # boardOrder
+  # children: [Issue]
+  # cycle: Cycle TODO: PQ-4
+  # dueDate: DateTime (although says timeless?)
+  # history: IssueHistoryConnection TODO: PQ-5
+  # identifier: human readable id string
+  # inverseRelations: IssueRelationConnection TODO: PQ-6
+  # labels: IssueLabelConnection TODO: PQ-7
+  # parent: Issue
+  # priorityLabel (maybe?): String
+  # project: Project TODO: PQ-8
+  # projectMilestones: ProjectMilestones TODO: PQ-9
+  # relations: IssueRelationConnection
+  # sortOrder: Float
+  # state: WorkflowState TODO: PQ-10
+
   @type issue :: %__MODULE__{
           id: String.t(),
+          identifier: String.t(),
           branchName: String.t(),
           comments: [Comment.t()],
           createdAt: DateTime.t(),
@@ -23,6 +42,7 @@ defmodule Infra.Linear.Records.Issue do
 
   object do
     field :id, :string
+    field :identifier, :string
     field :branchName, :string
     nodes(:comments, Comment)
     field :createdAt, :utc_datetime

@@ -37,7 +37,12 @@ defmodule PointQuestWeb.Endpoint do
     cookie_key: "request_logger"
 
   plug Plug.RequestId
-  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint]
+
+  @spec log_level(Plug.Conn.t()) :: atom() | boolean()
+  def log_level(%{request_path: "/_health"}), do: false
+  def log_level(%{request_path: "/metrics"}), do: false
+  def log_level(_conn), do: :info
+  plug Plug.Telemetry, event_prefix: [:phoenix, :endpoint], log: {__MODULE__, :log_level, []}
 
   plug Plug.Parsers,
     parsers: [:urlencoded, :multipart, :json],
