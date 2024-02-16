@@ -1,0 +1,9 @@
+{ 
+  workflowStates { 
+    nodes { 
+      id 
+      name 
+      <%= @issues_snippet %>
+    }
+  }
+}
