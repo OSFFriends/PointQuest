@@ -7,6 +7,10 @@ To start your Phoenix server:
 
 Now you can visit [`localhost:4000`](http://localhost:4000) from your browser.
 
+## Postgres Database
+
+The default port for the postgres instance this app talks to has been moved to 5430. The docker-compose file does already reference this.
+
 ## Environment Setup
 
 ### Required Env Vars

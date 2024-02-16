@@ -6,6 +6,7 @@ config :point_quest, PointQuest.Repo,
   password: "postgres",
   hostname: "localhost",
   database: "point_quest_dev",
+  port: 5430,
   stacktrace: true,
   show_sensitive_data_on_connection_error: true,
   pool_size: 10
@@ -64,6 +65,11 @@ config :point_quest, PointQuestWeb.Endpoint,
 
 # Enable dev routes for dashboard and mailbox
 config :point_quest, dev_routes: true
+
+_log_levels = [:info, :error, :warning, :debug]
+
+config :logger,
+  level: System.get_env("DEFAULT_LOG_LEVEL", "debug") |> String.to_existing_atom()
 
 # Do not include metadata nor timestamps in development logs
 config :logger, :console, format: "[$level] $message\n"
