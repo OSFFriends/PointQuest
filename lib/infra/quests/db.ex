@@ -4,12 +4,12 @@ defmodule Infra.Quests.Db do
   """
   alias PointQuest.Quests.Quest
 
-  @spec create(Ecto.Changeset.t(Quest.t())) :: Quest.t()
+  @spec create(Ecto.Changeset.t(Quest.t())) :: {:ok, Quest.t()} | {:error, Ecto.Changeset.t()}
   def create(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
       quest = Map.put(quest, :id, Ecto.UUID.generate())
       {:ok, _pid} = Infra.Quests.QuestServer.start_link(quest)
-      quest
+      {:ok, quest}
     end
   end
 
