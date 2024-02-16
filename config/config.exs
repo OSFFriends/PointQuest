@@ -24,7 +24,8 @@ config :point_quest, PointQuestWeb.Endpoint,
 config :point_quest, PointQuest.Behaviour.Linear, PointQuest.Linear
 config :point_quest, PointQuest.Behaviour.Linear.Client, PointQuest.Linear.Client
 config :point_quest, PointQuest.Behaviour.Linear.Repo, PointQuest.Linear.Repo
-config :point_quest, PointQuest.Behaviour.Quest, PointQuest.Quests
+config :point_quest, PointQuest.Behaviour.Quests, PointQuest.Quests
+config :point_quest, PointQuest.Behaviour.Quests.Repo, Infra.Quests.Db
 config :point_quest, PointQuest.Behaviour.Ticket, Infra.Linear.Linear
 
 # Configures the mailer
