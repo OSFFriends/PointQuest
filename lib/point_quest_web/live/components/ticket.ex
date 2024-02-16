@@ -3,7 +3,13 @@ defmodule PointQuestWeb.Live.Components.Ticket do
 
   def render(assigns) do
     ~H"""
-    <div id={"#{@item.id}"} class="px-2 py-8 my-2 border-b bg-white border-sky-100" data-id={@item.id}>
+    <div
+      id={"#{@item.id}"}
+      class="px-2 py-8 my-2 border-b bg-white border-sky-100"
+      data-id={@item.id}
+      phx-click="select-ticket"
+      phx-value-ticketnumber={@item.identifier}
+    >
       <%= @item.identifier %> - <%= @item.title %>
     </div>
     """
