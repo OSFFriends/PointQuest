@@ -6,6 +6,7 @@ defmodule Infra.Linear.Records.Issue do
   use Infra.LinearObject
 
   alias Infra.Linear.Records.Comment
+  alias Infra.Linear.Records.WorkflowState
   alias Infra.Linear.Records.User
 
   # assignee: User
@@ -24,7 +25,6 @@ defmodule Infra.Linear.Records.Issue do
   # projectMilestones: ProjectMilestones TODO: PQ-9
   # relations: IssueRelationConnection
   # sortOrder: Float
-  # state: WorkflowState TODO: PQ-10
 
   @type issue :: %__MODULE__{
           id: String.t(),
@@ -36,6 +36,7 @@ defmodule Infra.Linear.Records.Issue do
           description: String.t(),
           estimate: Float.t(),
           priority: Float.t(),
+          state: WorkflowState.issue_status(),
           title: String.t(),
           url: String.t()
         }
@@ -50,6 +51,7 @@ defmodule Infra.Linear.Records.Issue do
     field :description, :string
     field :estimate, :float
     field :priority, :float
+    embed(:state, WorkflowState)
     field :title, :string
     field :url, :string
   end
