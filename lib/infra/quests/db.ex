@@ -8,7 +8,13 @@ defmodule Infra.Quests.Db do
   def create(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
       quest = Map.put(quest, :id, Ecto.UUID.generate())
-      {:ok, _pid} = Infra.Quests.QuestServer.start_link(quest)
+      # {:ok, _pid} = Infra.Quests.QuestServer.start_link(quest)
+      {:ok, _pid} =
+        DynamicSupervisor.start_child(
+          Infra.Quests.QuestSupervisor,
+          {Infra.Quests.QuestServer, quest}
+        )
+
       {:ok, quest}
     end
   end
