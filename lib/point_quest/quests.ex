@@ -14,6 +14,11 @@ defmodule PointQuest.Quests do
   end
 
   @impl PointQuest.Behaviour.Quest
+  def get(quest_id) do
+    Infra.Quests.Db.get_quest_by_id(quest_id)
+  end
+
+  @impl PointQuest.Behaviour.Quest
   def add_adventurer_to_party(quest_id, adventurer_params) do
     with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(quest_id) do
       Quest.add_adventurer_to_party_changeset(quest, adventurer_params)
