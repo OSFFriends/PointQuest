@@ -1,0 +1,40 @@
+issues {
+  nodes {
+    id
+    identifier
+    title
+    description
+    branchName
+    comments {
+      nodes {
+        id
+        body
+        url
+        createdAt
+        user {
+          id
+          displayName
+          email
+          url
+          avatarUrl
+        }
+      }
+    }
+    createdAt
+    creator {
+      id
+      displayName
+      email
+      url
+      avatarUrl
+    }
+    estimate
+    state {
+      id
+      name
+      position
+    }
+    priority
+    url
+  }
+}
