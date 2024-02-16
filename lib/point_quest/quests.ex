@@ -6,23 +6,25 @@ defmodule PointQuest.Quests do
 
   alias PointQuest.Quests.Quest
 
+  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
+
   @impl PointQuest.Behaviour.Quest
   def create(quest_params) do
     %Quest{}
     |> Quest.create_changeset(quest_params)
-    |> Infra.Quests.Db.create()
+    |> repo().create()
   end
 
   @impl PointQuest.Behaviour.Quest
   def get(quest_id) do
-    Infra.Quests.Db.get_quest_by_id(quest_id)
+    repo().get_quest_by_id(quest_id)
   end
 
   @impl PointQuest.Behaviour.Quest
   def add_adventurer_to_party(quest_id, adventurer_params) do
     with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(quest_id) do
       Quest.add_adventurer_to_party_changeset(quest, adventurer_params)
-      |> Infra.Quests.Db.update()
+      |> repo().update()
     end
   end
 end

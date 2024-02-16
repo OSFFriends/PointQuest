@@ -2,9 +2,9 @@ defmodule Infra.Quests.Db do
   @moduledoc """
   In-memory DB system
   """
-  alias PointQuest.Quests.Quest
+  @behaviour PointQuest.Behaviour.Quests.Repo
 
-  @spec create(Ecto.Changeset.t(Quest.t())) :: {:ok, Quest.t()} | {:error, Ecto.Changeset.t()}
+  @impl PointQuest.Behaviour.Quests.Repo
   def create(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
       quest = Map.put(quest, :id, Ecto.UUID.generate())
@@ -13,7 +13,7 @@ defmodule Infra.Quests.Db do
     end
   end
 
-  @spec update(Ecto.Changeset.t(Quest.t())) :: {:ok, Quest.t()}
+  @impl PointQuest.Behaviour.Quests.Repo
   def update(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :update) do
       server = lookup_quest_server(quest.id)
@@ -22,7 +22,7 @@ defmodule Infra.Quests.Db do
     end
   end
 
-  @spec get_quest_by_id(quest_id :: String.t()) :: {:ok, Quest.t()} | {:error, :quest_not_found}
+  @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
     case lookup_quest_server(quest_id) do
       nil ->
@@ -33,7 +33,6 @@ defmodule Infra.Quests.Db do
     end
   end
 
-  @spec lookup_quest_server(quest_id :: String.t()) :: pid() | nil
   defp lookup_quest_server(quest_id) do
     case Registry.lookup(Infra.Quests.Registry, quest_id) do
       [{pid, _state}] ->
