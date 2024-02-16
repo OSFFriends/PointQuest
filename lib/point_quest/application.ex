@@ -19,7 +19,8 @@ defmodule PointQuest.Application do
       # Start Finch
       {Finch, name: PointQuest.Finch},
       # Start the Endpoint (http/https)
-      PointQuestWeb.Endpoint
+      PointQuestWeb.Endpoint,
+      {DynamicSupervisor, name: Infra.Quests.QuestSupervisor}
       # Start a worker by calling: PointQuest.Worker.start_link(arg)
       # {PointQuest.Worker, arg}
     ]
