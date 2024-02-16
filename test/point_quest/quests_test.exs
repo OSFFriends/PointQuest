@@ -10,7 +10,7 @@ defmodule PointQuest.QuestsTest do
     end
 
     test "missing required options results in an error" do
-      # pary leader is required
+      # party leader is required
       assert {:error, %Ecto.Changeset{valid?: false}} =
                Quests.create(%{name: "my quest"})
     end
