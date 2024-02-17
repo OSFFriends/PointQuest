@@ -4,15 +4,17 @@ defmodule Infra.Quests.Db do
   """
   @behaviour PointQuest.Behaviour.Quests.Repo
 
+  alias Infra.Quests.QuestServer
+
   @impl PointQuest.Behaviour.Quests.Repo
   def create(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
       quest = Map.put(quest, :id, Ecto.UUID.generate())
-      # {:ok, _pid} = Infra.Quests.QuestServer.start_link(quest)
+
       {:ok, _pid} =
         DynamicSupervisor.start_child(
           Infra.Quests.QuestSupervisor,
-          {Infra.Quests.QuestServer, quest}
+          {QuestServer, quest: quest}
         )
 
       {:ok, quest}
@@ -23,7 +25,7 @@ defmodule Infra.Quests.Db do
   def update(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :update) do
       server = lookup_quest_server(quest.id)
-      :ok = Agent.update(server, fn _q -> quest end)
+      :ok = QuestServer.update(server, quest)
       {:ok, quest}
     end
   end
@@ -35,7 +37,7 @@ defmodule Infra.Quests.Db do
         {:error, :quest_not_found}
 
       pid ->
-        {:ok, Agent.get(pid, fn q -> q end)}
+        {:ok, QuestServer.get(pid)}
     end
   end
 
