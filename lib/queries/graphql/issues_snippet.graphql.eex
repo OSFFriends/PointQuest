@@ -28,6 +28,11 @@ issues {
       url
       avatarUrl
     }
+    cycle {
+      id
+      name
+      number
+    }
     estimate
     state {
       id
