@@ -35,6 +35,10 @@ issues {
       position
     }
     priority
+    project {
+      id
+      name
+    }
     url
   }
 }

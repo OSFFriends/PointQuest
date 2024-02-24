@@ -6,6 +6,7 @@ defmodule Infra.Linear.Records.Issue do
   use Infra.LinearObject
 
   alias Infra.Linear.Records.Comment
+  alias Infra.Linear.Records.Project
   alias Infra.Linear.Records.WorkflowState
   alias Infra.Linear.Records.User
 
@@ -21,7 +22,6 @@ defmodule Infra.Linear.Records.Issue do
   # labels: IssueLabelConnection TODO: PQ-7
   # parent: Issue
   # priorityLabel (maybe?): String
-  # project: Project TODO: PQ-8
   # projectMilestones: ProjectMilestones TODO: PQ-9
   # relations: IssueRelationConnection
   # sortOrder: Float
@@ -36,6 +36,7 @@ defmodule Infra.Linear.Records.Issue do
           description: String.t(),
           estimate: Float.t(),
           priority: Float.t(),
+          project: Project.project(),
           state: WorkflowState.issue_status(),
           title: String.t(),
           url: String.t()
@@ -51,6 +52,7 @@ defmodule Infra.Linear.Records.Issue do
     field :description, :string
     field :estimate, :float
     field :priority, :float
+    embed(:project, Project)
     embed(:state, WorkflowState)
     field :title, :string
     field :url, :string
