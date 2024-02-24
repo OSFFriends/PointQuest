@@ -6,6 +6,7 @@ defmodule Infra.Linear.Records.Issue do
   use Infra.LinearObject
 
   alias Infra.Linear.Records.Comment
+  alias Infra.Linear.Records.Cycle
   alias Infra.Linear.Records.Project
   alias Infra.Linear.Records.WorkflowState
   alias Infra.Linear.Records.User
@@ -14,7 +15,6 @@ defmodule Infra.Linear.Records.Issue do
   # attachments (linked issues?): [Issue]
   # boardOrder
   # children: [Issue]
-  # cycle: Cycle TODO: PQ-4
   # dueDate: DateTime (although says timeless?)
   # history: IssueHistoryConnection TODO: PQ-5
   # identifier: human readable id string
@@ -33,6 +33,7 @@ defmodule Infra.Linear.Records.Issue do
           comments: [Comment.t()],
           createdAt: DateTime.t(),
           creator: User.t(),
+          cycle: Cycle.t(),
           description: String.t(),
           estimate: Float.t(),
           priority: Float.t(),
@@ -49,6 +50,7 @@ defmodule Infra.Linear.Records.Issue do
     nodes(:comments, Comment)
     field :createdAt, :utc_datetime
     embed(:creator, User)
+    embed(:cycle, Cycle)
     field :description, :string
     field :estimate, :float
     field :priority, :float
