@@ -5,15 +5,26 @@ defmodule PointQuest.Quests.Adventurer do
   use Ecto.Schema
 
   import Ecto.Changeset
+  import EctoEnum
+
+  @type t :: %__MODULE__{
+          name: String.t(),
+          class: ClassEnum.t()
+        }
+
+  defenum ClassEnum, healer: "healer", mage: "mage", knight: "knight"
 
   @primary_key {:id, :binary_id, autogenerate: true}
   embedded_schema do
     field :name, :string
+    field :class, ClassEnum
   end
 
   def create_changeset(adventurer, params \\ %{}) do
     adventurer
-    |> cast(params, [:name])
-    |> validate_required([:name])
+    # defaults
+    |> change(class: Enum.random([:healer, :mage, :knight]))
+    |> cast(params, [:name, :class])
+    |> validate_required([:name, :class])
   end
 end
