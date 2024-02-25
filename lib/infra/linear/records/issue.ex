@@ -7,6 +7,7 @@ defmodule Infra.Linear.Records.Issue do
 
   alias Infra.Linear.Records.Comment
   alias Infra.Linear.Records.Cycle
+  alias Infra.Linear.Records.Label
   alias Infra.Linear.Records.Project
   alias Infra.Linear.Records.WorkflowState
   alias Infra.Linear.Records.User
@@ -25,7 +26,7 @@ defmodule Infra.Linear.Records.Issue do
   # relations: IssueRelationConnection
   # sortOrder: Float
 
-  @type issue :: %__MODULE__{
+  @type full_issue :: %__MODULE__{
           id: String.t(),
           identifier: String.t(),
           branchName: String.t(),
@@ -35,12 +36,21 @@ defmodule Infra.Linear.Records.Issue do
           cycle: Cycle.t(),
           description: String.t(),
           estimate: Float.t(),
+          labels: [Label.t()],
           priority: Float.t(),
           project: Project.t(),
           state: WorkflowState.issue_status(),
           title: String.t(),
           url: String.t()
         }
+
+  @type issue_card :: %__MODULE__{
+          id: String.t(),
+          identifier: String.t(),
+          title: String.t()
+        }
+
+  @type t :: full_issue | issue_card
 
   object do
     field :id, :string
@@ -52,6 +62,7 @@ defmodule Infra.Linear.Records.Issue do
     embed(:cycle, Cycle)
     field :description, :string
     field :estimate, :float
+    nodes(:labels, Label)
     field :priority, :float
     embed(:project, Project)
     embed(:state, WorkflowState)

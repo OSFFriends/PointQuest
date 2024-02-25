@@ -1,4 +1,8 @@
 defmodule PointQuestWeb.Live.Components.List do
+  @moduledoc """
+  A component handling display of a sortable list of Linear issues
+  """
+
   use PointQuestWeb, :live_component
 
   def render(assigns) do
