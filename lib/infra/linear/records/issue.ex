@@ -19,7 +19,6 @@ defmodule Infra.Linear.Records.Issue do
   # history: IssueHistoryConnection TODO: PQ-5
   # identifier: human readable id string
   # inverseRelations: IssueRelationConnection TODO: PQ-6
-  # labels: IssueLabelConnection TODO: PQ-7
   # parent: Issue
   # priorityLabel (maybe?): String
   # projectMilestones: ProjectMilestones TODO: PQ-9
