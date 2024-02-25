@@ -1,0 +1,7 @@
+issues {
+  nodes {
+    id
+    identifier
+    title
+  }
+}

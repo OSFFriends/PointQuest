@@ -36,7 +36,7 @@ defmodule PointQuest.Linear do
 
   @impl PointQuest.Behaviour.Linear
   def list_issues(team_id, user_id) do
-    issues_snippet = QueryParser.issues_snippet([])
+    issues_snippet = QueryParser.issues_snippet_slim([])
     body = %{query: QueryParser.list_issues_for_team(id: team_id, issues_snippet: issues_snippet)}
 
     {:ok, %Tesla.Env{body: %{"data" => %{"team" => team}}}} =

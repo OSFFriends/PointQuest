@@ -55,8 +55,8 @@ defmodule Infra.LinearObject do
       LinearObject.__define_field__(
         __MODULE__,
         :field,
-        {unquote(name), unquote(type)},
-        unquote(opts)
+        {unquote(name), Infra.Linear.Records.Field},
+        unquote(opts) ++ [type: unquote(type)]
       )
     end
   end
@@ -116,6 +116,8 @@ defmodule Infra.LinearObject do
 
   @spec load(module(), nil) :: nil
   def load(_object, nil), do: nil
+
+  def load(_object, :not_loaded), do: :not_loaded
 
   @spec load(module(), map()) :: struct()
   def load(object, data) do
@@ -229,6 +231,8 @@ defmodule Infra.LinearObject do
     get(Map.get(record, key), rest)
   end
 
+  defp load_nodes(_params, :not_loaded), do: :not_loaded
+
   defp load_nodes(node, params) do
     params = get_key(params, :nodes)
     load(node, params)
@@ -240,8 +244,10 @@ defmodule Infra.LinearObject do
 
   defp composite?(_type), do: false
 
+  # defp get_key(:not_loaded, _key), do: :not_loaded
+
   defp get_key(map, atom_key) do
     # try to get key as atom and fall back to string version
-    Map.get(map, atom_key, Map.get(map, Atom.to_string(atom_key)))
+    Map.get(map, atom_key, Map.get(map, Atom.to_string(atom_key), :not_loaded))
   end
 end
