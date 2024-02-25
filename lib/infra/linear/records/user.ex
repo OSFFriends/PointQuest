@@ -5,7 +5,7 @@ defmodule Infra.Linear.Records.User do
 
   use Infra.LinearObject
 
-  @type user :: %__MODULE__{
+  @type t :: %__MODULE__{
           id: String.t(),
           avatarUrl: String.t(),
           displayName: String.t(),

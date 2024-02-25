@@ -37,7 +37,7 @@ defmodule Infra.Linear.Records.Issue do
           description: String.t(),
           estimate: Float.t(),
           priority: Float.t(),
-          project: Project.project(),
+          project: Project.t(),
           state: WorkflowState.issue_status(),
           title: String.t(),
           url: String.t()

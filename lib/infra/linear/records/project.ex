@@ -5,7 +5,7 @@ defmodule Infra.Linear.Records.Project do
 
   use Infra.LinearObject
 
-  @type project :: %__MODULE__{
+  @type t :: %__MODULE__{
           id: String.t(),
           name: String.t()
         }
