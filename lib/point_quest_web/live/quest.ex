@@ -59,9 +59,7 @@ defmodule PointQuestWeb.Quest do
   end
 
   def handle_event("select-ticket", %{"ticketnumber" => ticket}, socket) do
-    issue =
-      socket.assigns.issues
-      |> Enum.find(fn i -> i.identifier == ticket end)
+    issue = linear().load_issue(ticket, socket.assigns.current_user.id)
 
     {:noreply, assign(socket, :current_ticket, issue.identifier)}
   end

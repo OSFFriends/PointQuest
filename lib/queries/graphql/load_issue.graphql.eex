@@ -1,5 +1,5 @@
-issues {
-  nodes {
+{
+  issue(id: "<%= @id %>") {
     id
     identifier
     title
@@ -34,6 +34,12 @@ issues {
       number
     }
     estimate
+    labels {
+      nodes {
+        id
+        name
+      }
+    }
     state {
       id
       name

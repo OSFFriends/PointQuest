@@ -47,6 +47,16 @@ defmodule PointQuest.Linear do
   end
 
   @impl PointQuest.Behaviour.Linear
+  def load_issue(issue_id, user_id) do
+    body = %{query: QueryParser.load_issue(id: issue_id)}
+
+    {:ok, %Tesla.Env{body: %{"data" => %{"issue" => issue}}}} =
+      client().post(body, user_id)
+
+    Infra.LinearObject.load(Infra.Linear.Records.Issue, issue)
+  end
+
+  @impl PointQuest.Behaviour.Linear
   def redeem_code(redirect_uri, code, user_id) do
     with token <- client().token_from_code(redirect_uri, code),
          insert_changeset <-
