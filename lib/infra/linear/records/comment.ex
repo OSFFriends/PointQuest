@@ -7,7 +7,7 @@ defmodule Infra.Linear.Records.Comment do
 
   alias Infra.Linear.Records.User
 
-  @type comment :: %__MODULE__{
+  @type t :: %__MODULE__{
           id: String.t(),
           body: String.t(),
           createdAt: DateTime.t(),

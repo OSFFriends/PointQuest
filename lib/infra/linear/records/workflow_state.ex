@@ -9,13 +9,6 @@ defmodule Infra.Linear.Records.WorkflowState do
 
   alias Infra.Linear.Records.Issue
 
-  @type t :: %__MODULE__{
-          id: String.t(),
-          issues: [Issue.t()] | nil,
-          name: String.t(),
-          position: Float.t()
-        }
-
   @type issue_status :: %__MODULE__{
           id: String.t(),
           issues: nil,
@@ -29,6 +22,8 @@ defmodule Infra.Linear.Records.WorkflowState do
           name: String.t(),
           position: Float.t()
         }
+
+  @type t :: issue_status | queried_workflow_state
 
   object do
     field :id, :string
