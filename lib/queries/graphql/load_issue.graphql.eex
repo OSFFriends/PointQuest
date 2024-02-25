@@ -34,10 +34,40 @@
       number
     }
     estimate
+    inverseRelations {
+      nodes {
+        issue {
+          id
+          identifier
+          title
+        }
+        relatedIssue {
+          id
+          identifier
+          title
+        }
+        type
+      }
+    }
     labels {
       nodes {
         id
         name
+      }
+    }
+    relations {
+      nodes {
+        issue {
+          id
+          identifier
+          title
+        }
+        relatedIssue {
+          id
+          identifier
+          title
+        }
+        type
       }
     }
     state {
