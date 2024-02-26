@@ -41,6 +41,7 @@ defmodule PointQuest.MixProject do
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.20"},
       {:jason, "~> 1.2"},
+      {:nanoid, "~> 2.1.0"},
       {:oauth2, "~> 2.0"},
       {:phoenix, "~> 1.7.7"},
       {:phoenix_ecto, "~> 4.4"},
