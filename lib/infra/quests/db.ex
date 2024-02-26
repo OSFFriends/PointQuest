@@ -5,23 +5,28 @@ defmodule Infra.Quests.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
   alias Infra.Quests.QuestServer
+  alias PointQuest.Quests.Event
 
   @impl PointQuest.Behaviour.Quests.Repo
-  def create(quest_changeset) do
-    with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :insert) do
-      quest = Map.put(quest, :id, Ecto.UUID.generate())
+  def write(quest, %Event.QuestStarted{quest_id: quest_id}) do
+    quest = Map.put(quest, :id, quest_id)
 
-      {:ok, _pid} =
-        DynamicSupervisor.start_child(
-          Infra.Quests.QuestSupervisor,
-          {QuestServer, quest: quest}
-        )
+    {:ok, _pid} =
+      DynamicSupervisor.start_child(
+        Infra.Quests.QuestSupervisor,
+        {QuestServer, quest: quest}
+      )
 
-      {:ok, quest}
-    end
+    {:ok, quest}
   end
 
-  @impl PointQuest.Behaviour.Quests.Repo
+  def write(quest, %Event.AdventurerJoinedParty{}) do
+    server = lookup_quest_server(quest.id)
+    :ok = QuestServer.update(server, quest)
+
+    {:ok, quest}
+  end
+
   def update(quest_changeset) do
     with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :update) do
       server = lookup_quest_server(quest.id)

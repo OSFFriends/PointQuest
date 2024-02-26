@@ -4,7 +4,8 @@ defmodule PointQuest.Behaviour.Quest do
   """
   alias PointQuest.Quests.Quest
 
-  @callback create(quest_params :: map()) :: Quest.t()
+  @callback create(quest_params :: map()) ::
+              {:ok, Quest.t()} | {:error, Ecto.Changeset.t(Quest.t())}
   @doc """
   Get a `Quest` by it's id.
   """
