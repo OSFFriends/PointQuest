@@ -4,15 +4,15 @@ defmodule PointQuest.Quests.Event.AdventurerJoinedParty do
   alias PointQuest.Quests.Adventurer
 
   embedded_schema do
-    field(:quest_id)
-    field(:name)
-    field(:class, Adventurer.ClassEnum)
+    field :quest_id
+    field :name
+    field :class, Adventurer.ClassEnum
   end
 
   def changeset(adventurer_joined, params \\ %{}) do
     adventurer_joined
     |> cast(params, [:quest_id, :name, :class])
-    |> validate_required([:quest_id, :name, :class])
+    |> validate_required([:quest_id, :name])
   end
 
   def new!(params) do

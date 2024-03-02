@@ -22,9 +22,18 @@ defmodule PointQuest.Quests.Adventurer do
 
   def create_changeset(adventurer, params \\ %{}) do
     adventurer
-    # defaults
-    |> change(class: Enum.random([:healer, :mage, :knight]))
     |> cast(params, [:name, :class])
+    |> maybe_default_class()
     |> validate_required([:name, :class])
+  end
+
+  defp maybe_default_class(adventurer_changeset) do
+    case get_field(adventurer_changeset, :class) do
+      nil ->
+        change(adventurer_changeset, class: Enum.random([:healer, :mage, :knight]))
+
+      _class ->
+        adventurer_changeset
+    end
   end
 end
