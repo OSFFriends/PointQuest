@@ -5,34 +5,31 @@ defmodule Infra.Quests.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
   alias Infra.Quests.QuestServer
+  alias PointQuest.Quests.Quest
   alias PointQuest.Quests.Event
 
+  defstruct []
+
   @impl PointQuest.Behaviour.Quests.Repo
-  def write(quest, %Event.QuestStarted{quest_id: quest_id}) do
-    quest = Map.put(quest, :id, quest_id)
+  def write(quest, %Event.QuestStarted{} = event) do
+    new_quest = Quest.project(event, quest)
 
     {:ok, _pid} =
       DynamicSupervisor.start_child(
         Infra.Quests.QuestSupervisor,
-        {QuestServer, quest: quest}
+        {QuestServer, quest: new_quest}
       )
 
-    {:ok, quest}
+    {:ok, new_quest}
   end
 
-  def write(quest, %Event.AdventurerJoinedParty{}) do
-    server = lookup_quest_server(quest.id)
-    :ok = QuestServer.update(server, quest)
+  def write(quest, %Event.AdventurerJoinedParty{} = event) do
+    new_quest = Quest.project(event, quest)
 
-    {:ok, quest}
-  end
+    server = lookup_quest_server(new_quest.id)
+    :ok = QuestServer.update(server, new_quest)
 
-  def update(quest_changeset) do
-    with {:ok, quest} <- Ecto.Changeset.apply_action(quest_changeset, :update) do
-      server = lookup_quest_server(quest.id)
-      :ok = QuestServer.update(server, quest)
-      {:ok, quest}
-    end
+    {:ok, new_quest}
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
@@ -53,6 +50,30 @@ defmodule Infra.Quests.Db do
 
       _not_found ->
         nil
+    end
+  end
+
+  defimpl Projectionist.Reader do
+    alias Infra.Quests.Db
+
+    defp get_quest(quest_id) do
+      case Infra.Quests.Db.get_quest_by_id(quest_id) do
+        {:error, :quest_not_found} ->
+          []
+
+        {:ok, quest} ->
+          [quest]
+      end
+    end
+
+    def stream(%Db{}, %Projectionist.Reader.Read{position: :LAST, id: quest_id}, callback) do
+      quest = callback.(get_quest(quest_id))
+
+      [%{version: 1, data: quest}]
+    end
+
+    def read(%Db{}, %Projectionist.Reader.Read{position: :LAST, id: quest_id}) do
+      [%{version: 1, data: get_quest(quest_id)}]
     end
   end
 end
