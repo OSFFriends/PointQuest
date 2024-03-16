@@ -95,7 +95,11 @@ defmodule PointQuestWeb.Router do
   scope "/", PointQuestWeb do
     pipe_through [:browser]
 
-    live "/quest", Quest
+    get "/switch/:token", Switch, :set_session
+
+    live "/quest", QuestStartLive
+    live "/quest/:id", QuestLive
+    live "/quest/:id/join", QuestLive, :join
 
     # delete "/users/log_out", UserSessionController, :delete
     #

@@ -43,6 +43,36 @@ defmodule Infra.Quests.Db do
     end
   end
 
+  @impl PointQuest.Behaviour.Quests.Repo
+  def get_adventurer_by_id(quest_id, adventurer_id) do
+    case get_quest_by_id(quest_id) do
+      {:ok, %{party_leader: %{adventurer: %{id: ^adventurer_id} = adventurer}}} ->
+        {:ok, adventurer}
+
+      {:ok, %{adventurers: adventurers}} ->
+        case Enum.find(adventurers, fn %{id: id} -> id == adventurer_id end) do
+          nil -> {:error, :adventurer_not_found}
+          adventurer -> {:ok, adventurer}
+        end
+
+      {:error, :quest_not_found} = error ->
+        error
+    end
+  end
+
+  @impl PointQuest.Behaviour.Quests.Repo
+  def get_party_leader_by_id(quest_id, leader_id) do
+    dbg()
+
+    case get_quest_by_id(quest_id) do
+      {:ok, %{party_leader: %{id: ^leader_id} = party_leader}} ->
+        {:ok, party_leader}
+
+      {:error, :quest_not_found} = error ->
+        error
+    end
+  end
+
   defp lookup_quest_server(quest_id) do
     case Registry.lookup(Infra.Quests.Registry, quest_id) do
       [{pid, _state}] ->

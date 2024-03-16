@@ -1,10 +1,9 @@
 alias PointQuest.Quests
 
-{:ok, default_quest} =
+{:ok, jeffs_special_quest} =
   Quests.StartQuest.execute(
     Quests.StartQuest.new!(%{
-      name: "Default Quest",
-      party_leader: %{name: "Stevey Beevey"}
+      name: "Default Quest"
     })
   )
 
@@ -12,7 +11,7 @@ alias PointQuest.Quests
   Quests.StartQuest.execute(
     Quests.StartQuest.new!(%{
       name: "I'm a filthy",
-      party_leader: %{name: "JSON Noonan"}
+      party_leaders_adventurer: %{name: "JSON Noonan"}
     })
   )
 
@@ -20,8 +19,7 @@ alias PointQuest.Quests
   Quests.StartQuest.execute(
     Quests.StartQuest.new!(%{
       name: "Multi-party Quest",
-      party_leader: %{name: "Proto Leilani"},
-      lead_from_the_front: true
+      party_leaders_adventurer: %{name: "Proto Leilani"}
     })
   )
 
