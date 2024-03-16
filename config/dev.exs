@@ -1,16 +1,5 @@
 import Config
 
-# Configure your database
-config :point_quest, PointQuest.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "localhost",
-  database: "point_quest_dev",
-  port: 5430,
-  stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
-
 # For development, we disable any cache and enable
 # debugging and code reloading.
 #

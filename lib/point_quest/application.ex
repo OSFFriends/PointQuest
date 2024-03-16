@@ -11,7 +11,6 @@ defmodule PointQuest.Application do
       # Start the Telemetry supervisor
       PointQuestWeb.Telemetry,
       # Start the Ecto repository
-      PointQuest.Repo,
       Infra.Quests.QuestStore,
       # Registry for managing quest processes
       {Registry, keys: :unique, name: Infra.Quests.Registry},
