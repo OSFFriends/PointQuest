@@ -7,9 +7,6 @@
 # General application configuration
 import Config
 
-config :point_quest,
-  ecto_repos: [PointQuest.Repo]
-
 # Configures the endpoint
 config :point_quest, PointQuestWeb.Endpoint,
   url: [host: "localhost"],
