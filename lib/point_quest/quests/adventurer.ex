@@ -7,33 +7,42 @@ defmodule PointQuest.Quests.Adventurer do
   import Ecto.Changeset
   import EctoEnum
 
+  alias PointQuest.Quests.Adventurer
+
   @type t :: %__MODULE__{
           name: String.t(),
-          class: ClassEnum.t()
+          class: Adventurer.Class.NameEnum.t(),
+          quest_id: String.t()
         }
 
-  defenum ClassEnum, healer: "healer", mage: "mage", knight: "knight"
+  defmodule Class do
+    @moduledoc """
+    The class that an adventurer has
+    """
+    defenum NameEnum, healer: "healer", mage: "mage", knight: "knight"
+
+    def maybe_default_class(adventurer_changeset) do
+      case get_field(adventurer_changeset, :class) do
+        nil ->
+          change(adventurer_changeset, class: Enum.random([:healer, :mage, :knight]))
+
+        _class ->
+          adventurer_changeset
+      end
+    end
+  end
 
   @primary_key {:id, :binary_id, autogenerate: true}
   embedded_schema do
     field :name, :string
-    field :class, ClassEnum
+    field :class, Class.NameEnum
+    field :quest_id, :string
   end
 
   def create_changeset(adventurer, params \\ %{}) do
     adventurer
-    |> cast(params, [:name, :class])
-    |> maybe_default_class()
-    |> validate_required([:name, :class])
-  end
-
-  defp maybe_default_class(adventurer_changeset) do
-    case get_field(adventurer_changeset, :class) do
-      nil ->
-        change(adventurer_changeset, class: Enum.random([:healer, :mage, :knight]))
-
-      _class ->
-        adventurer_changeset
-    end
+    |> cast(params, [:id, :name, :class, :quest_id])
+    |> Class.maybe_default_class()
+    |> validate_required([:name, :class, :quest_id])
   end
 end

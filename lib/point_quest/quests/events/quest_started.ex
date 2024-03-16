@@ -2,19 +2,30 @@ defmodule PointQuest.Quests.Event.QuestStarted do
   use Ecto.Schema
   import Ecto.Changeset
 
-  defmodule PartyLeader do
+  defmodule PartyLeadersAdventurer do
+    @moduledoc """
+    The adventurer that participates in the quest
+    """
     use Ecto.Schema
+
     import Ecto.Changeset
 
     alias PointQuest.Quests.Adventurer
 
+    @type t :: %__MODULE__{
+            name: String.t(),
+            class: Adventurer.Class.NameEnum.t()
+          }
+
+    @primary_key {:id, :binary_id, autogenerate: true}
     embedded_schema do
       field :name, :string
-      field :class, Adventurer.ClassEnum
+      field :class, Adventurer.Class.NameEnum
     end
 
-    def changeset(party_leader, params \\ %{}) do
-      party_leader
+    def changeset(adventurer, params \\ %{}) do
+      adventurer
+      |> change(id: Nanoid.generate_non_secure())
       |> cast(params, [:name, :class])
       |> validate_required([:name])
     end
@@ -24,8 +35,7 @@ defmodule PointQuest.Quests.Event.QuestStarted do
   embedded_schema do
     field :quest_id, :string
     field :name, :string
-    field :lead_from_the_front, :boolean
-    embeds_one :party_leader, PartyLeader
+    embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
   end
 
   def new!(params) do
@@ -36,8 +46,8 @@ defmodule PointQuest.Quests.Event.QuestStarted do
 
   def changeset(quest_started, params \\ %{}) do
     quest_started
-    |> change(quest_id: Nanoid.generate_non_secure(8))
-    |> cast(params, [:quest_id, :name, :lead_from_the_front])
-    |> cast_embed(:party_leader, required: true)
+    |> change(quest_id: Nanoid.generate_non_secure())
+    |> cast(params, [:quest_id, :name])
+    |> cast_embed(:party_leaders_adventurer)
   end
 end

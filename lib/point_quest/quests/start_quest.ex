@@ -4,23 +4,31 @@ defmodule PointQuest.Quests.StartQuest do
 
   alias PointQuest.Quests
 
-  # duplicating this intentionally to allow drift between
-  # event and command
-  defmodule PartyLeader do
+  defmodule PartyLeadersAdventurer do
+    @moduledoc """
+    The adventurer that participates in the quest
+    """
     use Ecto.Schema
+
     import Ecto.Changeset
 
     alias PointQuest.Quests.Adventurer
 
-    @primary_key false
+    @type t :: %__MODULE__{
+            name: String.t(),
+            class: Adventurer.Class.NameEnum.t()
+          }
+
+    @primary_key {:id, :binary_id, autogenerate: true}
     embedded_schema do
       field :name, :string
-      field :class, Adventurer.ClassEnum
+      field :class, Adventurer.Class.NameEnum
     end
 
-    def changeset(party_leader, params \\ %{}) do
-      party_leader
+    def changeset(adventurer, params \\ %{}) do
+      adventurer
       |> cast(params, [:name, :class])
+      |> Adventurer.Class.maybe_default_class()
       |> validate_required([:name])
     end
   end
@@ -28,8 +36,7 @@ defmodule PointQuest.Quests.StartQuest do
   @primary_key false
   embedded_schema do
     field :name, :string
-    field :lead_from_the_front, :boolean
-    embeds_one :party_leader, PartyLeader
+    embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
   end
 
   def new(params) do
@@ -46,8 +53,8 @@ defmodule PointQuest.Quests.StartQuest do
 
   defp changeset(start_quest, params) do
     start_quest
-    |> cast(params, [:name, :lead_from_the_front])
-    |> cast_embed(:party_leader, required: true)
+    |> cast(params, [:name])
+    |> cast_embed(:party_leaders_adventurer)
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)

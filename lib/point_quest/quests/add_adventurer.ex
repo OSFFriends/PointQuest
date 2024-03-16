@@ -8,7 +8,7 @@ defmodule PointQuest.Quests.AddAdventurer do
   @primary_key false
   embedded_schema do
     field :name
-    field :class, Adventurer.ClassEnum
+    field :class, Adventurer.Class.NameEnum
     field :quest_id, :string
   end
 

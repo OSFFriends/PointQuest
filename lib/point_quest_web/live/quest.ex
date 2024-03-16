@@ -1,29 +1,25 @@
-defmodule PointQuestWeb.Quest do
+defmodule PointQuestWeb.QuestLive do
   @moduledoc """
-  Retrieve and display quest information
+  Page where we're actually running the quest.
   """
   use PointQuestWeb, :live_view
 
+  def render(%{live_action: :join} = assigns) do
+    ~H"""
+    <div>You're looking to join <%= @session_id %></div>
+    """
+  end
+
   def render(assigns) do
     ~H"""
-    <div class="flex flex-row items-start gap-y-5">
-      <button id="start quest" phx-click="start_quest">Start Quest</button>
+    <div>
+      Hello <%= @session_id %>
+      <div :if={@live_action == :join}>Look at you, joining a session</div>
     </div>
     """
   end
 
-  def mount(_params, _session, socket) do
-    session_id = "12242ljl"
-
-    socket =
-      assign(socket,
-        session: session_id
-      )
-
-    {:ok, socket}
-  end
-
-  def handle_event("start_quest", _params, socket) do
-    {:noreply, socket}
+  def mount(params, _session, socket) do
+    {:ok, assign(socket, session_id: params["id"])}
   end
 end
