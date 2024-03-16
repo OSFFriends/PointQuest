@@ -10,6 +10,7 @@ defmodule PointQuest.Quests.Quest do
   alias PointQuest.Quests
   alias PointQuest.Quests.Adventurer
   alias PointQuest.Quests.Attack
+  alias PointQuest.Quests.Commands
   alias PointQuest.Quests.Event
 
   @primary_key {:id, :binary_id, autogenerate: true}
@@ -94,12 +95,12 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
-  def handle(%Quests.StartQuest{} = command, _quest) do
+  def handle(%Commands.StartQuest{} = command, _quest) do
     {:ok, Event.QuestStarted.new!(Ecto.embedded_dump(command, :json))}
     # {:error, error}
   end
 
-  def handle(%Quests.AddAdventurer{} = command, quest) do
+  def handle(%Commands.AddAdventurer{} = command, quest) do
     if Enum.any?(quest.adventurers, fn a -> a.name == command.name end) do
       {:error, :adventurer_already_present}
     else

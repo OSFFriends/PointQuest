@@ -5,6 +5,7 @@ defmodule PointQuest.Authentication do
 
   alias PointQuest.Authentication.Actor
   alias PointQuest.Quests
+  alias PointQuest.Quests.Commands
 
   @salt "uy+yFunzM0OeFWaGyt3bjFPdeNv6ngzY6kktUXznKOSkQxjKC8uMDsczk2dPbxVu"
 
@@ -58,17 +59,15 @@ defmodule PointQuest.Authentication do
 
   def to_actor(%{type: :adventurer, quest_id: _quest_id, adventurer_id: _adventurer_id} = token) do
     {:ok, adventurer} =
-      PointQuest.Quests.GetAdventurer.new!(token) |> PointQuest.Quests.GetAdventurer.execute()
+      Commands.GetAdventurer.new!(token) |> Commands.GetAdventurer.execute()
 
     PointQuest.Authentication.create_actor(adventurer)
   end
 
   def to_actor(%{type: :party_leader, quest_id: _quest_id, adventurer_id: _adventurer_id} = token) do
-    dbg(token)
-
     {:ok, leader} =
-      PointQuest.Quests.GetPartyLeader.new!(token)
-      |> PointQuest.Quests.GetPartyLeader.execute()
+      Commands.GetPartyLeader.new!(token)
+      |> Commands.GetPartyLeader.execute()
 
     PointQuest.Authentication.create_actor(leader)
   end

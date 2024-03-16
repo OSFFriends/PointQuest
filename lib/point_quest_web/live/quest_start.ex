@@ -25,8 +25,8 @@ defmodule PointQuestWeb.QuestStartLive do
 
   def handle_event("start_quest", _params, socket) do
     {:ok, quest} =
-      PointQuest.Quests.StartQuest.new!(%{name: "can't believe this works"})
-      |> PointQuest.Quests.StartQuest.execute()
+      PointQuest.Quests.Commands.StartQuest.new!(%{name: "can't believe this works"})
+      |> PointQuest.Quests.Commands.StartQuest.execute()
 
     token =
       PointQuest.Authentication.create_actor(quest.party_leader)
