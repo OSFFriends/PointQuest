@@ -62,8 +62,6 @@ defmodule Infra.Quests.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_party_leader_by_id(quest_id, leader_id) do
-    dbg()
-
     case get_quest_by_id(quest_id) do
       {:ok, %{party_leader: %{id: ^leader_id} = party_leader}} ->
         {:ok, party_leader}

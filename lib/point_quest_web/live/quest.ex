@@ -13,13 +13,13 @@ defmodule PointQuestWeb.QuestLive do
   def render(assigns) do
     ~H"""
     <div>
-      Hello <%= @session_id %>
-      <div :if={@live_action == :join}>Look at you, joining a session</div>
+      <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
     </div>
     """
   end
 
   def mount(params, _session, socket) do
-    {:ok, assign(socket, session_id: params["id"])}
+    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(params["id"])
+    {:ok, assign(socket, session_id: params["id"], quest: quest)}
   end
 end
