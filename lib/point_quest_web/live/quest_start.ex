@@ -19,8 +19,19 @@ defmodule PointQuestWeb.QuestStartLive do
       <fieldset class="my-4">
         <legend class="py-2">Make your adventurer (if you want to also vote)</legend>
         <.inputs_for :let={adventurer_form} field={f[:party_leaders_adventurer]}>
-          <.input type="text" field={adventurer_form[:name]} label="Adventurer Name" />
-          <.input type="select" field={adventurer_form[:class]} label="Class" options={@classes} />
+          <.input
+            id="adventurer_name"
+            type="text"
+            field={adventurer_form[:name]}
+            label="Adventurer Name"
+          />
+          <.input
+            id="adventurer_class"
+            type="select"
+            field={adventurer_form[:class]}
+            label="Class"
+            options={@classes}
+          />
         </.inputs_for>
       </fieldset>
       <.button type="submit">Start Quest</.button>
