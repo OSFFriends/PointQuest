@@ -5,7 +5,7 @@ defmodule PointQuest.Quests.Adventurer do
   use Ecto.Schema
 
   import Ecto.Changeset
-  import EctoEnum
+  import PointQuest.Macros.Enum
 
   alias PointQuest.Quests.Adventurer
 
@@ -19,7 +19,7 @@ defmodule PointQuest.Quests.Adventurer do
     @moduledoc """
     The class that an adventurer has
     """
-    defenum NameEnum, healer: "healer", mage: "mage", knight: "knight"
+    defenum NameEnum, :class, [:healer, :mage, :knight]
 
     def maybe_default_class(adventurer_changeset) do
       case get_field(adventurer_changeset, :class) do

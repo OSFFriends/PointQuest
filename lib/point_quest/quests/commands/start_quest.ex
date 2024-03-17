@@ -103,7 +103,13 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     |> apply_action!(:insert)
   end
 
-  defp changeset(start_quest, params) do
+  @spec changeset(t(), map()) :: Ecto.Changeset.t(t())
+  @doc """
+  Creates a changeset from start_quest struct and params.
+
+  When backing a form, this allows for easy validation of the form state.
+  """
+  def changeset(start_quest, params \\ %{}) do
     start_quest
     |> cast(params, [:name])
     |> cast_embed(:party_leaders_adventurer)
