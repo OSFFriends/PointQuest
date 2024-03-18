@@ -90,7 +90,13 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     |> apply_action!(:update)
   end
 
-  defp changeset(add_adventurer, params) do
+  @spec changeset(t(), map()) :: Ecto.Changeset.t(t())
+  @doc """
+  Creates a changeset from add_adventurer struct and params.
+
+  When backing a form, this allows for easy validation of the form state.
+  """
+  def changeset(add_adventurer, params) do
     add_adventurer
     |> cast(params, [:quest_id, :name, :class])
     |> validate_required([:quest_id, :name])
