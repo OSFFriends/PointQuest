@@ -94,9 +94,28 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     add_adventurer
     |> cast(params, [:quest_id, :name, :class])
     |> validate_required([:quest_id, :name])
+    |> ensure_unique_name()
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
+
+  defp ensure_unique_name(changeset) do
+    with {:ok, %{adventurers: adventurers, party_leader: leader}} <-
+           repo().get_quest_by_id(get_field(changeset, :quest_id)) do
+      adventurers =
+        if is_nil(leader.adventurer) do
+          adventurers
+        else
+          [leader.adventurer | adventurers]
+        end
+
+      if Enum.any?(adventurers, fn a -> a.name == get_field(changeset, :name) end) do
+        Ecto.Changeset.add_error(changeset, :name, "name must be unique among party members")
+      else
+        changeset
+      end
+    end
+  end
 
   @spec execute(t()) :: PointQuest.Quests.Quest.t()
   @doc """
