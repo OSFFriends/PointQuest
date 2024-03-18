@@ -9,12 +9,7 @@ defmodule PointQuestWeb.QuestStartLive do
 
   def render(assigns) do
     ~H"""
-    <.form
-      :let={f}
-      for={@form}
-      id="start-quest-form"
-      phx-submit="start_quest"
-    >
+    <.form :let={f} for={@form} id="start-quest-form" phx-submit="start_quest">
       <.input id="quest_name" type="text" field={f[:name]} label="Quest Name" />
       <fieldset class="my-4">
         <legend class="py-2">Make your adventurer (if you want to also vote)</legend>
@@ -38,8 +33,6 @@ defmodule PointQuestWeb.QuestStartLive do
     </.form>
     """
   end
-
-  #         class="flex justify-between text-left text-input-text px-2.5 py-2 text-sm bg-transparent border border-grey-300 rounded-md focus:outline-none focus:ring-0 peer"
 
   def mount(_params, _session, socket) do
     classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
