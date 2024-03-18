@@ -8,10 +8,16 @@ defmodule PointQuestWeb.QuestLive do
 
   def render(%{live_action: :join} = assigns) do
     ~H"""
-    <.form :let={f} for={@form} id="join-quest-form" phx-submit="join_party">
-      <.input type="text" field={f[:name]} label="Adventurer Name" />
-      <.input type="select" field={f[:class]} label="Class" options={@classes} />
-      <.button type="submit">Join Quest</.button>
+    <.form
+      for={@form}
+      id="join-quest-form"
+      phx-change="validate_adventurer"
+      phx-debounce="250"
+      phx-submit="join_party"
+    >
+      <.input type="text" field={@form[:name]} label="Adventurer Name" />
+      <.input type="select" field={@form[:class]} label="Class" options={@classes} />
+      <.button type="submit" disabled={not @form.source.valid? |> dbg}>Join Quest</.button>
     </.form>
     """
   end
@@ -27,13 +33,27 @@ defmodule PointQuestWeb.QuestLive do
   def mount(params, _session, socket) do
     classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
 
-    form =
-      %AddAdventurer{}
-      |> AddAdventurer.changeset(%{})
-      |> to_form()
+    changeset = get_changeset(%{quest_id: params["id"]})
 
     {:ok, quest} = Infra.Quests.Db.get_quest_by_id(params["id"])
-    {:ok, assign(socket, session_id: params["id"], quest: quest, form: form, classes: classes)}
+
+    {:ok,
+     assign(socket,
+       session_id: params["id"],
+       quest: quest,
+       form: to_form(changeset),
+       classes: classes
+     )}
+  end
+
+  def handle_event("validate_adventurer", %{"add_adventurer" => params}, socket) do
+    params = Map.put(params, "quest_id", socket.assigns.quest.id)
+
+    form =
+      get_changeset(params)
+      |> to_form()
+
+    {:noreply, assign(socket, form: form)}
   end
 
   def handle_event(
@@ -52,5 +72,12 @@ defmodule PointQuestWeb.QuestLive do
       |> PointQuest.Authentication.actor_to_token()
 
     {:noreply, push_navigate(socket, to: ~p"/switch/#{token}")}
+  end
+
+  defp get_changeset(params) do
+    case AddAdventurer.new(params) do
+      {:ok, %AddAdventurer{} = command} -> AddAdventurer.changeset(command, %{})
+      {:error, changeset} -> changeset
+    end
   end
 end
