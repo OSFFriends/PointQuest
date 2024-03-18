@@ -108,6 +108,8 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   defp ensure_unique_name(changeset) do
     with {:ok, %{adventurers: adventurers, party_leader: leader}} <-
            repo().get_quest_by_id(get_field(changeset, :quest_id)) do
+      name = get_field(changeset, :name)
+
       adventurers =
         if is_nil(leader.adventurer) do
           adventurers
@@ -115,7 +117,10 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
           [leader.adventurer | adventurers]
         end
 
-      if Enum.any?(adventurers, fn a -> a.name == get_field(changeset, :name) end) do
+      if not is_nil(name) and
+           Enum.any?(adventurers, fn a ->
+             String.downcase(a.name) == String.downcase(name)
+           end) do
         Ecto.Changeset.add_error(changeset, :name, "name must be unique among party members")
       else
         changeset
