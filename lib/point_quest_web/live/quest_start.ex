@@ -9,11 +9,11 @@ defmodule PointQuestWeb.QuestStartLive do
 
   def render(assigns) do
     ~H"""
-    <.form :let={f} for={@form} id="start-quest-form" phx-submit="start_quest">
-      <.input id="quest_name" type="text" field={f[:name]} label="Quest Name" />
+    <.form for={@form} id="start-quest-form" phx-submit="start_quest">
+      <.input id="quest_name" type="text" field={@form[:name]} label="Quest Name" />
       <fieldset class="my-4">
         <legend class="py-2">Make your adventurer (if you want to also vote)</legend>
-        <.inputs_for :let={adventurer_form} field={f[:party_leaders_adventurer]}>
+        <.inputs_for :let={adventurer_form} field={@form[:party_leaders_adventurer]}>
           <.input
             id="adventurer_name"
             type="text"
@@ -65,11 +65,13 @@ defmodule PointQuestWeb.QuestStartLive do
       end
 
     {:ok, quest} =
-      StartQuest.new!(params)
+      params
+      |> StartQuest.new!()
       |> StartQuest.execute()
 
     token =
-      Authentication.create_actor(quest.party_leader)
+      quest.party_leader
+      |> Authentication.create_actor()
       |> Authentication.actor_to_token()
 
     {:noreply, push_navigate(socket, to: ~p"/switch/#{token}")}
