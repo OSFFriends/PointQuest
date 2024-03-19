@@ -50,7 +50,8 @@ defmodule PointQuestWeb.QuestLive do
     params = Map.put(params, "quest_id", socket.assigns.quest.id)
 
     form =
-      get_changeset(params)
+      params
+      |> get_changeset()
       |> to_form()
 
     {:noreply, assign(socket, form: form)}
@@ -62,13 +63,15 @@ defmodule PointQuestWeb.QuestLive do
         socket
       ) do
     {:ok, quest} =
-      AddAdventurer.new!(%{quest_id: socket.assigns.quest.id, name: name, class: class})
+      %{quest_id: socket.assigns.quest.id, name: name, class: class}
+      |> AddAdventurer.new!()
       |> AddAdventurer.execute()
 
     adventurer = Enum.find(quest.adventurers, fn a -> a.name == name end)
 
     token =
-      PointQuest.Authentication.create_actor(adventurer)
+      adventurer
+      |> PointQuest.Authentication.create_actor()
       |> PointQuest.Authentication.actor_to_token()
 
     {:noreply, push_navigate(socket, to: ~p"/switch/#{token}")}
