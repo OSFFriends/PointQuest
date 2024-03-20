@@ -15,7 +15,8 @@ defmodule PointQuest.Application do
       # Registry for managing quest processes
       {Registry, keys: :unique, name: Infra.Quests.Registry},
       # Start the PubSub system
-      {Phoenix.PubSub, name: PointQuest.PubSub},
+      {Phoenix.PubSub, name: PointQuestWeb.PubSub},
+      PointQuestWeb.Presence,
       # Start Finch
       {Finch, name: PointQuest.Finch},
       # Start the Endpoint (http/https)

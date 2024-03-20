@@ -4,83 +4,67 @@ defmodule PointQuestWeb.QuestLive do
   """
   use PointQuestWeb, :live_view
 
-  alias PointQuest.Quests.Commands.AddAdventurer
-
-  def render(%{live_action: :join} = assigns) do
-    ~H"""
-    <.form
-      for={@form}
-      id="join-quest-form"
-      phx-change="validate_adventurer"
-      phx-debounce="250"
-      phx-submit="join_party"
-    >
-      <.input type="text" field={@form[:name]} label="Adventurer Name" />
-      <.input type="select" field={@form[:class]} label="Class" options={@classes} />
-      <.button type="submit" disabled={not @form.source.valid? |> dbg}>Join Quest</.button>
-    </.form>
-    """
-  end
-
   def render(assigns) do
     ~H"""
     <div>
       <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
     </div>
+    <div class="flex gap-4">
+      <div :for={{user_id, _meta} <- @users} class="bg-blue-400">
+        <%= user_id %>
+      </div>
+    </div>
     """
   end
 
-  def mount(params, _session, socket) do
-    classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
+  def mount(params, session, socket) do
+    socket =
+      with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(params["id"]),
+           {:ok, current_actor} <- PointQuest.Authentication.token_to_actor(session["session"]) do
+        current_user = get_actor_id(current_actor)
 
-    changeset = get_changeset(%{quest_id: params["id"]})
+        {:ok, _state} =
+          PointQuestWeb.Presence.track(self(), quest.id, current_user, %{})
 
-    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(params["id"])
+        Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
-    {:ok,
-     assign(socket,
-       session_id: params["id"],
-       quest: quest,
-       form: to_form(changeset),
-       classes: classes
-     )}
-  end
-
-  def handle_event("validate_adventurer", %{"add_adventurer" => params}, socket) do
-    params = Map.put(params, "quest_id", socket.assigns.quest.id)
-
-    form =
-      params
-      |> get_changeset()
-      |> to_form()
-
-    {:noreply, assign(socket, form: form)}
-  end
-
-  def handle_event(
-        "join_party",
-        %{"add_adventurer" => %{"name" => name, "class" => class}},
         socket
-      ) do
-    {:ok, quest} =
-      %{quest_id: socket.assigns.quest.id, name: name, class: class}
-      |> AddAdventurer.new!()
-      |> AddAdventurer.execute()
+        |> assign(quest: quest, users: %{}, form: nil)
+        |> handle_joins(PointQuestWeb.Presence.list(quest.id))
+      else
+        {:error, :missing} ->
+          redirect(socket, to: ~p"/quest/#{params["id"]}/join")
 
-    adventurer = Enum.find(quest.adventurers, fn a -> a.name == name end)
+        {:error, :quest_not_found} ->
+          redirect(socket, to: ~p"/quest")
+      end
 
-    token =
-      adventurer
-      |> PointQuest.Authentication.create_actor()
-      |> PointQuest.Authentication.actor_to_token()
-
-    {:noreply, push_navigate(socket, to: ~p"/switch/#{token}")}
+    {:ok, socket}
   end
 
-  defp get_changeset(params) do
-    case AddAdventurer.new(params) do
-      {:ok, %AddAdventurer{} = command} -> AddAdventurer.changeset(command, %{})
-      {:error, changeset} -> changeset
-    end
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
+    {
+      :noreply,
+      socket
+      |> handle_leaves(diff.leaves)
+      |> handle_joins(diff.joins)
+    }
   end
+
+  def handle_joins(socket, joins) do
+    Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
+      assign(socket, :users, Map.put(socket.assigns.users, user, meta))
+    end)
+  end
+
+  defp handle_leaves(socket, leaves) do
+    Enum.reduce(leaves, socket, fn {user, _}, socket ->
+      assign(socket, :users, Map.delete(socket.assigns.users, user))
+    end)
+  end
+
+  defp get_actor_id(%PointQuest.Authentication.Actor.PartyLeader{leader_id: user_id}), do: user_id
+
+  defp get_actor_id(%PointQuest.Authentication.Actor.Adventurer{adventurer: %{id: user_id}}),
+    do: user_id
 end
