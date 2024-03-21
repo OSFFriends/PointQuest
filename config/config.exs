@@ -14,7 +14,7 @@ config :point_quest, PointQuestWeb.Endpoint,
     formats: [html: PointQuestWeb.ErrorHTML, json: PointQuestWeb.ErrorJSON],
     layout: false
   ],
-  pubsub_server: PointQuest.PubSub,
+  pubsub_server: PointQuestWeb.PubSub,
   live_view: [signing_salt: "Qx76kENh"]
 
 # Configures dependency injection
