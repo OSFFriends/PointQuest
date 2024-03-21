@@ -17,21 +17,21 @@ defmodule PointQuestWeb.QuestLive do
     """
   end
 
-  def mount(params, session, socket) do
+  def mount(params, _session, socket) do
     socket =
-      with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(params["id"]),
-           {:ok, current_actor} <- PointQuest.Authentication.token_to_actor(session["session"]) do
-        current_user = get_actor_id(current_actor)
+      case Infra.Quests.Db.get_quest_by_id(params["id"]) do
+        {:ok, quest} ->
+          current_user = get_actor_id(socket.assigns.current_actor)
 
-        {:ok, _state} =
-          PointQuestWeb.Presence.track(self(), quest.id, current_user, %{})
+          {:ok, _state} =
+            PointQuestWeb.Presence.track(self(), quest.id, current_user, %{})
 
-        Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
+          Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
-        socket
-        |> assign(quest: quest, users: %{}, form: nil)
-        |> handle_joins(PointQuestWeb.Presence.list(quest.id))
-      else
+          socket
+          |> assign(quest: quest, users: %{}, form: nil)
+          |> handle_joins(PointQuestWeb.Presence.list(quest.id))
+
         {:error, :missing} ->
           redirect(socket, to: ~p"/quest/#{params["id"]}/join")
 
