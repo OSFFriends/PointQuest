@@ -23,7 +23,7 @@ defmodule Infra.Quests.Db do
     {:ok, new_quest}
   end
 
-  def write(quest, %Event.AdventurerJoinedParty{} = event) do
+  def write(quest, event) do
     new_quest = Quest.project(event, quest)
 
     server = lookup_quest_server(new_quest.id)
