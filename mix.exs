@@ -55,6 +55,7 @@ defmodule PointQuest.MixProject do
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
+      {:telemetrex, "~> 0.2"},
       {:tesla, "~> 1.7"},
       {:timex, "~> 3.7"}
     ]

@@ -6,6 +6,9 @@ defmodule PointQuest.Quests.Commands.Attack do
   import Ecto.Changeset
   alias PointQuest.Quests
 
+  require PointQuest.Quests.Telemetry
+  require Telemetrex
+
   @type t :: %__MODULE__{
           quest_id: String.t(),
           adventurer_id: String.t(),
@@ -41,9 +44,15 @@ defmodule PointQuest.Quests.Commands.Attack do
   end
 
   def execute(%__MODULE__{quest_id: quest_id} = attack_command) do
-    with {:ok, quest} <- repo().get_quest_by_id(quest_id),
-         {:ok, event} <- Quests.Quest.handle(attack_command, quest) do
-      repo().write(quest, event)
+    Telemetrex.span event: Quests.Telemetry.attack(), context: %{command: attack_command} do
+      with {:ok, quest} <- repo().get_quest_by_id(quest_id),
+           {:ok, event} <- Quests.Quest.handle(attack_command, quest),
+           {:ok, updated_quest} <- repo().write(quest, event) do
+        {:ok, updated_quest, event}
+      end
+    after
+      {:ok, %Quests.Quest{} = quest, event} -> %{quest: quest, event: event}
+      {:error, reason} -> %{error: true, reason: reason}
     end
   end
 end
