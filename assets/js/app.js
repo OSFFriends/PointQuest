@@ -61,3 +61,13 @@ liveSocket.connect();
 // >> liveSocket.enableLatencySim(1000)  // enabled for duration of browser session
 // >> liveSocket.disableLatencySim()
 window.liveSocket = liveSocket;
+
+// copy to clipboard
+window.addEventListener("phx:copy", (event) => {
+  const text = event.detail.text;
+  if (text && "clipboard" in navigator) {
+    navigator.clipboard.writeText(text);
+  } else {
+    alert("Sorry, your browser does not support copy to clipboard.");
+  }
+});
