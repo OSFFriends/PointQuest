@@ -2,6 +2,7 @@ defmodule PointQuestWeb.QuestJoinLive do
   use PointQuestWeb, :live_view
 
   alias PointQuest.Quests.Commands.AddAdventurer
+  alias PointQuest.Quests.Quest
 
   def render(assigns) do
     ~H"""
@@ -21,13 +22,16 @@ defmodule PointQuestWeb.QuestJoinLive do
 
   def mount(params, _session, socket) do
     socket =
-      case Infra.Quests.Db.get_quest_by_id(params["id"]) do
-        {:ok, quest} ->
-          changeset = get_changeset(%{quest_id: quest.id})
-          classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
+      with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(params["id"]),
+           {:in_quest?, false} <- check_actor_in_quest(quest, socket.assigns.current_actor) do
+        changeset = get_changeset(%{quest_id: quest.id})
+        classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
 
-          socket
-          |> assign(classes: classes, form: to_form(changeset), quest: quest)
+        socket
+        |> assign(classes: classes, form: to_form(changeset), quest: quest)
+      else
+        {:in_quest?, true} ->
+          redirect(socket, to: ~p"/quest/#{params["id"]}")
 
         {:error, :quest_not_found} ->
           redirect(socket, to: ~p"/quest")
@@ -72,5 +76,13 @@ defmodule PointQuestWeb.QuestJoinLive do
       {:ok, %AddAdventurer{} = command} -> AddAdventurer.changeset(command, %{})
       {:error, changeset} -> changeset
     end
+  end
+
+  def check_actor_in_quest(%Quest{id: quest_id}, %{quest_id: quest_id}) do
+    {:in_quest?, true}
+  end
+
+  def check_actor_in_quest(_quest, _actor) do
+    {:in_quest?, false}
   end
 end

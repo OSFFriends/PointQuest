@@ -49,20 +49,15 @@ defmodule PointQuestWeb.Router do
     end
   end
 
-  scope "/", PointQuestWeb do
-    pipe_through [:browser]
-
-    get "/switch/:token", Switch, :set_session
-
-    live "/quest", QuestStartLive
-    live "/quest/:id/join", QuestJoinLive
-  end
-
   live_session :ensure_actor, on_mount: [PointQuestWeb.Middleware.LoadActor.Hook] do
     pipe_through [:browser]
 
     scope "/", PointQuestWeb do
+      get "/switch/:token", Switch, :set_session
       live "/quest/:id", QuestLive
+
+    live "/quest", QuestStartLive
+    live "/quest/:id/join", QuestJoinLive
     end
   end
 end
