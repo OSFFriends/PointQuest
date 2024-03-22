@@ -95,6 +95,18 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
+  def project(%Event.AdventurerAttacked{} = command, %__MODULE__{attacks: attacks} = quest) do
+    # adventurer could be updating their previous attack
+    updated_attacks =
+      [struct(Attack, Map.take(command, [:adventurer_id, :attack])) | attacks]
+      |> Enum.uniq_by(fn %{adventurer_id: id} -> id end)
+
+    %__MODULE__{
+      quest
+      | attacks: updated_attacks
+    }
+  end
+
   def handle(%Commands.StartQuest{} = command, _quest) do
     {:ok, Event.QuestStarted.new!(Ecto.embedded_dump(command, :json))}
     # {:error, error}
@@ -106,5 +118,9 @@ defmodule PointQuest.Quests.Quest do
     else
       {:ok, Event.AdventurerJoinedParty.new!(Ecto.embedded_dump(command, :json))}
     end
+  end
+
+  def handle(%Commands.Attack{} = command, _quest) do
+    {:ok, Event.AdventurerAttacked.new!(Ecto.embedded_dump(command, :json))}
   end
 end
