@@ -50,26 +50,30 @@ defmodule PointQuest.Authentication do
     )
   end
 
-  @spec token_to_actor(token()) :: {:ok, Actor.t()} | {:error, :expired | :invalid | :missing}
+  @spec token_to_actor(token()) ::
+          {:ok, Actor.t()} | {:error, :expired | :invalid | :missing | :stale_quest}
   def token_to_actor(token) do
     with {:ok, serializable} <- Phoenix.Token.verify(PointQuestWeb.Endpoint, @salt, token) do
-      {:ok, to_actor(serializable)}
+      to_actor(serializable)
     end
   end
 
   def to_actor(%{type: :adventurer, quest_id: _quest_id, adventurer_id: _adventurer_id} = token) do
-    {:ok, adventurer} =
-      Commands.GetAdventurer.new!(token) |> Commands.GetAdventurer.execute()
+    get_adventurer = Commands.GetAdventurer.new!(token)
 
-    PointQuest.Authentication.create_actor(adventurer)
+    case Commands.GetAdventurer.execute(get_adventurer) do
+      {:ok, adventurer} -> {:ok, PointQuest.Authentication.create_actor(adventurer)}
+      {:error, :quest_not_found} -> {:error, :stale_quest}
+    end
   end
 
   def to_actor(%{type: :party_leader, quest_id: _quest_id, adventurer_id: _adventurer_id} = token) do
-    {:ok, leader} =
-      Commands.GetPartyLeader.new!(token)
-      |> Commands.GetPartyLeader.execute()
+    get_leader = Commands.GetPartyLeader.new!(token)
 
-    PointQuest.Authentication.create_actor(leader)
+    case Commands.GetPartyLeader.execute(get_leader) do
+      {:ok, leader} -> {:ok, PointQuest.Authentication.create_actor(leader)}
+      {:error, :quest_not_found} -> {:error, :stale_quest}
+    end
   end
 
   def from_actor(%Actor.Adventurer{} = adventurer) do
