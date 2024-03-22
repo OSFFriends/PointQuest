@@ -62,15 +62,23 @@ defmodule PointQuestWeb.QuestLive do
     end)
   end
 
-  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{quest_id: quest_id, leader_id: user_id, adventurer: nil}) do
+  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
+         leader_id: user_id,
+         adventurer: nil
+       }) do
     %{user_id: user_id, class: "leader", name: "Party Leader"}
   end
 
-  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{leader_id: user_id, adventurer: adventurer}) do
+  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
+         leader_id: user_id,
+         adventurer: adventurer
+       }) do
     %{user_id: user_id, class: adventurer.class, name: adventurer.name}
   end
 
-  defp actor_to_meta(%PointQuest.Authentication.Actor.Adventurer{adventurer: %{id: user_id} = adventurer}) do
+  defp actor_to_meta(%PointQuest.Authentication.Actor.Adventurer{
+         adventurer: %{id: user_id} = adventurer
+       }) do
     %{user_id: user_id, class: adventurer.class, name: adventurer.name}
   end
 end
