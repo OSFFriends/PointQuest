@@ -10,8 +10,10 @@ defmodule PointQuestWeb.QuestLive do
       <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
     </div>
     <div class="flex gap-4">
-      <div :for={{user_id, _meta} <- @users} class="bg-blue-400">
+      <div :for={{user_id, %{name: name, class: class}} <- @users} class="bg-blue-400">
         <%= user_id %>
+        <%= name %>
+        <%= class %>
       </div>
     </div>
     """
@@ -21,11 +23,8 @@ defmodule PointQuestWeb.QuestLive do
     socket =
       case Infra.Quests.Db.get_quest_by_id(params["id"]) do
         {:ok, quest} ->
-          current_user = get_actor_id(socket.assigns.current_actor)
-
-          {:ok, _state} =
-            PointQuestWeb.Presence.track(self(), quest.id, current_user, %{})
-
+          user_meta = actor_to_meta(socket.assigns.current_actor)
+          PointQuestWeb.Presence.track(self(), quest.id, user_meta.user_id, user_meta)
           Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
           socket
@@ -63,8 +62,15 @@ defmodule PointQuestWeb.QuestLive do
     end)
   end
 
-  defp get_actor_id(%PointQuest.Authentication.Actor.PartyLeader{leader_id: user_id}), do: user_id
+  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{quest_id: quest_id, leader_id: user_id, adventurer: nil}) do
+    %{user_id: user_id, class: "leader", name: "Party Leader"}
+  end
 
-  defp get_actor_id(%PointQuest.Authentication.Actor.Adventurer{adventurer: %{id: user_id}}),
-    do: user_id
+  defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{leader_id: user_id, adventurer: adventurer}) do
+    %{user_id: user_id, class: adventurer.class, name: adventurer.name}
+  end
+
+  defp actor_to_meta(%PointQuest.Authentication.Actor.Adventurer{adventurer: %{id: user_id} = adventurer}) do
+    %{user_id: user_id, class: adventurer.class, name: adventurer.name}
+  end
 end

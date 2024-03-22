@@ -35,7 +35,7 @@ defmodule PointQuest.Authentication do
       %{
         quest_id: leader.quest_id,
         leader_id: leader.id,
-        adventurer: Ecto.embedded_dump(leader, :json)
+        adventurer: Ecto.embedded_dump(leader.adventurer, :json)
       },
       :json
     )
