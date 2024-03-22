@@ -4,16 +4,32 @@ defmodule PointQuestWeb.QuestLive do
   """
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Authentication.Actor.PartyLeader
+
+  require Logger
+
   def render(assigns) do
     ~H"""
-    <div>
-      <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
-    </div>
-    <div class="flex gap-4">
-      <div :for={{user_id, %{name: name, class: class}} <- @users} class="bg-blue-400">
-        <%= user_id %>
-        <%= name %>
-        <%= class %>
+    <div class="flex flex-col w-full">
+      <div :if={is_party_leader?(@current_actor)} id="leader-controls" class="flex justify-between">
+        <div id="quest-actions">
+          <.button phx-click="show_attacks">Show Attacks</.button>
+          <.button phx-click="clear_attacks">Clear Attacks</.button>
+        </div>
+        <div id="meta-actions" class="justify-end">
+          <.button phx-click="copy_link">Copy Invite Link</.button>
+        </div>
+      </div>
+
+      <div>
+        <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
+      </div>
+      <div class="flex gap-4">
+        <div :for={{user_id, %{name: name, class: class}} <- @users} class="bg-blue-400">
+          <%= user_id %>
+          <%= name %>
+          <%= class %>
+        </div>
       </div>
     </div>
     """
@@ -50,6 +66,30 @@ defmodule PointQuestWeb.QuestLive do
     }
   end
 
+  def handle_event("copy_link", _params, socket) do
+    quest_id = socket.assigns.quest.id
+
+    link = "#{PointQuestWeb.Endpoint.url()}/quest/#{quest_id}/join"
+
+    socket =
+      socket
+      |> push_event("copy", %{text: link})
+
+    {:noreply, socket}
+  end
+
+  def handle_event("show_attacks", _params, socket) do
+    Logger.info("show attacks is not implemented yet")
+    {:noreply, socket}
+  end
+
+  def handle_event("clear_attacks", _params, socket) do
+    Logger.info("clear attacks is not implemented yet")
+    _quest_id = socket.assigns.quest.id
+
+    {:noreply, socket}
+  end
+
   def handle_joins(socket, joins) do
     Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
       assign(socket, :users, Map.put(socket.assigns.users, user, meta))
@@ -81,4 +121,7 @@ defmodule PointQuestWeb.QuestLive do
        }) do
     %{user_id: user_id, class: adventurer.class, name: adventurer.name}
   end
+
+  defp is_party_leader?(%PartyLeader{} = _actor), do: true
+  defp is_party_leader?(_actor), do: false
 end
