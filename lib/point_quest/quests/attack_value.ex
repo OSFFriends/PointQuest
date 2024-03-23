@@ -23,4 +23,7 @@ defmodule PointQuest.Quests.AttackValue do
 
   @impl Ecto.Type
   def dump(attack_value), do: {:ok, attack_value}
+
+  @spec valid_attacks() :: [integer(), ...]
+  def valid_attacks(), do: @valid_attacks
 end

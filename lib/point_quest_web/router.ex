@@ -56,8 +56,8 @@ defmodule PointQuestWeb.Router do
       get "/switch/:token", Switch, :set_session
       live "/quest/:id", QuestLive
 
-    live "/quest", QuestStartLive
-    live "/quest/:id/join", QuestJoinLive
+      live "/quest", QuestStartLive
+      live "/quest/:id/join", QuestJoinLive
     end
   end
 end

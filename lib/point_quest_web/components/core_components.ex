@@ -225,7 +225,7 @@ defmodule PointQuestWeb.CoreComponents do
     <button
       type={@type}
       class={[
-        "phx-submit-loading:opacity-75 bg-indigo-500 hover:bg-indigo-400 py-2 px-4 border-indigo-700 border-b-4 hover:border-indigo-500 rounded", 
+        "phx-submit-loading:opacity-75 bg-indigo-500 hover:bg-indigo-400 py-2 px-4 border-indigo-700 border-b-4 hover:border-indigo-500 rounded",
         "text-sm font-semibold leading-6 text-white active:text-white/80",
         @class
       ]}
