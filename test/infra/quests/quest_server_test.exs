@@ -2,13 +2,18 @@ defmodule Infra.Quests.QuestServerTest do
   use ExUnit.Case, async: true
 
   alias Infra.Quests.QuestServer
-  alias PointQuest.Quests.Quest
+  alias PointQuest.Quests
 
   describe "automatic cleanup of old sessions" do
     setup do
       quest =
-        Quest.create_changeset(%Quest{}, %{name: "Bob's Burgers", party_leader: %{name: "Bob"}})
-        |> Ecto.Changeset.apply_action!(:insert)
+        Quests.Quest.project(
+          Quests.Event.QuestStarted.new!(%{
+            quest_id: Nanoid.generate_non_secure(),
+            name: "My Quest"
+          }),
+          %Quests.Quest{}
+        )
 
       Process.flag(:trap_exit, true)
 

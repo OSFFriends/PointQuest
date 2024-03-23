@@ -6,7 +6,7 @@ defmodule PointQuest.Quests.AdventurerTest do
 
   describe "creating an adventurer" do
     test "required fields" do
-      required_params = %{name: "my party"}
+      required_params = %{name: "my party", quest_id: "xab124D"}
 
       for {field, _value} <- required_params do
         missing_requied = Map.delete(required_params, field)
@@ -22,7 +22,11 @@ defmodule PointQuest.Quests.AdventurerTest do
       for class <- [:healer, :mage, :knight] do
         assert %Changeset{valid?: true} =
                  adventurer_changeset =
-                 Adventurer.create_changeset(%Adventurer{}, %{name: "a #{class}", class: class})
+                 Adventurer.create_changeset(%Adventurer{}, %{
+                   name: "a #{class}",
+                   class: class,
+                   quest_id: "abc123"
+                 })
 
         assert class == Changeset.get_field(adventurer_changeset, :class)
       end
@@ -30,7 +34,10 @@ defmodule PointQuest.Quests.AdventurerTest do
       # a random one is assigned if not passed
       assert %Changeset{valid?: true} =
                adventurer_changeset =
-               Adventurer.create_changeset(%Adventurer{}, %{name: "another member"})
+               Adventurer.create_changeset(%Adventurer{}, %{
+                 name: "another member",
+                 quest_id: "abc123"
+               })
 
       assert Changeset.get_field(adventurer_changeset, :class) != nil
     end
