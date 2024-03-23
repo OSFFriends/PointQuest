@@ -9,10 +9,10 @@ defmodule PointQuestWeb.QuestStartLive do
 
   def render(assigns) do
     ~H"""
-    <.form for={@form} id="start-quest-form" phx-submit="start_quest">
+    <.form for={@form} class="flex flex-col space-y-6" id="start-quest-form" phx-submit="start_quest">
       <.input id="quest_name" type="text" field={@form[:name]} label="Quest Name" />
-      <fieldset class="my-4">
-        <legend class="py-2">Make your adventurer (if you want to also vote)</legend>
+      <.input name={:join_as_adventurer} value={@join_as_adventurer} label="Join quest as an adventurer" type="checkbox"phx-click="toggle_join_as_adventurer" />
+      <fieldset :if={@join_as_adventurer} >
         <.inputs_for :let={adventurer_form} field={@form[:party_leaders_adventurer]}>
           <.input
             id="adventurer_name"
@@ -29,7 +29,9 @@ defmodule PointQuestWeb.QuestStartLive do
           />
         </.inputs_for>
       </fieldset>
-      <.button type="submit">Start Quest</.button>
+      <div>
+        <.button type="submit">Start Quest</.button>
+      </div>
     </.form>
     """
   end
@@ -41,9 +43,18 @@ defmodule PointQuestWeb.QuestStartLive do
     changeset = StartQuest.changeset(start_quest, %{})
 
     socket =
-      assign(socket, start_quest: start_quest, classes: classes, form: to_form(changeset))
+      assign(socket,
+        start_quest: start_quest,
+        classes: classes,
+        form: to_form(changeset),
+        join_as_adventurer: false
+      )
 
     {:ok, socket}
+  end
+
+  def handle_event("toggle_join_as_adventurer", _params, socket) do
+    {:noreply, assign(socket, join_as_adventurer: !socket.assigns.join_as_adventurer)}
   end
 
   def handle_event(
