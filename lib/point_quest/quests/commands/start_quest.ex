@@ -113,6 +113,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     start_quest
     |> cast(params, [:name])
     |> cast_embed(:party_leaders_adventurer)
+    |> validate_required([:name])
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)

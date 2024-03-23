@@ -8,6 +8,15 @@ defmodule PointQuest.MixProject do
       elixir: "~> 1.15",
       elixirc_paths: elixirc_paths(Mix.env()),
       start_permanent: Mix.env() == :prod,
+      test_coverage: [tool: ExCoveralls],
+      preferred_cli_env: [
+        check: :test,
+        coverage: :test,
+        coveralls: :test,
+        "coveralls.json": :test,
+        "coveralls.html": :test,
+        "coverage.serve": :test
+      ],
       aliases: aliases(),
       deps: deps()
     ]
@@ -36,6 +45,7 @@ defmodule PointQuest.MixProject do
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
       {:ecto_enum, "~> 1.4"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:excoveralls, "~> 0.16", only: [:test, :dev]},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.20"},
@@ -74,7 +84,21 @@ defmodule PointQuest.MixProject do
       "ecto.reset": ["ecto.drop", "ecto.setup"],
       "assets.setup": ["tailwind.install --if-missing", "esbuild.install --if-missing"],
       "assets.build": ["tailwind default", "esbuild default"],
-      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"]
+      "assets.deploy": ["tailwind default --minify", "esbuild default --minify", "phx.digest"],
+      check: [
+        "compile --warnings-as-errors",
+        "test",
+        "credo --strict",
+        "format --check-formatted",
+        "dialyzer"
+      ],
+      coverage: [
+        "coveralls.html",
+        "open ./cover/excoveralls.html"
+      ],
+      "coverage.serve": [
+        "coveralls.html -o ./priv/static"
+      ]
     ]
   end
 end
