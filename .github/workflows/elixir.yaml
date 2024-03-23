@@ -91,4 +91,3 @@ jobs:
       # Step: Execute the tests.
       - name: Run tests
         run: mix test
-        continue-on-error: true
