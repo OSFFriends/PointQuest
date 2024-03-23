@@ -11,7 +11,7 @@ defmodule PointQuestWeb.QuestLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col w-full">
-      <div :if={is_party_leader?(@current_actor)} id="leader-controls" class="flex justify-between">
+      <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between">
         <div id="quest-actions">
           <.button phx-click="show_attacks">Show Attacks</.button>
           <.button phx-click="clear_attacks">Clear Attacks</.button>
@@ -39,7 +39,7 @@ defmodule PointQuestWeb.QuestLive do
     socket =
       case Infra.Quests.Db.get_quest_by_id(params["id"]) do
         {:ok, quest} ->
-          user_meta = actor_to_meta(socket.assigns.current_actor)
+          user_meta = actor_to_meta(socket.assigns.actor)
           PointQuestWeb.Presence.track(self(), quest.id, user_meta.user_id, user_meta)
           Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 

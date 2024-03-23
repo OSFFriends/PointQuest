@@ -23,7 +23,7 @@ defmodule PointQuestWeb.QuestJoinLive do
   def mount(params, _session, socket) do
     socket =
       with {:ok, quest} <- Infra.Quests.Db.get_quest_by_id(params["id"]),
-           {:in_quest?, false} <- check_actor_in_quest(quest, socket.assigns.current_actor) do
+           {:in_quest?, false} <- check_actor_in_quest(quest, socket.assigns.actor) do
         changeset = get_changeset(%{quest_id: quest.id})
         classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
 

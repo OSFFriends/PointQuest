@@ -46,6 +46,6 @@ defmodule PointQuestWeb.Middleware.LoadActor.Hook do
           nil
       end
 
-    {:cont, assign(socket, :current_actor, actor)}
+    {:cont, assign(socket, :actor, actor)}
   end
 end
