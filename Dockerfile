@@ -11,7 +11,7 @@
 #   - https://pkgs.org/ - resource for finding needed packages
 #   - Ex: hexpm/elixir:1.14.5-erlang-25.3.2.9-debian-bullseye-20240130-slim
 #
-ARG ELIXIR_VERSION=1.14.5
+ARG ELIXIR_VERSION=1.15.7
 ARG OTP_VERSION=25.3.2.9
 ARG DEBIAN_VERSION=bullseye-20240130-slim
 
