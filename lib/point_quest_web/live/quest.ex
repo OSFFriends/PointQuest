@@ -3,6 +3,7 @@ defmodule PointQuestWeb.QuestLive do
   Page where we're actually running the quest.
   """
   use PointQuestWeb, :live_view
+  alias PointQuest.Quests.Event
 
   alias PointQuest.Authentication.Actor.PartyLeader
 
@@ -88,6 +89,13 @@ defmodule PointQuestWeb.QuestLive do
     _quest_id = socket.assigns.quest.id
 
     {:noreply, socket}
+  end
+
+  def handle_info(%Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack}, socket) do
+    {
+      :noreply,
+      put_flash(socket, :info, "Adventurer: #{adventurer_id} attacked with #{attack}")
+    }
   end
 
   def handle_joins(socket, joins) do

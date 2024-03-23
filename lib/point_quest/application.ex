@@ -22,8 +22,6 @@ defmodule PointQuest.Application do
       # Start the Endpoint (http/https)
       PointQuestWeb.Endpoint,
       {DynamicSupervisor, name: Infra.Quests.QuestSupervisor}
-      # Start a worker by calling: PointQuest.Worker.start_link(arg)
-      # {PointQuest.Worker, arg}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html
