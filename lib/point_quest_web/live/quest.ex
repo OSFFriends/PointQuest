@@ -58,15 +58,6 @@ defmodule PointQuestWeb.QuestLive do
     {:ok, socket}
   end
 
-  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
-    {
-      :noreply,
-      socket
-      |> handle_leaves(diff.leaves)
-      |> handle_joins(diff.joins)
-    }
-  end
-
   def handle_event("copy_link", _params, socket) do
     quest_id = socket.assigns.quest.id
 
@@ -89,6 +80,15 @@ defmodule PointQuestWeb.QuestLive do
     _quest_id = socket.assigns.quest.id
 
     {:noreply, socket}
+  end
+
+  def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
+    {
+      :noreply,
+      socket
+      |> handle_leaves(diff.leaves)
+      |> handle_joins(diff.joins)
+    }
   end
 
   def handle_info(%Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack}, socket) do
