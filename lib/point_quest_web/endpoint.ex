@@ -21,7 +21,7 @@ defmodule PointQuestWeb.Endpoint do
     at: "/",
     from: :point_quest,
     gzip: false,
-    only: PointQuestWeb.static_paths()
+    only: PointQuestWeb.static_paths(Application.compile_env(:point_quest, :compile_env))
 
   # Code reloading can be explicitly enabled under the
   # :code_reloader configuration of your endpoint.

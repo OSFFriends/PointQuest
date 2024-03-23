@@ -17,7 +17,12 @@ defmodule PointQuestWeb do
   those modules here.
   """
 
-  def static_paths, do: ~w(assets fonts images favicon.ico robots.txt)
+  @prod_static_paths ~w(assets fonts images favicon.ico robots.txt)
+  @dev_static_paths ~w(assets fonts images favicon.ico robots.txt excoveralls.html)
+
+  @spec static_paths(atom) :: [String.t()]
+  def static_paths(:prod), do: @prod_static_paths
+  def static_paths(_non_prod), do: @dev_static_paths
 
   def router do
     quote do
@@ -100,7 +105,7 @@ defmodule PointQuestWeb do
       use Phoenix.VerifiedRoutes,
         endpoint: PointQuestWeb.Endpoint,
         router: PointQuestWeb.Router,
-        statics: PointQuestWeb.static_paths()
+        statics: PointQuestWeb.static_paths(Application.compile_env(:point_quest, :compile_env))
     end
   end
 

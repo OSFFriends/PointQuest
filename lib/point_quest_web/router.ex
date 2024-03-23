@@ -27,12 +27,6 @@ defmodule PointQuestWeb.Router do
     plug :require_linear_token
   end
 
-  scope "/", PointQuestWeb do
-    pipe_through :browser
-
-    get "/", PageController, :home
-  end
-
   scope "/dev" do
     pipe_through :browser
 

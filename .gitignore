@@ -35,3 +35,5 @@ point_quest-*.tar
 npm-debug.log
 /assets/node_modules/
 
+# Coveralls
+/priv/static/excoveralls.html
