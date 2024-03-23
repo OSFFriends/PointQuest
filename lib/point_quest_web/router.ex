@@ -1,6 +1,7 @@
 defmodule PointQuestWeb.Router do
   use PointQuestWeb, :router
 
+  import Phoenix.LiveDashboard.Router
   import PointQuestWeb.LinearAuthPlug
 
   pipeline :browser do
@@ -32,21 +33,10 @@ defmodule PointQuestWeb.Router do
     get "/", PageController, :home
   end
 
-  # Enable LiveDashboard and Swoosh mailbox preview in development
-  if Application.compile_env(:point_quest, :dev_routes) do
-    # If you want to use the LiveDashboard in production, you should put
-    # it behind authentication and allow only admins to access it.
-    # If your application does not have an admins-only section yet,
-    # you can use Plug.BasicAuth to set up some basic authentication
-    # as long as you are also using SSL (which you should anyway).
-    import Phoenix.LiveDashboard.Router
+  scope "/dev" do
+    pipe_through :browser
 
-    scope "/dev" do
-      pipe_through :browser
-
-      live_dashboard "/dashboard", metrics: PointQuestWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
-    end
+    live_dashboard "/dashboard", metrics: PointQuestWeb.Telemetry
   end
 
   live_session :ensure_actor, on_mount: [PointQuestWeb.Middleware.LoadActor.Hook] do
