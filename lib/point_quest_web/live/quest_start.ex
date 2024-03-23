@@ -11,8 +11,14 @@ defmodule PointQuestWeb.QuestStartLive do
     ~H"""
     <.form for={@form} class="flex flex-col space-y-6" id="start-quest-form" phx-submit="start_quest">
       <.input id="quest_name" type="text" field={@form[:name]} label="Quest Name" />
-      <.input name={:join_as_adventurer} value={@join_as_adventurer} label="Join quest as an adventurer" type="checkbox"phx-click="toggle_join_as_adventurer" />
-      <fieldset :if={@join_as_adventurer} >
+      <.input
+        name={:join_as_adventurer}
+        value={@join_as_adventurer}
+        label="Join quest as an adventurer"
+        type="checkbox"
+        phx-click="toggle_join_as_adventurer"
+      />
+      <fieldset :if={@join_as_adventurer}>
         <.inputs_for :let={adventurer_form} field={@form[:party_leaders_adventurer]}>
           <.input
             id="adventurer_name"
