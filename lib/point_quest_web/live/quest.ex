@@ -3,9 +3,10 @@ defmodule PointQuestWeb.QuestLive do
   Page where we're actually running the quest.
   """
   use PointQuestWeb, :live_view
-  alias PointQuest.Quests.Event
 
+  alias PointQuest.Quests.Event
   alias PointQuest.Authentication.Actor.PartyLeader
+  alias PointQuestWeb.Live.Components
 
   require Logger
 
@@ -32,21 +33,13 @@ defmodule PointQuestWeb.QuestLive do
           <%= class %>
         </div>
       </div>
-
-      <div class="flex flex-row rounded-full pt-2">
-        <div
-          :for={attack <- @attack_list}
-          type="action"
-          phx-click="set_attack"
-          phx-value-attack={attack}
-          class={[
-            "p-4 first:rounded-s-full last:rounded-e-full",
-            get_background_color(attack, @selected_attack)
-          ]}
-        >
-          <%= attack %>
-        </div>
-      </div>
+      <.live_component
+        :if={show_attack_panel?(@actor)}
+        module={Components.Attack}
+        id="attack_controls"
+        actor={@actor}
+        quest_id={@quest.id}
+      />
     </div>
     """
   end
@@ -56,7 +49,6 @@ defmodule PointQuestWeb.QuestLive do
       case Infra.Quests.Db.get_quest_by_id(params["id"]) do
         {:ok, quest} ->
           user_meta = actor_to_meta(socket.assigns.actor)
-          attack_list = PointQuest.Quests.AttackValue.valid_attacks()
           PointQuestWeb.Presence.track(self(), quest.id, user_meta.user_id, user_meta)
           Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
@@ -64,9 +56,7 @@ defmodule PointQuestWeb.QuestLive do
           |> assign(
             quest: quest,
             users: %{},
-            form: nil,
-            attack_list: attack_list,
-            selected_attack: nil
+            form: nil
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
 
@@ -102,10 +92,6 @@ defmodule PointQuestWeb.QuestLive do
     _quest_id = socket.assigns.quest.id
 
     {:noreply, socket}
-  end
-
-  def handle_event("set_attack", params, socket) do
-    {:noreply, assign(socket, selected_attack: params["attack"] |> String.to_integer())}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
@@ -159,6 +145,6 @@ defmodule PointQuestWeb.QuestLive do
   defp is_party_leader?(%PartyLeader{} = _actor), do: true
   defp is_party_leader?(_actor), do: false
 
-  defp get_background_color(attack, attack), do: "bg-amber-400 hover:bg-amber-500"
-  defp get_background_color(_attack, _selected), do: "bg-indigo-400 hover:bg-indigo-500"
+  defp show_attack_panel?(%PartyLeader{adventurer: nil}), do: false
+  defp show_attack_panel?(_actor), do: true
 end
