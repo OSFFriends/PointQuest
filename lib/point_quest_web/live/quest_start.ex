@@ -9,7 +9,13 @@ defmodule PointQuestWeb.QuestStartLive do
 
   def render(assigns) do
     ~H"""
-    <.form for={@form} class="flex flex-col space-y-6" id="start-quest-form" phx-submit="start_quest">
+    <.form
+      for={@form}
+      class="flex flex-col space-y-6"
+      id="start-quest-form"
+      phx-change="validate_quest"
+      phx-submit="start_quest"
+    >
       <.input id="quest_name" type="text" field={@form[:name]} label="Quest Name" />
       <.input
         name={:join_as_adventurer}
@@ -63,23 +69,52 @@ defmodule PointQuestWeb.QuestStartLive do
     {:noreply, assign(socket, join_as_adventurer: !socket.assigns.join_as_adventurer)}
   end
 
+  def handle_event("validate_quest", %{"start_quest" => params}, socket) do
+    changeset =
+      case StartQuest.new(params) do
+        {:ok, %StartQuest{} = command} -> StartQuest.changeset(command, %{})
+        {:error, changeset} -> changeset
+      end
+
+    {:noreply, assign(socket, form: to_form(changeset))}
+  end
+
   def handle_event(
         "start_quest",
-        %{"start_quest" => %{"name" => quest_name, "party_leaders_adventurer" => adventurer}},
+        %{
+          "start_quest" => %{"name" => quest_name, "party_leaders_adventurer" => adventurer},
+          "join_as_adventurer" => "true"
+        },
         socket
       ) do
     params =
-      if Map.get(adventurer, "name") == "" do
-        %{name: quest_name}
-      else
-        %{
-          name: quest_name,
-          party_leaders_adventurer: %{
-            name: adventurer["name"],
-            class: adventurer["class"]
-          }
+      %{
+        name: quest_name,
+        party_leaders_adventurer: %{
+          name: adventurer["name"],
+          class: adventurer["class"]
         }
-      end
+      }
+
+    {:ok, quest} =
+      params
+      |> StartQuest.new!()
+      |> StartQuest.execute()
+
+    token =
+      quest.party_leader
+      |> Authentication.create_actor()
+      |> Authentication.actor_to_token()
+
+    {:noreply, push_navigate(socket, to: ~p"/switch/#{token}")}
+  end
+
+  def handle_event(
+        "start_quest",
+        %{"start_quest" => %{"name" => quest_name}, "join_as_adventurer" => "false"},
+        socket
+      ) do
+    params = %{name: quest_name}
 
     {:ok, quest} =
       params
