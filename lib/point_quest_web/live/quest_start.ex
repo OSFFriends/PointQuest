@@ -45,12 +45,11 @@ defmodule PointQuestWeb.QuestStartLive do
   def mount(_params, _session, socket) do
     classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
 
-    start_quest = StartQuest.new!(%{})
-    changeset = StartQuest.changeset(start_quest, %{})
+    changeset = StartQuest.changeset(%StartQuest{}, %{})
 
     socket =
       assign(socket,
-        start_quest: start_quest,
+        start_quest: %StartQuest{},
         classes: classes,
         form: to_form(changeset),
         join_as_adventurer: false
