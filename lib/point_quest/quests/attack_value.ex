@@ -15,7 +15,7 @@ defmodule PointQuest.Quests.AttackValue do
 
   @impl Ecto.Type
   def cast(_invalid_attack) do
-    {:error, "invalid attack value"}
+    :error
   end
 
   @impl Ecto.Type
