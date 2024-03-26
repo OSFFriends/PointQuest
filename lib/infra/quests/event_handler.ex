@@ -1,6 +1,10 @@
 defmodule Infra.Quests.EventHandler do
   import PointQuest.Quests.Telemetry
+
+  alias PointQuest.Authentication.Actor
   alias PointQuest.Quests.Event
+
+  require Logger
 
   def attach() do
     :telemetry.attach_many(
@@ -16,13 +20,24 @@ defmodule Infra.Quests.EventHandler do
   def handle_event(
         attack(:stop),
         _measurements,
-        %{event: %Event.AdventurerAttacked{} = adventurer_attacked},
+        %{event: %Event.AdventurerAttacked{} = adventurer_attacked, actor: _actor},
         _config
       ) do
     Phoenix.PubSub.broadcast(
       PointQuestWeb.PubSub,
       adventurer_attacked.quest_id,
       adventurer_attacked
+    )
+  end
+
+  def handle_event(
+        attack(:stop),
+        _measurements,
+        %{error: true, actor: actor, command: command, reason: reason},
+        _config
+      ) do
+    Logger.error(
+      "Adventurer #{Actor.get_actor_id(actor)} failed to attack in quest #{command.quest_id}: #{inspect(reason)}"
     )
   end
 end
