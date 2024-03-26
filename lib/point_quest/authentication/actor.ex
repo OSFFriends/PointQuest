@@ -46,4 +46,8 @@ defmodule PointQuest.Authentication.Actor do
   end
 
   @type t :: Adventurer.t() | PartyLeader.t()
+
+  def get_actor_id(%PartyLeader{adventurer: %{id: id}}), do: id
+  def get_actor_id(%PartyLeader{leader_id: id}), do: id
+  def get_actor_id(%Adventurer{adventurer: %{id: id}}), do: id
 end

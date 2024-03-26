@@ -43,12 +43,15 @@ defmodule PointQuest.Quests.Commands.Attack do
     |> apply_action(:update)
   end
 
-  def execute(%__MODULE__{quest_id: quest_id} = attack_command) do
-    Telemetrex.span event: Quests.Telemetry.attack(), context: %{command: attack_command} do
+  def execute(%__MODULE__{quest_id: quest_id} = attack_command, actor) do
+    Telemetrex.span event: Quests.Telemetry.attack(),
+                    context: %{command: attack_command, actor: actor} do
       with {:ok, quest} <- repo().get_quest_by_id(quest_id),
            {:ok, event} <- Quests.Quest.handle(attack_command, quest),
            {:ok, updated_quest} <- repo().write(quest, event) do
         {:ok, updated_quest, event}
+        {:error, _error} = error ->
+          error
       end
     after
       {:ok, %Quests.Quest{} = quest, event} -> %{quest: quest, event: event}
