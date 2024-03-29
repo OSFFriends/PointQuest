@@ -22,15 +22,18 @@ defmodule PointQuestWeb.QuestLive do
           <.button phx-click="copy_link">Copy Invite Link</.button>
         </div>
       </div>
-
-      <div>
-        <pre><code><%= Jason.encode!(Ecto.embedded_dump(@quest, :json), pretty: true) %></code></pre>
-      </div>
       <div class="flex gap-4">
-        <div :for={{user_id, %{name: name, class: class}} <- @users} class="bg-blue-400">
-          <%= user_id %>
-          <%= name %>
-          <%= class %>
+        <div :for={%{id: id, class: class, name: name} <- @adventurers} class="flex flex-col p-2">
+          <div class={"#{get_background_color(id, @users)} rounded p-2"}>
+            <div id="class-sprite" class="w-16 mt-2">
+              <img
+                src={"/images/#{class}.png"}
+                alt={"small sprite representing #{class} class"}
+                class="w-full"
+              />
+            </div>
+            <p><%= name %></p>
+          </div>
         </div>
       </div>
       <.live_component
@@ -52,10 +55,13 @@ defmodule PointQuestWeb.QuestLive do
           PointQuestWeb.Presence.track(self(), quest.id, user_meta.user_id, user_meta)
           Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
+          {:ok, adventurers} = Infra.Quests.Db.get_all_adventurers(quest.id)
+
           socket
           |> assign(
             quest: quest,
             users: %{},
+            adventurers: adventurers,
             form: nil
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
@@ -112,13 +118,22 @@ defmodule PointQuestWeb.QuestLive do
 
   def handle_joins(socket, joins) do
     Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
+      meta = Map.put(meta, :connected?, true)
       assign(socket, :users, Map.put(socket.assigns.users, user, meta))
     end)
   end
 
   defp handle_leaves(socket, leaves) do
-    Enum.reduce(leaves, socket, fn {user, _}, socket ->
-      assign(socket, :users, Map.delete(socket.assigns.users, user))
+    Enum.reduce(leaves, socket, fn {user, %{metas: [meta | _]}}, socket ->
+      meta = Map.put(meta, :connected?, false)
+
+      assign(
+        socket,
+        :users,
+        Map.update(socket.assigns.users, user, meta, fn curr ->
+          Map.put(curr, :connected?, false)
+        end)
+      )
     end)
   end
 
@@ -147,4 +162,18 @@ defmodule PointQuestWeb.QuestLive do
 
   defp show_attack_panel?(%PartyLeader{adventurer: nil}), do: false
   defp show_attack_panel?(_actor), do: true
+
+  defp get_background_color(adventurer_id, users) do
+    case Map.get(users, adventurer_id) do
+      nil ->
+        "bg-gray-400"
+
+      user ->
+        if user.connected? do
+          ""
+        else
+          "bg-gray-400"
+        end
+    end
+  end
 end
