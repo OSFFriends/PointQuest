@@ -23,8 +23,8 @@ defmodule PointQuestWeb.QuestLive do
         </div>
       </div>
       <div class="flex gap-4">
-        <div :for={%{id: id, class: class, name: name} <- @adventurers} class="flex flex-col p-2">
-          <div class={"#{get_background_color(id, @users)} rounded p-2"}>
+        <div :for={%{class: class, name: name} <- @adventurers} class="flex flex-col p-2">
+          <div class={"#{get_background_color(name, @users)} rounded p-2"}>
             <div id="class-sprite" class="w-16 mt-2">
               <img
                 src={"/images/#{class}.png"}
@@ -117,9 +117,11 @@ defmodule PointQuestWeb.QuestLive do
   end
 
   def handle_joins(socket, joins) do
+    {:ok, adventurers} = Infra.Quests.Db.get_all_adventurers(socket.assigns.quest.id)
+
     Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
       meta = Map.put(meta, :connected?, true)
-      assign(socket, :users, Map.put(socket.assigns.users, user, meta))
+      assign(socket, users: Map.put(socket.assigns.users, user, meta), adventurers: adventurers)
     end)
   end
 
@@ -163,17 +165,13 @@ defmodule PointQuestWeb.QuestLive do
   defp show_attack_panel?(%PartyLeader{adventurer: nil}), do: false
   defp show_attack_panel?(_actor), do: true
 
-  defp get_background_color(adventurer_id, users) do
-    case Map.get(users, adventurer_id) do
-      nil ->
-        "bg-gray-400"
-
-      user ->
-        if user.connected? do
-          ""
-        else
-          "bg-gray-400"
-        end
+  defp get_background_color(name, users) do
+    Enum.filter(users, fn {_id, u} -> u.name == name and u.connected? end)
+    |> Enum.any?()
+    |> if do
+      ""
+    else
+      "bg-gray-400"
     end
   end
 end

@@ -71,6 +71,19 @@ defmodule Infra.Quests.Db do
     end
   end
 
+  def get_all_adventurers(quest_id) do
+    case get_quest_by_id(quest_id) do
+      {:ok, %{party_leader: %{adventurer: leader}, adventurers: adventurers}} ->
+        {:ok, [leader | adventurers]}
+
+      {:ok, %{adventurers: adventurers}} ->
+        {:ok, adventurers}
+
+      {:error, :quest_not_found} = error ->
+        error
+    end
+  end
+
   defp lookup_quest_server(quest_id) do
     case Registry.lookup(Infra.Quests.Registry, quest_id) do
       [{pid, _state}] ->
