@@ -18,7 +18,7 @@ defmodule PointQuest.Quests.Commands.AttackTest do
       })
       |> StartQuest.execute()
 
-    {:ok, %{adventurers: [adventurer | _rest]} = quest} =
+    {:ok, %{adventurers: [adventurer | _rest]} = quest, _event} =
       AddAdventurer.new!(%{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id})
       |> AddAdventurer.execute()
 

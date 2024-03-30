@@ -56,7 +56,7 @@ defmodule PointQuestWeb.QuestJoinLive do
         %{"add_adventurer" => %{"name" => name, "class" => class}},
         socket
       ) do
-    {:ok, quest} =
+    {:ok, quest, _event} =
       %{quest_id: socket.assigns.quest.id, name: name, class: class}
       |> AddAdventurer.new!()
       |> AddAdventurer.execute()

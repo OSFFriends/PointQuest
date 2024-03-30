@@ -44,6 +44,9 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   alias PointQuest.Quests
   alias PointQuest.Quests.Adventurer
 
+  require PointQuest.Quests.Telemetry
+  require Telemetrex
+
   @type t :: %__MODULE__{
           name: String.t(),
           class: Adventurer.Class.NameEnum.t(),
@@ -140,13 +143,20 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   ```
   """
   def execute(%__MODULE__{quest_id: quest_id} = add_adventurer_command) do
-    # TODO: add telemetry events here
-    with {:ok, quest} <- repo().get_quest_by_id(quest_id),
-         {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest) do
-      repo().write(
-        quest,
-        event
-      )
+    Telemetrex.span event: Quests.Telemetry.add_adventurer(),
+                    context: %{command: add_adventurer_command} do
+      with {:ok, quest} <- repo().get_quest_by_id(quest_id),
+           {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest),
+           {:ok, updated_quest} <-
+             repo().write(
+               quest,
+               event
+             ) do
+        {:ok, updated_quest, event}
+      end
+    after
+      {:ok, %Quests.Quest{} = quest, event} -> %{quest: quest, event: event}
+      {:error, reason} -> %{error: true, reason: reason}
     end
   end
 end

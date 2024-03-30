@@ -23,7 +23,7 @@ alias PointQuest.Quests.Commands
     })
   )
 
-{:ok, multi_party_quest} =
+{:ok, multi_party_quest, _event} =
   Commands.AddAdventurer.execute(
     Commands.AddAdventurer.new!(%{
       quest_id: multi_party_quest.id,
@@ -32,7 +32,7 @@ alias PointQuest.Quests.Commands
     })
   )
 
-{:ok, multi_party_quest} =
+{:ok, multi_party_quest, _event} =
   Commands.AddAdventurer.execute(
     Commands.AddAdventurer.new!(%{
       quest_id: multi_party_quest.id,
