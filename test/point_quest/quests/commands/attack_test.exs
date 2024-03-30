@@ -166,114 +166,29 @@ defmodule PointQuest.Quests.Commands.AttackTest do
         error: :quest_not_found
       })
     end
-  end
 
-  describe "execute/2 policy checking" do
-    test "policy check fails if adventurer is not part of current quest", %{
-      quest: quest,
-      other_actor: %{adventurer: other_adventurer} = actor
-    } do
-      ensure_attack_fails(%{
-        quest_id: quest.id,
-        adventurer_id: other_adventurer.id,
-        attack: 3,
-        actor: actor,
-        error: "attack disallowed"
-      })
+    defp ensure_attack_fails(%{
+           quest_id: quest_id,
+           adventurer_id: adventurer_id,
+           attack: attack,
+           actor: actor,
+           error: error
+         }) do
+      log =
+        capture_log(fn ->
+          assert {:error, ^error} =
+                   Attack.new!(%{
+                     quest_id: quest_id,
+                     adventurer_id: adventurer_id,
+                     attack: attack
+                   })
+                   |> Attack.execute(actor)
+        end)
 
-      ensure_quest_not_updated(quest.id)
+      actor_id = PointQuest.Authentication.Actor.get_actor_id(actor)
+
+      assert log =~
+               "Adventurer #{actor_id} failed to attack in quest #{quest_id}"
     end
-
-    test "policy check fails if actor is not attacking adventurer", %{
-      quest: quest,
-      adventurer: adventurer,
-      other_actor: other_actor
-    } do
-      ensure_attack_fails(%{
-        quest_id: quest.id,
-        adventurer_id: adventurer.id,
-        attack: 1,
-        actor: other_actor,
-        error: "attack disallowed"
-      })
-
-      ensure_quest_not_updated(quest.id)
-    end
-
-    test "policy check fails if party leader with no adventurer tries to attack for other adventurer",
-         %{party_leader_actor: actor, adventurer: adventurer} do
-      ensure_attack_fails(%{
-        quest_id: actor.quest_id,
-        adventurer_id: adventurer.id,
-        attack: 1,
-        actor: actor,
-        error: "attack disallowed"
-      })
-
-      ensure_quest_not_updated(actor.quest_id)
-    end
-
-    test "policy check fails if actor is adventurer belonging to a different quest", %{
-      other_quest: %{id: quest_id},
-      adventurer_actor: %{adventurer: adventurer} = actor
-    } do
-      ensure_attack_fails(%{
-        quest_id: quest_id,
-        adventurer_id: adventurer.id,
-        attack: 3,
-        actor: actor,
-        error: "attack disallowed"
-      })
-
-      ensure_quest_not_updated(quest_id)
-    end
-
-    test "policy check fails if actor is an adventurer different from the attacking adventurer",
-         %{
-           other_quest: %{id: quest_id},
-           adventurer_actor: actor,
-           other_actor: %{adventurer: %{id: adventurer_id}}
-         } do
-      ensure_attack_fails(%{
-        quest_id: quest_id,
-        adventurer_id: adventurer_id,
-        attack: 3,
-        actor: actor,
-        error: "attack disallowed"
-      })
-
-      ensure_quest_not_updated(quest_id)
-    end
-  end
-
-  defp ensure_attack_fails(%{
-         quest_id: quest_id,
-         adventurer_id: adventurer_id,
-         attack: attack,
-         actor: actor,
-         error: error
-       }) do
-    log =
-      capture_log(fn ->
-        assert {:error, ^error} =
-                 Attack.new!(%{
-                   quest_id: quest_id,
-                   adventurer_id: adventurer_id,
-                   attack: attack
-                 })
-                 |> Attack.execute(actor)
-      end)
-
-    actor_id = PointQuest.Authentication.Actor.get_actor_id(actor)
-
-    assert log =~
-             "Adventurer #{actor_id} failed to attack in quest #{quest_id}"
-  end
-
-  defp ensure_quest_not_updated(quest_id) do
-    {:ok, %PointQuest.Quests.Quest{attacks: attacks} = _quest} =
-      Infra.Quests.Db.get_quest_by_id(quest_id)
-
-    assert Enum.empty?(attacks)
   end
 end

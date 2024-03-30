@@ -135,7 +135,7 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   @doc """
   Executes the command to update the quest state.
 
-  Returns the updated quest.
+  Returns the event for adding the adventurer.
 
   ```elixir
   command = PointQuest.Quests.Commands.AddAdventurer.new!(%{name: "Stevey Beevey", class: :knight, quest_id: "abcd1234"})

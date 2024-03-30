@@ -5,8 +5,8 @@ defmodule PointQuest.Quests.Commands.Attack do
   use Ecto.Schema
   import Ecto.Changeset
 
-  alias PointQuest.Authentication.Actor
   alias PointQuest.Quests
+  alias PointQuest.Quests.Commands
 
   require PointQuest.Quests.Telemetry
   require Telemetrex
@@ -49,7 +49,14 @@ defmodule PointQuest.Quests.Commands.Attack do
     Telemetrex.span event: Quests.Telemetry.attack(),
                     context: %{command: attack_command, actor: actor} do
       with {:ok, quest} <- repo().get_quest_by_id(quest_id),
-           true <- can_attack?(attack_command, actor),
+           {:ok, adventurer} <-
+             Commands.GetAdventurer.execute(
+               Commands.GetAdventurer.new!(%{
+                 quest_id: quest.id,
+                 adventurer_id: attack_command.adventurer_id
+               })
+             ),
+           true <- can_attack?(adventurer, quest, actor),
            {:ok, event} <- Quests.Quest.handle(attack_command, quest),
            {:ok, _quest} <- repo().write(quest, event) do
         {:ok, event}
@@ -66,31 +73,11 @@ defmodule PointQuest.Quests.Commands.Attack do
     end
   end
 
-  defp can_attack?(command, actor) do
+  defp can_attack?(adventurer, quest, actor) do
     [
-      is_attacker?(command.adventurer_id, actor),
-      is_in_party?(command.quest_id, actor)
+      Quests.Spec.is_attacker?(adventurer, actor),
+      Quests.Spec.is_in_party?(quest, actor)
     ]
     |> Enum.all?()
   end
-
-  defp is_attacker?(_attacker_id, %Actor.PartyLeader{adventurer: nil}), do: false
-
-  defp is_attacker?(attacker_id, %Actor.PartyLeader{adventurer: %{id: attacker_id}}), do: true
-
-  defp is_attacker?(_attacker_id, %Actor.PartyLeader{adventurer: %{id: _other_adventurer}}),
-    do: false
-
-  defp is_attacker?(attacker_id, %Actor.Adventurer{adventurer: %{id: attacker_id}}), do: true
-
-  defp is_attacker?(_attacker_id, %Actor.Adventurer{adventurer: %{id: _other_adventurer}}),
-    do: false
-
-  defp is_in_party?(_quest_id, %Actor.PartyLeader{adventurer: nil}), do: false
-
-  defp is_in_party?(quest_id, %Actor.PartyLeader{quest_id: quest_id}), do: true
-  defp is_in_party?(_quest_id, %Actor.PartyLeader{quest_id: _other_quest}), do: false
-
-  defp is_in_party?(quest_id, %Actor.Adventurer{quest_id: quest_id}), do: true
-  defp is_in_party?(_quest_id, %Actor.Adventurer{quest_id: _other_quest}), do: false
 end

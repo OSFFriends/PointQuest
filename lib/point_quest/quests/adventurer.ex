@@ -7,8 +7,6 @@ defmodule PointQuest.Quests.Adventurer do
   import Ecto.Changeset
   import PointQuest.Macros.Enum
 
-  alias PointQuest.Quests.Adventurer
-
   @type t :: %__MODULE__{
           name: String.t(),
           class: Adventurer.Class.NameEnum.t(),
