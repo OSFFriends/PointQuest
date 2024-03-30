@@ -42,6 +42,8 @@ defmodule PointQuestWeb.Router do
 
       live "/quest", QuestStartLive
       live "/quest/:id/join", QuestJoinLive
+
+      forward "/", Middleware.QuestForwarder.Plug
     end
   end
 end
