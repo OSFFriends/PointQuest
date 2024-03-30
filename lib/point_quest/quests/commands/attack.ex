@@ -51,8 +51,8 @@ defmodule PointQuest.Quests.Commands.Attack do
       with {:ok, quest} <- repo().get_quest_by_id(quest_id),
            true <- can_attack?(attack_command, actor),
            {:ok, event} <- Quests.Quest.handle(attack_command, quest),
-           {:ok, updated_quest} <- repo().write(quest, event) do
-        {:ok, updated_quest, event}
+           {:ok, _quest} <- repo().write(quest, event) do
+        {:ok, event}
       else
         false ->
           {:error, "attack disallowed"}
@@ -61,7 +61,7 @@ defmodule PointQuest.Quests.Commands.Attack do
           error
       end
     after
-      {:ok, %Quests.Quest{} = quest, event} -> %{quest: quest, event: event}
+      {:ok, event} -> %{event: event}
       {:error, reason} -> %{error: true, reason: reason}
     end
   end
