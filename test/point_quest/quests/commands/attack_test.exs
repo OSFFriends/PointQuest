@@ -3,6 +3,7 @@ defmodule PointQuest.Quests.Commands.AttackTest do
 
   import ExUnit.CaptureLog
 
+  alias PointQuest.Quests.Event
   alias PointQuest.Quests.Commands.Attack
   alias PointQuest.Quests.Commands.StartQuest
   alias PointQuest.Quests.Commands.AddAdventurer
@@ -18,8 +19,9 @@ defmodule PointQuest.Quests.Commands.AttackTest do
       })
       |> StartQuest.execute()
 
-    {:ok, %{adventurers: [adventurer | _rest]} = quest, _event} =
-      AddAdventurer.new!(%{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id})
+    {:ok, %Event.AdventurerJoinedParty{} = adventurer} =
+      %{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id}
+      |> AddAdventurer.new!()
       |> AddAdventurer.execute()
 
     party_leader_actor = %PointQuest.Authentication.Actor.PartyLeader{
@@ -137,21 +139,16 @@ defmodule PointQuest.Quests.Commands.AttackTest do
         attack: 3
       }
 
-      assert {:ok,
-              %PointQuest.Quests.Quest{
-                id: ^quest_id,
-                adventurers: [%{id: ^adventurer_id}],
-                attacks: [%PointQuest.Quests.Attack{adventurer_id: ^adventurer_id, attack: 3}]
-              },
-              ^attacked_event} =
-               Attack.new!(%{quest_id: quest_id, adventurer_id: adventurer_id, attack: 3})
+      assert {:ok, ^attacked_event} =
+               %{quest_id: quest_id, adventurer_id: adventurer_id, attack: 3}
+               |> Attack.new!()
                |> Attack.execute(adventurer_actor)
 
       assert_receive ^attacked_event, 500
     end
 
     test "succeeds if party leader is adventurer attacking", %{other_actor: actor} do
-      assert {:ok, _quest, _event} =
+      assert {:ok, _event} =
                Attack.new!(%{
                  quest_id: actor.quest_id,
                  adventurer_id: actor.adventurer.id,

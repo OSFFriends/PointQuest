@@ -1,13 +1,13 @@
 alias PointQuest.Quests.Commands
 
-{:ok, jeffs_special_quest} =
+{:ok, jeffs_special_quest_event} =
   Commands.StartQuest.execute(
     Commands.StartQuest.new!(%{
       name: "Just let me have this one"
     })
   )
 
-{:ok, lying_quest_leader} =
+{:ok, lying_quest_leader_event} =
   Commands.StartQuest.execute(
     Commands.StartQuest.new!(%{
       name: "I'm a filthy",
@@ -23,7 +23,7 @@ alias PointQuest.Quests.Commands
     })
   )
 
-{:ok, multi_party_quest, _event} =
+{:ok, multi_party_quest_event} =
   Commands.AddAdventurer.execute(
     Commands.AddAdventurer.new!(%{
       quest_id: multi_party_quest.id,
@@ -32,7 +32,7 @@ alias PointQuest.Quests.Commands
     })
   )
 
-{:ok, multi_party_quest, _event} =
+{:ok, multi_party_quest_event} =
   Commands.AddAdventurer.execute(
     Commands.AddAdventurer.new!(%{
       quest_id: multi_party_quest.id,

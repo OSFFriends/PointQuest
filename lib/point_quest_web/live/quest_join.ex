@@ -1,6 +1,7 @@
 defmodule PointQuestWeb.QuestJoinLive do
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Quests.Commands.GetAdventurer
   alias PointQuest.Quests.Commands.AddAdventurer
   alias PointQuest.Quests.Quest
 
@@ -56,12 +57,15 @@ defmodule PointQuestWeb.QuestJoinLive do
         %{"add_adventurer" => %{"name" => name, "class" => class}},
         socket
       ) do
-    {:ok, quest, _event} =
+    {:ok, adventurer_added} =
       %{quest_id: socket.assigns.quest.id, name: name, class: class}
       |> AddAdventurer.new!()
       |> AddAdventurer.execute()
 
-    adventurer = Enum.find(quest.adventurers, fn a -> a.name == name end)
+    {:ok, adventurer} =
+      %{quest_id: socket.assigns.quest.id, adventurer_id: adventurer_added.id}
+      |> GetAdventurer.new!()
+      |> GetAdventurer.execute()
 
     token =
       adventurer
