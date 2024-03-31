@@ -4,6 +4,7 @@ defmodule PointQuest.Authentication do
   """
 
   alias PointQuest.Authentication.Actor
+  alias PointQuest.Error
   alias PointQuest.Quests
   alias PointQuest.Quests.Commands
 
@@ -63,7 +64,7 @@ defmodule PointQuest.Authentication do
 
     case Commands.GetAdventurer.execute(get_adventurer) do
       {:ok, adventurer} -> {:ok, PointQuest.Authentication.create_actor(adventurer)}
-      {:error, :quest_not_found} -> {:error, :stale_quest}
+      {:error, %Error.NotFound{resource: :quest}} -> {:error, :stale_quest}
     end
   end
 
@@ -72,7 +73,7 @@ defmodule PointQuest.Authentication do
 
     case Commands.GetPartyLeader.execute(get_leader) do
       {:ok, leader} -> {:ok, PointQuest.Authentication.create_actor(leader)}
-      {:error, :quest_not_found} -> {:error, :stale_quest}
+      {:error, %Error.NotFound{resource: :quest}} -> {:error, :stale_quest}
     end
   end
 

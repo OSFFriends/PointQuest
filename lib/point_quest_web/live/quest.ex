@@ -4,6 +4,7 @@ defmodule PointQuestWeb.QuestLive do
   """
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Error
   alias PointQuest.Quests.Event
   alias PointQuest.Authentication.Actor.PartyLeader
   alias PointQuestWeb.Live.Components
@@ -69,7 +70,7 @@ defmodule PointQuestWeb.QuestLive do
         {:error, :missing} ->
           redirect(socket, to: ~p"/quest/#{params["id"]}/join")
 
-        {:error, :quest_not_found} ->
+        {:error, %Error.NotFound{resource: :quest}} ->
           redirect(socket, to: ~p"/quest")
       end
 

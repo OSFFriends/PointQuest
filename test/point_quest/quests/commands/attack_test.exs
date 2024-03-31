@@ -3,6 +3,7 @@ defmodule PointQuest.Quests.Commands.AttackTest do
 
   import ExUnit.CaptureLog
 
+  alias PointQuest.Error
   alias PointQuest.Quests.Event
   alias PointQuest.Quests.Commands.Attack
   alias PointQuest.Quests.Commands.StartQuest
@@ -163,7 +164,7 @@ defmodule PointQuest.Quests.Commands.AttackTest do
         adventurer_id: adventurer.id,
         attack: 5,
         actor: actor,
-        error: :quest_not_found
+        error: Error.NotFound.exception(resource: :quest)
       })
     end
   end

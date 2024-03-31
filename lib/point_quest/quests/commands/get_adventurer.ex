@@ -8,6 +8,7 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias PointQuest.Error
 
   @type t :: %__MODULE__{
           quest_id: String.t(),
@@ -73,8 +74,7 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
 
   @spec execute(t()) ::
           {:ok, PointQuest.Quests.Adventurer.t()}
-          | {:error, :quest_not_found}
-          | {:error, :adventurer_not_found}
+          | {:error, Error.NotFound.t(:adventurer | :quest)}
   @doc """
   Executes the query to return the adventurer, if found.
 

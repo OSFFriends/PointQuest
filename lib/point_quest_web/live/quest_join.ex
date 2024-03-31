@@ -1,6 +1,7 @@
 defmodule PointQuestWeb.QuestJoinLive do
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Error
   alias PointQuest.Quests.Commands.GetAdventurer
   alias PointQuest.Quests.Commands.AddAdventurer
   alias PointQuest.Quests.Quest
@@ -34,7 +35,7 @@ defmodule PointQuestWeb.QuestJoinLive do
         {:in_quest?, true} ->
           redirect(socket, to: ~p"/quest/#{params["id"]}")
 
-        {:error, :quest_not_found} ->
+        {:error, %Error.NotFound{resource: :quest}} ->
           redirect(socket, to: ~p"/quest")
       end
 

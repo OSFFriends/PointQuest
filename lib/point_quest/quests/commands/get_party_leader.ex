@@ -11,6 +11,7 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
   """
   use Ecto.Schema
   import Ecto.Changeset
+  alias PointQuest.Error
 
   @type t :: %__MODULE__{
           quest_id: String.t(),
@@ -76,7 +77,7 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
 
   @spec execute(t()) ::
           {:ok, PointQuest.Quests.PartyLeader.t()}
-          | {:error, :quest_not_found}
+          | {:error, Error.NotFound.t(:quest)}
   @doc """
   Executes the query to return the adventurer, if found.
 
