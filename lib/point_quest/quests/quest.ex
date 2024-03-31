@@ -20,6 +20,7 @@ defmodule PointQuest.Quests.Quest do
     embeds_one :party_leader, Quests.PartyLeader
     field :name, :string
     field :all_adventurers_attacking?, :boolean
+    field :round_active?, :boolean
   end
 
   def init() do
@@ -28,7 +29,8 @@ defmodule PointQuest.Quests.Quest do
        adventurers: [],
        attacks: [],
        name: nil,
-       all_adventurers_attacking?: nil
+       all_adventurers_attacking?: nil,
+       round_active?: false
      }}
   end
 
@@ -107,6 +109,13 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
+  def project(%Event.RoundStarted{}, %__MODULE__{} = quest) do
+    %__MODULE__{
+      quest
+      | round_active?: true
+    }
+  end
+
   def handle(%Commands.StartQuest{} = command, _quest) do
     {:ok, Event.QuestStarted.new!(Ecto.embedded_dump(command, :json))}
     # {:error, error}
@@ -122,5 +131,13 @@ defmodule PointQuest.Quests.Quest do
 
   def handle(%Commands.Attack{} = command, _quest) do
     {:ok, Event.AdventurerAttacked.new!(Ecto.embedded_dump(command, :json))}
+  end
+
+  def handle(%Commands.StartRound{} = command, quest) do
+    if quest.round_active? do
+      {:error, :round_already_active}
+    else
+      {:ok, Event.RoundStarted.new!(Ecto.embedded_dump(command, :json))}
+    end
   end
 end

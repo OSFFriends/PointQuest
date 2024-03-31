@@ -50,4 +50,16 @@ defmodule PointQuest.Quests.Spec do
 
   def is_in_party?(%Quest{id: quest_id}, %Actor.Adventurer{quest_id: quest_id}), do: true
   def is_in_party?(%Quest{id: _quest_id}, %Actor.Adventurer{quest_id: _other_quest}), do: false
+
+  @spec is_party_leader?(quest :: Quest.t(), actor :: Actor.t()) :: boolean
+  @doc """
+  Ensures the actor is the party leader of the provided quest
+  """
+  def is_party_leader?(%Quest{party_leader: %{id: id}}, %Actor.PartyLeader{leader_id: id}),
+    do: true
+
+  def is_party_leader?(%Quest{party_leader: %{id: _id}}, %Actor.PartyLeader{leader_id: _other_id}),
+    do: false
+
+  def is_party_leader?(_quest, %Actor.Adventurer{}), do: false
 end

@@ -70,4 +70,27 @@ defmodule PointQuest.Quests.SpecTest do
       refute Spec.is_in_party?(quest, actor)
     end
   end
+
+  describe "is_party_leader?/2" do
+    test "policy check succeeds if actor is leader of provided quest", %{
+      quest: quest,
+      party_leader_actor: actor
+    } do
+      assert Spec.is_party_leader?(quest, actor)
+    end
+
+    test "policy check fails if actor is a party leader of different quest", %{
+      other_quest: quest,
+      party_leader_actor: actor
+    } do
+      refute Spec.is_party_leader?(quest, actor)
+    end
+
+    test "policy check fails if actor is not a party leader", %{
+      quest: quest,
+      adventurer_actor: actor
+    } do
+      refute Spec.is_party_leader?(quest, actor)
+    end
+  end
 end
