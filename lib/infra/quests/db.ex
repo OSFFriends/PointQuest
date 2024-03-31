@@ -5,6 +5,7 @@ defmodule Infra.Quests.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
   alias Infra.Quests.QuestServer
+  alias PointQuest.Error
   alias PointQuest.Quests.Quest
   alias PointQuest.Quests.Event
 
@@ -36,7 +37,7 @@ defmodule Infra.Quests.Db do
   def get_quest_by_id(quest_id) do
     case lookup_quest_server(quest_id) do
       nil ->
-        {:error, :quest_not_found}
+        {:error, Error.NotFound.exception(resource: :quest)}
 
       pid ->
         {:ok, QuestServer.get(pid)}
@@ -51,11 +52,11 @@ defmodule Infra.Quests.Db do
 
       {:ok, %{adventurers: adventurers}} ->
         case Enum.find(adventurers, fn %{id: id} -> id == adventurer_id end) do
-          nil -> {:error, :adventurer_not_found}
+          nil -> {:error, Error.NotFound.exception(resource: :adventurer)}
           adventurer -> {:ok, adventurer}
         end
 
-      {:error, :quest_not_found} = error ->
+      {:error, %Error.NotFound{resource: :quest}} = error ->
         error
     end
   end
@@ -66,7 +67,7 @@ defmodule Infra.Quests.Db do
       {:ok, %{party_leader: %{id: ^leader_id} = party_leader}} ->
         {:ok, party_leader}
 
-      {:error, :quest_not_found} = error ->
+      {:error, %Error.NotFound{resource: :quest}} = error ->
         error
     end
   end
@@ -79,7 +80,7 @@ defmodule Infra.Quests.Db do
       {:ok, %{adventurers: adventurers}} ->
         {:ok, adventurers}
 
-      {:error, :quest_not_found} = error ->
+      {:error, %Error.NotFound{resource: :quest}} = error ->
         error
     end
   end
@@ -99,7 +100,7 @@ defmodule Infra.Quests.Db do
 
     defp get_quest(quest_id) do
       case Infra.Quests.Db.get_quest_by_id(quest_id) do
-        {:error, :quest_not_found} ->
+        {:error, %Error.NotFound{resource: :quest}} ->
           []
 
         {:ok, quest} ->
