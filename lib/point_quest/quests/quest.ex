@@ -49,7 +49,8 @@ defmodule PointQuest.Quests.Quest do
         adventurers: [],
         party_leader: party_leader,
         name: event.name,
-        all_adventurers_attacking?: false
+        all_adventurers_attacking?: false,
+        round_active?: false
     }
   end
 
@@ -75,7 +76,8 @@ defmodule PointQuest.Quests.Quest do
         adventurers: [],
         party_leader: party_leader,
         name: event.name,
-        all_adventurers_attacking?: false
+        all_adventurers_attacking?: false,
+        round_active?: false
     }
   end
 
