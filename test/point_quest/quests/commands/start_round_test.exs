@@ -4,6 +4,8 @@ defmodule PointQuest.Quests.Commands.StartRoundTest do
   alias PointQuest.Quests.Commands.StartRound
   alias PointQuest.Quests.Event.RoundStarted
 
+  require PointQuest.Quests.Telemetry
+
   setup do
     {:ok, QuestSetupHelper.setup()}
   end
@@ -47,6 +49,28 @@ defmodule PointQuest.Quests.Commands.StartRoundTest do
                %{quest_id: quest_id}
                |> StartRound.new!()
                |> StartRound.execute(actor)
+    end
+
+    test "fires rounds started telemetry event", %{quest: quest, party_leader_actor: actor} do
+      ref =
+        :telemetry_test.attach_event_handlers(
+          self(),
+          [
+            PointQuest.Quests.Telemetry.round_started(:stop)
+          ]
+        )
+
+      assert {:ok, %RoundStarted{} = round_started} =
+               %{quest_id: quest.id}
+               |> StartRound.new!()
+               |> StartRound.execute(actor)
+
+      assert_receive {
+        PointQuest.Quests.Telemetry.round_started(:stop),
+        ^ref,
+        _measurements,
+        %{event: ^round_started, actor: ^actor}
+      }
     end
 
     test "returns error if quest doesn't exist", %{party_leader_actor: actor} do
