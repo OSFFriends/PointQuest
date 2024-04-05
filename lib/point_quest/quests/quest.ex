@@ -112,7 +112,8 @@ defmodule PointQuest.Quests.Quest do
   def project(%Event.RoundStarted{}, %__MODULE__{} = quest) do
     %__MODULE__{
       quest
-      | round_active?: true
+      | round_active?: true,
+        attacks: []
     }
   end
 
