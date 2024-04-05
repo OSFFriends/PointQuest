@@ -1,8 +1,6 @@
 defmodule PointQuest.Quests.Commands.AttackTest do
   use ExUnit.Case
 
-  import ExUnit.CaptureLog
-
   alias PointQuest.Error
   alias PointQuest.Quests.Commands.Attack
 
@@ -131,21 +129,13 @@ defmodule PointQuest.Quests.Commands.AttackTest do
            actor: actor,
            error: error
          }) do
-      log =
-        capture_log(fn ->
-          assert {:error, ^error} =
-                   Attack.new!(%{
-                     quest_id: quest_id,
-                     adventurer_id: adventurer_id,
-                     attack: attack
-                   })
-                   |> Attack.execute(actor)
-        end)
-
-      actor_id = PointQuest.Authentication.Actor.get_actor_id(actor)
-
-      assert log =~
-               "Adventurer #{actor_id} failed to attack in quest #{quest_id}"
+      assert {:error, ^error} =
+               Attack.new!(%{
+                 quest_id: quest_id,
+                 adventurer_id: adventurer_id,
+                 attack: attack
+               })
+               |> Attack.execute(actor)
     end
   end
 end

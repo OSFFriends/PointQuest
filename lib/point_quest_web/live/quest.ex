@@ -18,8 +18,7 @@ defmodule PointQuestWeb.QuestLive do
       <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between">
         <div id="quest-actions">
           <.button :if={!@round_active?} phx-click="start_round">New round</.button>
-          <.button phx-click="show_attacks">Show Attacks</.button>
-          <.button phx-click="clear_attacks">Clear Attacks</.button>
+          <.button :if={@round_active?} phx-click="stop_round">Show Attacks</.button>
         </div>
         <div id="meta-actions" class="justify-end">
           <.button phx-click="copy_link">Copy Invite Link</.button>
@@ -102,8 +101,13 @@ defmodule PointQuestWeb.QuestLive do
     {:noreply, socket}
   end
 
-  def handle_event("show_attacks", _params, socket) do
-    Logger.info("show attacks is not implemented yet")
+  def handle_event("stop_round", _params, socket) do
+    %{actor: actor, quest: quest} = socket.assigns
+
+    %{quest_id: quest.id}
+    |> Commands.StopRound.new!()
+    |> Commands.StopRound.execute(actor)
+
     {:noreply, socket}
   end
 
@@ -134,6 +138,13 @@ defmodule PointQuestWeb.QuestLive do
     {
       :noreply,
       assign(socket, round_active?: true)
+    }
+  end
+
+  def handle_info(%Event.RoundEnded{}, socket) do
+    {
+      :noreply,
+      assign(socket, round_active?: false)
     }
   end
 
