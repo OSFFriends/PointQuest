@@ -11,7 +11,8 @@ defmodule Infra.Quests.LogHandler do
       __MODULE__,
       [
         attack(:stop),
-        quest_started(:stop)
+        quest_started(:stop),
+        round_ended(:stop)
       ],
       &__MODULE__.handle_event/4,
       nil
@@ -47,7 +48,19 @@ defmodule Infra.Quests.LogHandler do
     )
   end
 
+  def handle_event(
+        round_ended(:stop),
+        _measurements,
+        %{error: true, reason: reason, actor: actor, command: command},
+        _config
+      ) do
+    Logger.error(
+      "Failed to stop round - #{inspect(reason)}. actor: #{inspect(actor)}, command: #{inspect(command)}"
+    )
+  end
+
   def handle_event(_unhandled, _measurements, _context, _config) do
+    Logger.error("tee hee")
     :ok
   end
 end

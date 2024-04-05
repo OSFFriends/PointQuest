@@ -34,6 +34,8 @@ config :point_quest, PointQuest.Behaviour.Quests.Repo, Infra.Quests.Db
 # at the `config/runtime.exs`.
 config :point_quest, PointQuest.Mailer, adapter: Swoosh.Adapters.Local
 
+config :point_quest, env: Mix.env()
+
 # Configure esbuild (the version is required)
 config :esbuild,
   version: "0.17.11",

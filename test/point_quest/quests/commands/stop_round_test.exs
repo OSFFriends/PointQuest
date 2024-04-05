@@ -6,6 +6,8 @@ defmodule PointQuest.Quests.Commands.StopRoundTest do
   alias PointQuest.Quests.Event.RoundEnded
   alias PointQuest.Quests.Event.RoundStarted
 
+  require PointQuest.Quests.Telemetry
+
   setup do
     {:ok, QuestSetupHelper.setup()}
   end
@@ -62,6 +64,30 @@ defmodule PointQuest.Quests.Commands.StopRoundTest do
                %{quest_id: "abc123"}
                |> StopRound.new!()
                |> StopRound.execute(actor)
+    end
+
+    test "fires round ended telemetry event", %{quest: quest, party_leader_actor: actor} do
+      ref =
+        :telemetry_test.attach_event_handlers(self(), [
+          PointQuest.Quests.Telemetry.round_ended(:stop)
+        ])
+
+      assert {:ok, %RoundStarted{}} =
+               %{quest_id: quest.id}
+               |> StartRound.new!()
+               |> StartRound.execute(actor)
+
+      assert {:ok, %RoundEnded{} = round_ended} =
+               %{quest_id: quest.id}
+               |> StopRound.new!()
+               |> StopRound.execute(actor)
+
+      assert_receive {
+        PointQuest.Quests.Telemetry.round_ended(:stop),
+        ^ref,
+        _measurements,
+        %{event: ^round_ended, actor: ^actor}
+      }
     end
 
     test "returns error if actor is not leader of provided quest", %{

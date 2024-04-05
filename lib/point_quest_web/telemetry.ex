@@ -12,7 +12,17 @@ defmodule PointQuestWeb.Telemetry do
       # Telemetry poller will execute the given period measurements
       # every 10_000ms. Learn more here: https://hexdocs.pm/telemetry_metrics
       {:telemetry_poller, measurements: periodic_measurements(), period: 10_000},
-      {Infra.TelemetryWatcher, handlers: [Infra.Quests.EventHandler, Infra.Quests.LogHandler]}
+      {Infra.TelemetryWatcher,
+       handlers:
+         [
+           Infra.Quests.EventHandler,
+           if Application.get_env(:point_quest, :env) == :test do
+             []
+           else
+             [Infra.Quests.LogHandler]
+           end
+         ]
+         |> List.flatten()}
     ]
 
     Supervisor.init(children, strategy: :one_for_one)
