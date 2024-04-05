@@ -98,7 +98,9 @@ defmodule PointQuestWeb.QuestLive do
     |> Commands.StartRound.new!()
     |> Commands.StartRound.execute(actor)
 
-    {:noreply, socket}
+    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest.id)
+
+    {:noreply, assign(socket, quest: quest)}
   end
 
   def handle_event("stop_round", _params, socket) do
