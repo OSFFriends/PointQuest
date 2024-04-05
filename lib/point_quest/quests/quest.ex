@@ -116,6 +116,13 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
+  def project(%Event.RoundEnded{}, %__MODULE__{} = quest) do
+    %__MODULE__{
+      quest
+      | round_active?: false
+    }
+  end
+
   def handle(%Commands.StartQuest{} = command, _quest) do
     {:ok, Event.QuestStarted.new!(Ecto.embedded_dump(command, :json))}
     # {:error, error}
@@ -138,6 +145,14 @@ defmodule PointQuest.Quests.Quest do
       {:error, :round_already_active}
     else
       {:ok, Event.RoundStarted.new!(Ecto.embedded_dump(command, :json))}
+    end
+  end
+
+  def handle(%Commands.StopRound{} = command, quest) do
+    if quest.round_active? do
+      {:ok, Event.RoundEnded.new!(Ecto.embedded_dump(command, :json))}
+    else
+      {:error, :round_not_active}
     end
   end
 end
