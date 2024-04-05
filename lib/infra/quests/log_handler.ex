@@ -60,7 +60,6 @@ defmodule Infra.Quests.LogHandler do
   end
 
   def handle_event(_unhandled, _measurements, _context, _config) do
-    Logger.error("tee hee")
     :ok
   end
 end

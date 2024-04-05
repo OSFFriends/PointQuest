@@ -25,8 +25,8 @@ defmodule PointQuestWeb.QuestLive do
         </div>
       </div>
       <div class="flex gap-4">
-        <div :for={%{class: class, name: name} <- @adventurers} class="flex flex-col p-2">
-          <div class={"#{get_background_color(name, @users)} rounded p-2"}>
+        <div :for={%{class: class, name: name} = adventurer <- @adventurers} class="flex flex-col p-2">
+          <div class={"#{get_background_color(name, @users)} #{get_attacking_ring(adventurer, @attacks)} rounded p-2"}>
             <div id="class-sprite" class="w-16 mt-2">
               <img
                 src={"/images/#{class}.png"}
@@ -59,11 +59,17 @@ defmodule PointQuestWeb.QuestLive do
 
           {:ok, adventurers} = Infra.Quests.Db.get_all_adventurers(quest.id)
 
+          attacks =
+            Enum.reduce(quest.attacks, %{}, fn a, attacks ->
+              Map.put(attacks, a.adventurer_id, a.attack)
+            end)
+
           socket
           |> assign(
             quest: quest,
             users: %{},
             adventurers: adventurers,
+            attacks: attacks,
             form: nil,
             round_active?: quest.round_active?
           )
@@ -129,10 +135,15 @@ defmodule PointQuestWeb.QuestLive do
     }
   end
 
-  def handle_info(%Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack}, socket) do
+  def handle_info(
+        %Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack_value},
+        socket
+      ) do
+    attacks = Map.put(socket.assigns.attacks, adventurer_id, attack_value)
+
     {
       :noreply,
-      put_flash(socket, :info, "Adventurer: #{adventurer_id} attacked with #{attack}")
+      assign(socket, attacks: attacks)
     }
   end
 
@@ -177,20 +188,30 @@ defmodule PointQuestWeb.QuestLive do
          leader_id: user_id,
          adventurer: nil
        }) do
-    %{user_id: user_id, class: "leader", name: "Party Leader"}
+    %{user_id: user_id, class: "leader", name: "Party Leader", adventurer_id: nil}
   end
 
   defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
          leader_id: user_id,
          adventurer: adventurer
        }) do
-    %{user_id: user_id, class: adventurer.class, name: adventurer.name}
+    %{
+      user_id: user_id,
+      class: adventurer.class,
+      name: adventurer.name,
+      adventurer_id: adventurer.id
+    }
   end
 
   defp actor_to_meta(%PointQuest.Authentication.Actor.Adventurer{
          adventurer: %{id: user_id} = adventurer
        }) do
-    %{user_id: user_id, class: adventurer.class, name: adventurer.name}
+    %{
+      user_id: user_id,
+      class: adventurer.class,
+      name: adventurer.name,
+      adventurer_id: adventurer.id
+    }
   end
 
   defp is_party_leader?(%PartyLeader{} = _actor), do: true
@@ -203,9 +224,23 @@ defmodule PointQuestWeb.QuestLive do
     Enum.filter(users, fn {_id, u} -> u.name == name and u.connected? end)
     |> Enum.any?()
     |> if do
-      ""
+      [""]
     else
-      "bg-gray-400"
+      ["bg-gray-400"]
     end
+  end
+
+  defp get_attacking_ring(adventurer, attacks) do
+    if adventurer_attacking?(adventurer.id, attacks) do
+      ["ring-4 ring-blue-300 ring-inset"]
+    else
+      [""]
+    end
+  end
+
+  defp adventurer_attacking?(nil, _attacks), do: false
+
+  defp adventurer_attacking?(adventurer_id, attacks) do
+    Map.has_key?(attacks, adventurer_id)
   end
 end
