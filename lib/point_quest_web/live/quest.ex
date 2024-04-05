@@ -25,9 +25,15 @@ defmodule PointQuestWeb.QuestLive do
         </div>
       </div>
       <div class="flex gap-4">
-        <div :for={%{class: class, name: name} = adventurer <- @adventurers} class="flex flex-col p-2">
-          <div class={"#{get_background_color(name, @users)} #{get_attacking_ring(adventurer, @attacks)} rounded p-2"}>
-            <div id="class-sprite" class="w-16 mt-2">
+        <div
+          :for={%{id: id, class: class, name: name} = adventurer <- @adventurers}
+          class="flex flex-col p-2"
+        >
+          <div class={"#{get_background_color(name, @users)} #{get_attacking_ring(adventurer, @attacks)} rounded p-2 mt-5"}>
+            <div :if={@reveal_attacks?}>
+              <p><%= Map.get(@attacks, id) %></p>
+            </div>
+            <div class="w-16 mt-2">
               <img
                 src={"/images/#{class}.png"}
                 alt={"small sprite representing #{class} class"}
@@ -71,7 +77,8 @@ defmodule PointQuestWeb.QuestLive do
             adventurers: adventurers,
             attacks: attacks,
             form: nil,
-            round_active?: quest.round_active?
+            round_active?: quest.round_active?,
+            reveal_attacks?: not quest.round_active? and not Enum.empty?(attacks)
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
 
@@ -119,13 +126,6 @@ defmodule PointQuestWeb.QuestLive do
     {:noreply, socket}
   end
 
-  def handle_event("clear_attacks", _params, socket) do
-    Logger.info("clear attacks is not implemented yet")
-    _quest_id = socket.assigns.quest.id
-
-    {:noreply, socket}
-  end
-
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
     {
       :noreply,
@@ -150,14 +150,14 @@ defmodule PointQuestWeb.QuestLive do
   def handle_info(%Event.RoundStarted{}, socket) do
     {
       :noreply,
-      assign(socket, round_active?: true)
+      assign(socket, round_active?: true, reveal_attacks?: false, attacks: %{})
     }
   end
 
   def handle_info(%Event.RoundEnded{}, socket) do
     {
       :noreply,
-      assign(socket, round_active?: false)
+      assign(socket, round_active?: false, reveal_attacks?: true)
     }
   end
 
