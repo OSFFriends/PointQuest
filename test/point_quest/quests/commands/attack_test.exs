@@ -4,54 +4,10 @@ defmodule PointQuest.Quests.Commands.AttackTest do
   import ExUnit.CaptureLog
 
   alias PointQuest.Error
-  alias PointQuest.Quests.Event
   alias PointQuest.Quests.Commands.Attack
-  alias PointQuest.Quests.Commands.StartQuest
-  alias PointQuest.Quests.Commands.AddAdventurer
 
   setup do
-    {:ok, %{party_leader: party_leader} = quest} =
-      StartQuest.new!(%{name: "proper quest"}) |> StartQuest.execute()
-
-    {:ok, other_quest} =
-      StartQuest.new!(%{
-        name: "Steve's Shenanigans",
-        party_leaders_adventurer: %{name: "Stevey Beevey", class: :mage}
-      })
-      |> StartQuest.execute()
-
-    {:ok, %Event.AdventurerJoinedParty{} = adventurer} =
-      %{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id}
-      |> AddAdventurer.new!()
-      |> AddAdventurer.execute()
-
-    party_leader_actor = %PointQuest.Authentication.Actor.PartyLeader{
-      quest_id: quest.id,
-      leader_id: party_leader.id,
-      adventurer: nil
-    }
-
-    adventurer_actor = %PointQuest.Authentication.Actor.Adventurer{
-      quest_id: quest.id,
-      adventurer: adventurer
-    }
-
-    other_actor = %PointQuest.Authentication.Actor.PartyLeader{
-      quest_id: other_quest.id,
-      leader_id: other_quest.party_leader.id,
-      adventurer: other_quest.party_leader.adventurer
-    }
-
-    {:ok,
-     %{
-       quest: quest,
-       other_quest: other_quest,
-       party_leader: party_leader,
-       adventurer: adventurer,
-       party_leader_actor: party_leader_actor,
-       adventurer_actor: adventurer_actor,
-       other_actor: other_actor
-     }}
+    {:ok, QuestSetupHelper.setup()}
   end
 
   describe "changeset/2" do

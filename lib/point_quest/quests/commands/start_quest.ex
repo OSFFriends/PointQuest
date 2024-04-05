@@ -10,6 +10,9 @@ defmodule PointQuest.Quests.Commands.StartQuest do
 
   alias PointQuest.Quests
 
+  require PointQuest.Quests.Telemetry
+  require Telemetrex
+
   defmodule PartyLeadersAdventurer do
     @moduledoc """
     The adventurer for the party leader when participating in the quest.
@@ -149,12 +152,17 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   ```
   """
   def execute(%__MODULE__{} = start_quest_command) do
-    # TODO: add telemetry events here
-    with {:ok, event} <- Quests.Quest.handle(start_quest_command, %Quests.Quest{}) do
-      repo().write(
-        %Quests.Quest{},
-        event
-      )
+    Telemetrex.span event: Quests.Telemetry.quest_started(),
+                    context: %{command: start_quest_command} do
+      with {:ok, event} <- Quests.Quest.handle(start_quest_command, %Quests.Quest{}) do
+        repo().write(
+          %Quests.Quest{},
+          event
+        )
+      end
+    after
+      {:ok, event} -> %{event: event}
+      {:error, error} -> %{error: true, reason: error}
     end
   end
 end
