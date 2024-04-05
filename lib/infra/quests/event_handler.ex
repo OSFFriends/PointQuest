@@ -1,10 +1,7 @@
 defmodule Infra.Quests.EventHandler do
   import PointQuest.Quests.Telemetry
 
-  alias PointQuest.Authentication.Actor
   alias PointQuest.Quests.Event
-
-  require Logger
 
   def attach() do
     :telemetry.attach_many(
@@ -32,17 +29,6 @@ defmodule Infra.Quests.EventHandler do
   end
 
   def handle_event(
-        attack(:stop),
-        _measurements,
-        %{error: true, actor: actor, command: command, reason: reason},
-        _config
-      ) do
-    Logger.error(
-      "Adventurer #{Actor.get_actor_id(actor)} failed to attack in quest #{command.quest_id}: #{inspect(reason)}"
-    )
-  end
-
-  def handle_event(
         round_started(:stop),
         _measurements,
         %{event: %Event.RoundStarted{} = round_started, actor: _actor},
@@ -53,5 +39,9 @@ defmodule Infra.Quests.EventHandler do
       round_started.quest_id,
       round_started
     )
+  end
+
+  def handle_event(_unhandled, _measurements, _context, _config) do
+    :ok
   end
 end

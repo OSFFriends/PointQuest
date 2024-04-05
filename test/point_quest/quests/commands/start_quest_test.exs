@@ -1,7 +1,7 @@
 defmodule PointQuest.Quests.Commands.StartQuestTest do
   use ExUnit.Case
 
-  alias PointQuest.Quests.Quest
+  alias PointQuest.Quests.Event.QuestStarted
   alias PointQuest.Quests.Commands.StartQuest
 
   describe "new/1" do
@@ -103,7 +103,11 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
   describe "execute/1" do
     test "returns new quest state" do
       {:ok, start_quest} = StartQuest.new(%{name: "test"})
-      assert {:ok, %Quest{name: "test"}} = StartQuest.execute(start_quest)
+
+      assert {:ok, %QuestStarted{quest_id: quest_id, name: "test"}} =
+               StartQuest.execute(start_quest)
+
+      refute is_nil(quest_id)
     end
 
     test "errors when passed invalid changeset" do

@@ -21,7 +21,7 @@ defmodule Infra.Quests.Db do
         {QuestServer, quest: new_quest}
       )
 
-    {:ok, new_quest}
+    {:ok, event}
   end
 
   def write(quest, event) do

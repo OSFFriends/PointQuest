@@ -94,10 +94,12 @@ defmodule PointQuestWeb.QuestStartLive do
         }
       }
 
-    {:ok, quest} =
+    {:ok, quest_started} =
       params
       |> StartQuest.new!()
       |> StartQuest.execute()
+
+    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party_leader
@@ -114,10 +116,12 @@ defmodule PointQuestWeb.QuestStartLive do
       ) do
     params = %{name: quest_name}
 
-    {:ok, quest} =
+    {:ok, quest_started} =
       params
       |> StartQuest.new!()
       |> StartQuest.execute()
+
+    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party_leader
