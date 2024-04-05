@@ -10,7 +10,8 @@ defmodule Infra.Quests.EventHandler do
     :telemetry.attach_many(
       __MODULE__,
       [
-        attack(:stop)
+        attack(:stop),
+        round_started(:stop)
       ],
       &__MODULE__.handle_event/4,
       nil
@@ -38,6 +39,19 @@ defmodule Infra.Quests.EventHandler do
       ) do
     Logger.error(
       "Adventurer #{Actor.get_actor_id(actor)} failed to attack in quest #{command.quest_id}: #{inspect(reason)}"
+    )
+  end
+
+  def handle_event(
+        round_started(:stop),
+        _measurements,
+        %{event: %Event.RoundStarted{} = round_started, actor: _actor},
+        _config
+      ) do
+    Phoenix.PubSub.broadcast(
+      PointQuestWeb.PubSub,
+      round_started.quest_id,
+      round_started
     )
   end
 end

@@ -4,9 +4,10 @@ defmodule PointQuestWeb.QuestLive do
   """
   use PointQuestWeb, :live_view
 
-  alias PointQuest.Error
-  alias PointQuest.Quests.Event
   alias PointQuest.Authentication.Actor.PartyLeader
+  alias PointQuest.Error
+  alias PointQuest.Quests.Commands
+  alias PointQuest.Quests.Event
   alias PointQuestWeb.Live.Components
 
   require Logger
@@ -16,6 +17,7 @@ defmodule PointQuestWeb.QuestLive do
     <div class="flex flex-col w-full">
       <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between">
         <div id="quest-actions">
+          <.button :if={!@round_active?} phx-click="start_round">New round</.button>
           <.button phx-click="show_attacks">Show Attacks</.button>
           <.button phx-click="clear_attacks">Clear Attacks</.button>
         </div>
@@ -38,7 +40,7 @@ defmodule PointQuestWeb.QuestLive do
         </div>
       </div>
       <.live_component
-        :if={show_attack_panel?(@actor)}
+        :if={show_attack_panel?(@actor, @round_active?)}
         module={Components.Attack}
         id="attack_controls"
         actor={@actor}
@@ -63,7 +65,8 @@ defmodule PointQuestWeb.QuestLive do
             quest: quest,
             users: %{},
             adventurers: adventurers,
-            form: nil
+            form: nil,
+            round_active?: quest.round_active?
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
 
@@ -85,6 +88,16 @@ defmodule PointQuestWeb.QuestLive do
     socket =
       socket
       |> push_event("copy", %{text: link})
+
+    {:noreply, socket}
+  end
+
+  def handle_event("start_round", _params, socket) do
+    %{actor: actor, quest: quest} = socket.assigns
+
+    %{quest_id: quest.id}
+    |> Commands.StartRound.new!()
+    |> Commands.StartRound.execute(actor)
 
     {:noreply, socket}
   end
@@ -114,6 +127,13 @@ defmodule PointQuestWeb.QuestLive do
     {
       :noreply,
       put_flash(socket, :info, "Adventurer: #{adventurer_id} attacked with #{attack}")
+    }
+  end
+
+  def handle_info(%Event.RoundStarted{}, socket) do
+    {
+      :noreply,
+      assign(socket, round_active?: true)
     }
   end
 
@@ -163,8 +183,8 @@ defmodule PointQuestWeb.QuestLive do
   defp is_party_leader?(%PartyLeader{} = _actor), do: true
   defp is_party_leader?(_actor), do: false
 
-  defp show_attack_panel?(%PartyLeader{adventurer: nil}), do: false
-  defp show_attack_panel?(_actor), do: true
+  defp show_attack_panel?(%PartyLeader{adventurer: nil}, _round_active?), do: false
+  defp show_attack_panel?(_actor, round_active?), do: round_active?
 
   defp get_background_color(name, users) do
     Enum.filter(users, fn {_id, u} -> u.name == name and u.connected? end)
