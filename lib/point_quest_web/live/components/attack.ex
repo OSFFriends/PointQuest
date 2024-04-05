@@ -1,6 +1,8 @@
 defmodule PointQuestWeb.Live.Components.Attack do
   use PointQuestWeb, :live_component
 
+  alias PointQuest.Quests.Commands.Attack
+
   def render(assigns) do
     ~H"""
     <div class="flex flex-row rounded-full pt-2">
@@ -28,13 +30,18 @@ defmodule PointQuestWeb.Live.Components.Attack do
   end
 
   def handle_event("set_attack", params, socket) do
+    # Quests.AttackValue expects the attack to be an integer
     attack_value = params["attack"] |> String.to_integer()
 
-    socket =
-      case socket.assigns.selected_attack do
-        ^attack_value -> assign(socket, selected_attack: nil)
-        _else -> assign(socket, selected_attack: attack_value)
-      end
+    %{
+      quest_id: socket.assigns.quest_id,
+      adventurer_id: socket.assigns.actor.adventurer.id,
+      attack: attack_value
+    }
+    |> Attack.new!()
+    |> Attack.execute(socket.assigns.actor)
+
+    socket = assign(socket, selected_attack: attack_value)
 
     {:noreply, socket}
   end
