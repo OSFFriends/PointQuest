@@ -25,9 +25,8 @@ defmodule PointQuest.Quests.Event.QuestStarted do
 
     def changeset(adventurer, params \\ %{}) do
       adventurer
-      |> change(id: Nanoid.generate_non_secure())
-      |> cast(params, [:name, :class])
-      |> validate_required([:name])
+      |> cast(params, [:id, :name, :class])
+      |> validate_required([:id, :name])
     end
   end
 
@@ -35,6 +34,7 @@ defmodule PointQuest.Quests.Event.QuestStarted do
   embedded_schema do
     field :quest_id, :string
     field :name, :string
+    field :leader_id, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
   end
 
@@ -46,8 +46,8 @@ defmodule PointQuest.Quests.Event.QuestStarted do
 
   def changeset(quest_started, params \\ %{}) do
     quest_started
-    |> change(quest_id: Nanoid.generate_non_secure())
-    |> cast(params, [:quest_id, :name])
+    |> cast(params, [:quest_id, :name, :leader_id])
+    |> validate_required([:quest_id, :name, :leader_id])
     |> cast_embed(:party_leaders_adventurer)
   end
 end

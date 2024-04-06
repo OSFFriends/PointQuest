@@ -27,6 +27,7 @@ defmodule PointQuest.Quests.Quest do
   def init() do
     {:ok,
      %__MODULE__{
+       id: Nanoid.generate_non_secure(),
        adventurers: [],
        attacks: [],
        name: nil,
@@ -39,15 +40,14 @@ defmodule PointQuest.Quests.Quest do
     party_leader =
       %Quests.PartyLeader{}
       |> Quests.PartyLeader.changeset(%{
-        id: Nanoid.generate_non_secure(),
-        quest_id: event.quest_id
+        id: event.leader_id,
+        quest_id: quest.id
       })
       |> Ecto.Changeset.apply_action!(:insert)
 
     %__MODULE__{
       quest
-      | id: event.quest_id,
-        adventurers: [],
+      | adventurers: [],
         party_leader: party_leader,
         name: event.name,
         all_adventurers_attacking?: false,
@@ -61,12 +61,12 @@ defmodule PointQuest.Quests.Quest do
       event.party_leaders_adventurer
       |> Ecto.embedded_dump(:json)
       |> Map.put(:quest_id, event.quest_id)
-      |> Map.put(:id, Nanoid.generate_non_secure())
+      |> Map.put(:id, event.leader_id)
 
     party_leader =
       %Quests.PartyLeader{}
       |> Quests.PartyLeader.changeset(%{
-        id: Nanoid.generate_non_secure(),
+        id: event.leader_id,
         quest_id: event.quest_id,
         adventurer: party_leaders_adventurer_params
       })
@@ -129,9 +129,27 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
-  def handle(%Commands.StartQuest{} = command, _quest) do
-    {:ok, Event.QuestStarted.new!(Ecto.embedded_dump(command, :json))}
-    # {:error, error}
+  def handle(%Commands.StartQuest{party_leaders_adventurer: nil} = command, quest) do
+    event =
+      command
+      |> Ecto.embedded_dump(:json)
+      |> Map.merge(%{quest_id: quest.id, leader_id: Nanoid.generate_non_secure()})
+      |> Event.QuestStarted.new!()
+
+    {:ok, event}
+  end
+
+  def handle(%Commands.StartQuest{} = command, quest) do
+    leader_id = Nanoid.generate_non_secure()
+
+    event =
+      command
+      |> Ecto.embedded_dump(:json)
+      |> Map.merge(%{quest_id: quest.id, leader_id: leader_id})
+      |> update_in([:party_leaders_adventurer, :id], fn _ -> leader_id end)
+      |> Event.QuestStarted.new!()
+
+    {:ok, event}
   end
 
   def handle(%Commands.AddAdventurer{} = command, quest) do
