@@ -8,6 +8,7 @@ defmodule PointQuest.Quests.Event.RoundStarted do
   @primary_key false
   embedded_schema do
     field :quest_id, :string
+    field :quest_objective, :string
   end
 
   def new!(params) do
@@ -18,6 +19,6 @@ defmodule PointQuest.Quests.Event.RoundStarted do
 
   def changeset(round_started, params \\ %{}) do
     round_started
-    |> cast(params, [:quest_id])
+    |> cast(params, [:quest_id, :quest_objective])
   end
 end
