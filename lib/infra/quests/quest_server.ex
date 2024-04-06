@@ -5,47 +5,74 @@ defmodule Infra.Quests.QuestServer do
 
   use GenServer, restart: :transient
 
+  @type opt :: {:quest, PointQuest.Quests.Quest} | {:timeout, non_neg_integer()}
+  @type opts :: [opt(), ...]
+
+  # how many events we take in before snapshotting
+  @max_events 50
+
   def start_link(opts) do
     opts =
       opts
-      |> Keyword.take([:quest, :timeout])
+      |> Keyword.take([:timeout, :quest])
       |> Keyword.put_new(:timeout, :timer.hours(1))
       |> Map.new()
 
-    GenServer.start_link(__MODULE__, opts,
+    GenServer.start_link(
+      __MODULE__,
+      opts,
       name: {:via, Registry, {Infra.Quests.Registry, opts.quest.id}}
     )
   end
 
-  def update(server, quest) do
-    GenServer.call(server, {:update_quest, quest})
+  def get_snapshot(server) do
+    GenServer.call(server, {:get_snapshot})
   end
 
-  def get(server) do
-    GenServer.call(server, {:fetch_quest})
+  def get_events(server) do
+    GenServer.call(server, {:get_events})
   end
 
-  def init(%{quest: _quest, timeout: timeout} = opts) do
+  def add_event(server, event) do
+    GenServer.call(server, {:add_event, event})
+  end
+
+  # GENSERVER CALLBACKS
+
+  def init(%{timeout: timeout} = opts) do
     timeout_ref = schedule_cleanup(timeout)
-    state = Map.put(opts, :timeout_ref, timeout_ref)
+    state = Map.merge(opts, %{timeout_ref: timeout_ref, events: []})
 
     {:ok, state}
   end
 
-  def handle_call({:update_quest, quest}, _from, state) do
+  def handle_call({:add_event, event}, _from, state) do
     :erlang.cancel_timer(state.timeout_ref)
+    # new event gets added at the tail after possibly taking a new snapshot
+    # doing this to optimize readers over writers (read doesn't need to enum reverse)
+    state =
+      if length(state.events) >= @max_events do
+        drop_count = @max_events / 2
 
-    state = %{
-      state
-      | timeout_ref: schedule_cleanup(state.timeout),
-        quest: quest
-    }
+        new_snapshot =
+          state.events
+          |> Enum.take(drop_count)
+          |> Enum.reduce(state.quest, &PointQuest.Quests.Quest.project/2)
 
-    {:reply, :ok, state}
+        %{state | events: Enum.drop(state.events, drop_count) ++ [event], quest: new_snapshot}
+      else
+        Map.update!(state, :events, fn events -> events ++ [event] end)
+      end
+
+    {:reply, event, Map.put(state, :timeout_ref, schedule_cleanup(state.timeout))}
   end
 
-  def handle_call({:fetch_quest}, _from, state) do
+  def handle_call({:get_snapshot}, _from, state) do
     {:reply, state.quest, state}
+  end
+
+  def handle_call({:get_events}, _from, state) do
+    {:reply, state.events, state}
   end
 
   def handle_info(:kill, _state) do

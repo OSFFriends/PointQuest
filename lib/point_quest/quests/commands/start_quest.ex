@@ -28,7 +28,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
             class: Adventurer.Class.NameEnum.t()
           }
 
-    @primary_key {:id, :binary_id, autogenerate: true}
+    @primary_key false
     embedded_schema do
       field :name, :string
       field :class, Adventurer.Class.NameEnum
@@ -67,7 +67,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     %PointQuest.Quests.Commands.StartQuest{
      name: "Example Quest",
      party_leaders_adventurer: %PointQuest.Quests.Commands.StartQuest.PartyLeadersAdventurer{
-       id: nil,
        name: "Stevey Beevey",
        class: :knight
      }
@@ -93,7 +92,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   %PointQuest.Quests.Commands.StartQuest{
      name: "Example Quest",
      party_leaders_adventurer: %PointQuest.Quests.Commands.StartQuest.PartyLeadersAdventurer{
-       id: nil,
        name: "Stevey Beevey",
        class: :knight
      }
@@ -140,7 +138,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
       id: "FQaBVAHr",
       quest_id: "XHCV7TZ2",
       adventurer: %PointQuest.Quests.Adventurer{
-        id: "qkQ07CO7",
+        id: "FQaBVAHr",
         name: "Stevey Beevey",
         class: :knight,
         quest_id: "XHCV7TZ2"
@@ -152,10 +150,12 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   ```
   """
   def execute(%__MODULE__{} = start_quest_command) do
+    {:ok, quest} = Quests.Quest.init()
+
     Telemetrex.span event: Quests.Telemetry.quest_started(),
                     context: %{command: start_quest_command} do
-      with {:ok, event} <- Quests.Quest.handle(start_quest_command, %Quests.Quest{}),
-           {:ok, _quest} <- repo().write(%Quests.Quest{}, event) do
+      with {:ok, event} <- Quests.Quest.handle(start_quest_command, quest),
+           {:ok, _quest} <- repo().write(quest, event) do
         {:ok, event}
       end
     after
