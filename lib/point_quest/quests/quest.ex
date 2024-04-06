@@ -21,6 +21,7 @@ defmodule PointQuest.Quests.Quest do
     field :name, :string
     field :all_adventurers_attacking?, :boolean
     field :round_active?, :boolean
+    field :quest_objective, :string
   end
 
   def init() do
@@ -50,7 +51,8 @@ defmodule PointQuest.Quests.Quest do
         party_leader: party_leader,
         name: event.name,
         all_adventurers_attacking?: false,
-        round_active?: false
+        round_active?: false,
+        quest_objective: ""
     }
   end
 
@@ -111,11 +113,12 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
-  def project(%Event.RoundStarted{}, %__MODULE__{} = quest) do
+  def project(%Event.RoundStarted{quest_objective: objective}, %__MODULE__{} = quest) do
     %__MODULE__{
       quest
       | round_active?: true,
-        attacks: []
+        attacks: [],
+        quest_objective: objective
     }
   end
 

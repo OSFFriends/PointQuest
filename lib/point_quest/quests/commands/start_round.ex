@@ -15,12 +15,14 @@ defmodule PointQuest.Quests.Commands.StartRound do
   require Telemetrex
 
   @type t :: %__MODULE__{
-          quest_id: String.t()
+          quest_id: String.t(),
+          quest_objective: String.t()
         }
 
   @primary_key false
   embedded_schema do
     field :quest_id, :string
+    field :quest_objective, :string
   end
 
   @spec new(map()) :: {:ok, t()}
@@ -53,7 +55,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
   """
   def changeset(start_round, params \\ %{}) do
     start_round
-    |> cast(params, [:quest_id])
+    |> cast(params, [:quest_id, :quest_objective])
     |> validate_required([:quest_id])
   end
 

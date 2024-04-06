@@ -15,14 +15,13 @@ defmodule PointQuestWeb.QuestLive do
   def render(assigns) do
     ~H"""
     <div class="flex flex-col w-full">
-      <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between">
-        <div id="quest-actions">
-          <.button :if={!@round_active?} phx-click="start_round">New round</.button>
-          <.button :if={@round_active?} phx-click="stop_round">Show Attacks</.button>
-        </div>
-        <div id="meta-actions" class="justify-end">
-          <.button phx-click="copy_link">Copy Invite Link</.button>
-        </div>
+      <.render_party_leader_controls
+        round_active?={@round_active?}
+        actor={@actor}
+        quest_objective={@quest_objective}
+      />
+      <div :if={@round_active?} class="py-2 text-xl">
+        <a href={@quest_objective} target="_blank"><%= @quest_objective %></a>
       </div>
       <div class="flex gap-4">
         <div
@@ -55,6 +54,45 @@ defmodule PointQuestWeb.QuestLive do
     """
   end
 
+  def render_party_leader_controls(%{round_active?: false} = assigns) do
+    ~H"""
+    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex flex-col">
+      <div class="flex justify-between">
+        <div id="quest-actions">
+          <.button phx-click="start_round">New round</.button>
+        </div>
+        <div id="meta-actions" class="justify-end">
+          <.button phx-click="copy_link">Copy Invite Link</.button>
+        </div>
+      </div>
+      <div class="pb-2">
+        <.form
+          for={%{"quest_objective" => @quest_objective}}
+          phx-change="validate_link"
+          phx-submit="start_round"
+        >
+          <.input name={:quest_objective} value={@quest_objective} type="text" label="Issue Link" />
+        </.form>
+      </div>
+    </div>
+    """
+  end
+
+  def render_party_leader_controls(%{round_active?: true} = assigns) do
+    ~H"""
+    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex flex-col">
+      <div class="flex justify-between">
+        <div id="quest-actions">
+          <.button phx-click="stop_round">Show Attacks</.button>
+        </div>
+        <div id="meta-actions" class="justify-end">
+          <.button phx-click="copy_link">Copy Invite Link</.button>
+        </div>
+      </div>
+    </div>
+    """
+  end
+
   def mount(params, _session, socket) do
     socket =
       case Infra.Quests.Db.get_quest_by_id(params["id"]) do
@@ -78,7 +116,8 @@ defmodule PointQuestWeb.QuestLive do
             attacks: attacks,
             form: nil,
             round_active?: quest.round_active?,
-            reveal_attacks?: not quest.round_active? and not Enum.empty?(attacks)
+            reveal_attacks?: not quest.round_active? and not Enum.empty?(attacks),
+            quest_objective: quest.quest_objective
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
 
@@ -90,6 +129,10 @@ defmodule PointQuestWeb.QuestLive do
       end
 
     {:ok, socket}
+  end
+
+  def handle_event("validate_link", %{"quest_objective" => link}, socket) do
+    {:noreply, assign(socket, quest_objective: link)}
   end
 
   def handle_event("copy_link", _params, socket) do
@@ -107,7 +150,17 @@ defmodule PointQuestWeb.QuestLive do
   def handle_event("start_round", _params, socket) do
     %{actor: actor, quest: quest} = socket.assigns
 
-    %{quest_id: quest.id}
+    params =
+      if String.length(socket.assigns.quest_objective) > 0 do
+        %{
+          quest_id: quest.id,
+          quest_objective: socket.assigns.quest_objective
+        }
+      else
+        %{quest_id: quest.id}
+      end
+
+    params
     |> Commands.StartRound.new!()
     |> Commands.StartRound.execute(actor)
 
@@ -147,10 +200,15 @@ defmodule PointQuestWeb.QuestLive do
     }
   end
 
-  def handle_info(%Event.RoundStarted{}, socket) do
+  def handle_info(%Event.RoundStarted{quest_objective: link}, socket) do
     {
       :noreply,
-      assign(socket, round_active?: true, reveal_attacks?: false, attacks: %{})
+      assign(socket,
+        round_active?: true,
+        reveal_attacks?: false,
+        attacks: %{},
+        quest_objective: link
+      )
     }
   end
 

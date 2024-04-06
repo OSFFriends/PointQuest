@@ -12,7 +12,12 @@ defmodule PointQuest.Quests.Commands.StartRoundTest do
 
   describe "new/1" do
     test "returns ok tuple if valid", %{quest: %{id: quest_id}} do
-      assert {:ok, %StartRound{quest_id: ^quest_id}} =
+      assert {:ok, %StartRound{quest_id: ^quest_id, quest_objective: "https://www.google.com"}} =
+               StartRound.new(%{quest_id: quest_id, quest_objective: "https://www.google.com"})
+    end
+
+    test "quest_objective is optional", %{quest: %{id: quest_id}} do
+      assert {:ok, %StartRound{quest_id: ^quest_id, quest_objective: nil}} =
                StartRound.new(%{quest_id: quest_id})
     end
 
@@ -61,7 +66,7 @@ defmodule PointQuest.Quests.Commands.StartRoundTest do
         )
 
       assert {:ok, %RoundStarted{} = round_started} =
-               %{quest_id: quest.id}
+               %{quest_id: quest.id, quest_objective: "https://bitsonthemind.com"}
                |> StartRound.new!()
                |> StartRound.execute(actor)
 
