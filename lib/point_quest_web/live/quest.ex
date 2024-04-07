@@ -39,13 +39,16 @@ defmodule PointQuestWeb.QuestLive do
           <%!-- Attack --%>
           <.render_attack_choice reveal_attacks?={@reveal_attacks?} attack={Map.get(@attacks, id)} />
           <%!-- Sprite --%>
-          <div class={"w-16 mb-2 #{get_background_color(name, @users)}"}>
+          <div class="w-16 mb-2">
             <img
               src={"/images/#{class}.png"}
               alt={"small sprite representing #{class} class"}
               class="w-full"
             />
           </div>
+          <.render_health_bar connected?={
+            Enum.find(@users, fn {_id, u} -> u.name == name and u.connected? end)
+          } />
           <p class="text-bold"><%= name %></p>
         </div>
       </div>
@@ -115,6 +118,18 @@ defmodule PointQuestWeb.QuestLive do
     ~H"""
     <div class={"#{if @attack, do: "visible", else: "invisible"} relative flex justify-center items-center w-32 h-48 mb-8 bg-stone-300 border-2 border-stone-200 rounded-lg after:absolute after:w-[104%] after:h-[102%] after:top-[5px] after:left-0 after:bg-stone-400 after:-z-10 after:rounded-lg after:shadow-sm"}>
       <span :if={@reveal_attacks?} class="text-3xl text-stone-700"><%= @attack %></span>
+    </div>
+    """
+  end
+
+  def render_health_bar(assigns) do
+    ~H"""
+    <div class="flex rounded-lg items-start h-4 border-2 border-gray-600 w-24">
+      <%= if @connected? do %>
+        <div class="rounded-lg bg-green-400 w-full h-full"></div>
+      <% else %>
+        <div class="rounded-l-lg bg-red-400 w-1/4 h-full"></div>
+      <% end %>
     </div>
     """
   end
@@ -303,14 +318,4 @@ defmodule PointQuestWeb.QuestLive do
 
   defp show_attack_panel?(%PartyLeader{adventurer: nil}, _round_active?), do: false
   defp show_attack_panel?(_actor, round_active?), do: round_active?
-
-  defp get_background_color(name, users) do
-    Enum.filter(users, fn {_id, u} -> u.name == name and u.connected? end)
-    |> Enum.any?()
-    |> if do
-      [""]
-    else
-      ["bg-gray-400"]
-    end
-  end
 end
