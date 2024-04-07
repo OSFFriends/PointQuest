@@ -20,5 +20,17 @@ defmodule PointQuest.Quests.Event.RoundStarted do
   def changeset(round_started, params \\ %{}) do
     round_started
     |> cast(params, [:quest_id, :quest_objective])
+    |> default_quest_objective()
+  end
+
+  def default_quest_objective(%Ecto.Changeset{valid?: false} = invalid_changeset),
+    do: dbg(invalid_changeset)
+
+  def default_quest_objective(changeset) do
+    if get_change(changeset, :quest_objective) != nil do
+      changeset
+    else
+      put_change(changeset, :quest_objective, "")
+    end
   end
 end

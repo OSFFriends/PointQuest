@@ -20,11 +20,15 @@ defmodule PointQuestWeb.QuestLive do
         actor={@actor}
         quest_objective={@quest_objective}
       />
-      <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center text-xl text-indigo-500"}>
+      <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center"}>
         <.icon name="hero-arrow-top-right-on-square" />
-        <a href={@quest_objective} target="_blank">
-          <%= @quest_objective %>
-        </a>
+        <%= if @quest_objective != "" do %>
+          <a href={@quest_objective} target="_blank" class="text-indigo-500">
+            <%= @quest_objective %>
+          </a>
+        <% else %>
+          N/A
+        <% end %>
       </div>
       <div class="flex gap-4 justify-center">
         <%!-- Adventurer --%>
