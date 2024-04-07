@@ -5,7 +5,7 @@ defmodule PointQuestWeb.Live.Components.Attack do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-row rounded-full pt-2">
+    <div class="flex flex-row justify-center pt-16 gap-x-16 flex-wrap">
       <button
         :for={attack <- @attack_list}
         type="action"
@@ -13,11 +13,12 @@ defmodule PointQuestWeb.Live.Components.Attack do
         phx-value-attack={attack}
         phx-target={@myself}
         class={[
-          "p-4 first:rounded-s-full last:rounded-e-full",
+          "w-24 h-24 rotate-45",
+          "border-2",
           get_background_color(attack, @selected_attack)
         ]}
       >
-        <%= attack %>
+        <span class="inline-block -rotate-45 font-bold text-xl"><%= attack %></span>
       </button>
     </div>
     """
@@ -46,6 +47,9 @@ defmodule PointQuestWeb.Live.Components.Attack do
     {:noreply, socket}
   end
 
-  defp get_background_color(attack, attack), do: "bg-amber-400 hover:bg-amber-500"
-  defp get_background_color(_attack, _selected), do: "bg-indigo-400 hover:bg-indigo-500"
+  defp get_background_color(attack, attack),
+    do: "bg-amber-400 hover:bg-amber-500 border-amber-500"
+
+  defp get_background_color(_attack, _selected),
+    do: "bg-indigo-400 hover:bg-indigo-500 border-indigo-500"
 end

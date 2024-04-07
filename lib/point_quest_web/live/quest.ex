@@ -14,33 +14,35 @@ defmodule PointQuestWeb.QuestLive do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-col w-full">
+    <div class="flex flex-col gap-y-8 w-full">
       <.render_party_leader_controls
         round_active?={@round_active?}
         actor={@actor}
         quest_objective={@quest_objective}
       />
-      <div :if={@round_active?} class="py-2 text-xl">
-        <a href={@quest_objective} target="_blank"><%= @quest_objective %></a>
+      <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center text-xl text-indigo-500"}>
+        <.icon name="hero-arrow-top-right-on-square" />
+        <a href={@quest_objective} target="_blank">
+          <%= @quest_objective %>
+        </a>
       </div>
-      <div class="flex gap-4">
+      <div class="flex gap-4 justify-center">
+        <%!-- Adventurer --%>
         <div
-          :for={%{id: id, class: class, name: name} = adventurer <- @adventurers}
-          class="flex flex-col p-2"
+          :for={%{id: id, class: class, name: name} <- @adventurers}
+          class="flex flex-col items-center justify-between w-1/5"
         >
-          <div class={"#{get_background_color(name, @users)} #{get_attacking_ring(adventurer, @attacks)} rounded p-2 mt-5"}>
-            <div :if={@reveal_attacks?}>
-              <p><%= Map.get(@attacks, id) %></p>
-            </div>
-            <div class="w-16 mt-2">
-              <img
-                src={"/images/#{class}.png"}
-                alt={"small sprite representing #{class} class"}
-                class="w-full"
-              />
-            </div>
-            <p><%= name %></p>
+          <%!-- Attack --%>
+          <.render_attack_choice reveal_attacks?={@reveal_attacks?} attack={Map.get(@attacks, id)} />
+          <%!-- Sprite --%>
+          <div class={"w-16 mb-2 #{get_background_color(name, @users)}"}>
+            <img
+              src={"/images/#{class}.png"}
+              alt={"small sprite representing #{class} class"}
+              class="w-full"
+            />
           </div>
+          <p class="text-bold"><%= name %></p>
         </div>
       </div>
       <.live_component
@@ -56,23 +58,31 @@ defmodule PointQuestWeb.QuestLive do
 
   def render_party_leader_controls(%{round_active?: false} = assigns) do
     ~H"""
-    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex flex-col">
-      <div class="flex justify-between">
+    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between items-center">
+      <div class="flex justify-between items-center gap-x-4">
         <div id="quest-actions">
-          <.button phx-click="start_round">New round</.button>
+          <.button phx-click="start_round" class="flex items-center justify-around gap-x-2">
+            <.icon name="hero-arrow-path" /> New round
+          </.button>
         </div>
-        <div id="meta-actions" class="justify-end">
-          <.button phx-click="copy_link">Copy Invite Link</.button>
-        </div>
-      </div>
-      <div class="pb-2">
         <.form
           for={%{"quest_objective" => @quest_objective}}
           phx-change="validate_link"
           phx-submit="start_round"
         >
-          <.input name={:quest_objective} value={@quest_objective} type="text" label="Issue Link" />
+          <.input
+            name={:quest_objective}
+            value={@quest_objective}
+            type="text"
+            placeholder="Issue Link"
+            class="mt-0"
+          />
         </.form>
+      </div>
+      <div id="meta-actions">
+        <.button phx-click="copy_link" class="flex items-center justify-around gap-x-2">
+          <.icon name="hero-flag" /> Copy Invite Link
+        </.button>
       </div>
     </div>
     """
@@ -80,15 +90,27 @@ defmodule PointQuestWeb.QuestLive do
 
   def render_party_leader_controls(%{round_active?: true} = assigns) do
     ~H"""
-    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex flex-col">
-      <div class="flex justify-between">
+    <div :if={is_party_leader?(@actor)} id="leader-controls" class="flex justify-between items-center">
+      <div class="flex justify-between gap-x-4">
         <div id="quest-actions">
-          <.button phx-click="stop_round">Show Attacks</.button>
-        </div>
-        <div id="meta-actions" class="justify-end">
-          <.button phx-click="copy_link">Copy Invite Link</.button>
+          <.button phx-click="stop_round" class="flex items-center justify-around gap-x-2">
+            <.icon name="hero-eye" /> Show Attacks
+          </.button>
         </div>
       </div>
+      <div id="meta-actions">
+        <.button phx-click="copy_link" class="flex items-center justify-around gap-x-2">
+          <.icon name="hero-flag" /> Copy Invite Link
+        </.button>
+      </div>
+    </div>
+    """
+  end
+
+  def render_attack_choice(assigns) do
+    ~H"""
+    <div class={"#{if @attack, do: "visible", else: "invisible"} relative flex justify-center items-center w-32 h-48 mb-8 bg-stone-300 border-2 border-stone-200 rounded-lg after:absolute after:w-[104%] after:h-[102%] after:top-[5px] after:left-0 after:bg-stone-400 after:-z-10 after:rounded-lg after:shadow-sm"}>
+      <span :if={@reveal_attacks?} class="text-3xl text-stone-700"><%= @attack %></span>
     </div>
     """
   end
@@ -286,19 +308,5 @@ defmodule PointQuestWeb.QuestLive do
     else
       ["bg-gray-400"]
     end
-  end
-
-  defp get_attacking_ring(adventurer, attacks) do
-    if adventurer_attacking?(adventurer.id, attacks) do
-      ["ring-4 ring-blue-300 ring-inset"]
-    else
-      [""]
-    end
-  end
-
-  defp adventurer_attacking?(nil, _attacks), do: false
-
-  defp adventurer_attacking?(adventurer_id, attacks) do
-    Map.has_key?(attacks, adventurer_id)
   end
 end
