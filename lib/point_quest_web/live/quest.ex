@@ -241,7 +241,7 @@ defmodule PointQuestWeb.QuestLive do
   def handle_info(%Event.RoundEnded{}, socket) do
     {
       :noreply,
-      assign(socket, round_active?: false, reveal_attacks?: true)
+      assign(socket, round_active?: false, reveal_attacks?: true, quest_objective: "")
     }
   end
 

@@ -123,7 +123,8 @@ defmodule PointQuest.Quests.Quest do
   def project(%Event.RoundEnded{}, %__MODULE__{} = quest) do
     %__MODULE__{
       quest
-      | round_active?: false
+      | round_active?: false,
+        quest_objective: ""
     }
   end
 
