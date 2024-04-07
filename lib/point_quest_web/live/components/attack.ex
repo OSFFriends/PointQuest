@@ -32,7 +32,7 @@ defmodule PointQuestWeb.Live.Components.Attack do
 
   def handle_event("set_attack", params, socket) do
     # Quests.AttackValue expects the attack to be an integer
-    attack_value = params["attack"] |> String.to_integer()
+    attack_value = params["attack"]
 
     %{
       quest_id: socket.assigns.quest_id,

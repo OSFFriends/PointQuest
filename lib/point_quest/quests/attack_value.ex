@@ -9,6 +9,13 @@ defmodule PointQuest.Quests.AttackValue do
   def type(), do: :integer
 
   @impl Ecto.Type
+  def cast(attack_value_string) when is_binary(attack_value_string) do
+    attack_value_string
+    |> String.to_integer()
+    |> cast()
+  end
+
+  @impl Ecto.Type
   def cast(attack_value) when attack_value in @valid_attacks do
     {:ok, attack_value}
   end
