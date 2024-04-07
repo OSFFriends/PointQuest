@@ -32,7 +32,8 @@ defmodule PointQuest.Quests.Quest do
        attacks: [],
        name: nil,
        all_adventurers_attacking?: nil,
-       round_active?: false
+       round_active?: false,
+       quest_objective: ""
      }}
   end
 
@@ -49,10 +50,7 @@ defmodule PointQuest.Quests.Quest do
       quest
       | adventurers: [],
         party_leader: party_leader,
-        name: event.name,
-        all_adventurers_attacking?: false,
-        round_active?: false,
-        quest_objective: ""
+        name: event.name
     }
   end
 
