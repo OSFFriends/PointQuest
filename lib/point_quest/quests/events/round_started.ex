@@ -24,7 +24,7 @@ defmodule PointQuest.Quests.Event.RoundStarted do
   end
 
   def default_quest_objective(%Ecto.Changeset{valid?: false} = invalid_changeset),
-    do: dbg(invalid_changeset)
+    do: invalid_changeset
 
   def default_quest_objective(changeset) do
     if get_change(changeset, :quest_objective) != nil do
