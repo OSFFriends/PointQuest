@@ -116,8 +116,12 @@ defmodule PointQuestWeb.QuestLive do
 
   def render_attack_choice(assigns) do
     ~H"""
-    <div class={"#{if @attack, do: "visible", else: "invisible"} relative flex justify-center items-center w-32 h-48 mb-8 bg-stone-300 border-2 border-stone-200 rounded-lg after:absolute after:w-[104%] after:h-[102%] after:top-[5px] after:left-0 after:bg-stone-400 after:-z-10 after:rounded-lg after:shadow-sm"}>
-      <span :if={@reveal_attacks?} class="text-3xl text-stone-700"><%= @attack %></span>
+    <div class={[
+      "#{if @attack, do: "visible", else: "invisible"} relative flex justify-center items-center",
+      "w-16 h-28 mb-8 bg-stone-300 border-2 border-stone-200 rounded-lg",
+      "after:absolute after:w-[104%] after:h-[102%] after:top-[5px] after:left-0 after:bg-stone-400 after:-z-10 after:rounded-lg after:shadow-sm"
+    ]}>
+      <span :if={@reveal_attacks?} class="text-2xl text-stone-700"><%= @attack %></span>
     </div>
     """
   end

@@ -5,7 +5,7 @@ defmodule PointQuestWeb.Live.Components.Attack do
 
   def render(assigns) do
     ~H"""
-    <div class="flex flex-row justify-center pt-16 gap-x-16 flex-wrap">
+    <div class="flex flex-row justify-center pt-16 gap-x-12 flex-wrap">
       <button
         :for={attack <- @attack_list}
         type="action"
@@ -13,7 +13,7 @@ defmodule PointQuestWeb.Live.Components.Attack do
         phx-value-attack={attack}
         phx-target={@myself}
         class={[
-          "w-24 h-24 rotate-45",
+          "mb-8 w-16 h-16 rotate-45",
           "border-2",
           get_background_color(attack, @selected_attack)
         ]}
@@ -34,15 +34,16 @@ defmodule PointQuestWeb.Live.Components.Attack do
     # Quests.AttackValue expects the attack to be an integer
     attack_value = params["attack"]
 
-    %{
-      quest_id: socket.assigns.quest_id,
-      adventurer_id: socket.assigns.actor.adventurer.id,
-      attack: attack_value
-    }
-    |> Attack.new!()
-    |> Attack.execute(socket.assigns.actor)
+    {:ok, adventurerer_attacked} =
+      %{
+        quest_id: socket.assigns.quest_id,
+        adventurer_id: socket.assigns.actor.adventurer.id,
+        attack: attack_value
+      }
+      |> Attack.new!()
+      |> Attack.execute(socket.assigns.actor)
 
-    socket = assign(socket, selected_attack: attack_value)
+    socket = assign(socket, selected_attack: adventurerer_attacked.attack)
 
     {:noreply, socket}
   end
