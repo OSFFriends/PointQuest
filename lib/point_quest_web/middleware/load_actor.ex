@@ -28,6 +28,9 @@ defmodule PointQuestWeb.Middleware.LoadActor.Plug do
 end
 
 defmodule PointQuestWeb.Middleware.LoadActor.Hook do
+  @moduledoc """
+  Attempts to load an actor from the Phoenix Session prior to liveview's mount.
+  """
   import Phoenix.Component
   require Logger
 

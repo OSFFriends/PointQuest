@@ -33,15 +33,22 @@ defmodule PointQuestWeb.Router do
     live_dashboard "/dashboard", metrics: PointQuestWeb.Telemetry
   end
 
-  live_session :ensure_actor, on_mount: [PointQuestWeb.Middleware.LoadActor.Hook] do
+  scope "/", PointQuestWeb do
     pipe_through [:browser]
 
-    scope "/", PointQuestWeb do
-      get "/switch/:token", Switch, :set_session
-      live "/quest/:id", QuestLive
+    get "/switch/:token", Switch, :set_session
 
+    live_session :load_actor, on_mount: [PointQuestWeb.Middleware.LoadActor.Hook] do
       live "/quest", QuestStartLive
       live "/quest/:id/join", QuestJoinLive
+    end
+
+    live_session :ensure_actor,
+      on_mount: [
+        PointQuestWeb.Middleware.LoadActor.Hook,
+        PointQuestWeb.Middleware.EnsureActor.Hook
+      ] do
+      live "/quest/:id", QuestLive
 
       forward "/", Middleware.QuestForwarder.Plug
     end
