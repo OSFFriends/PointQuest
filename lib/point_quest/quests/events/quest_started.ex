@@ -1,14 +1,11 @@
 defmodule PointQuest.Quests.Event.QuestStarted do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable, optional_fields: [:party_leaders_adventurer]
 
   defmodule PartyLeadersAdventurer do
     @moduledoc """
     The adventurer that participates in the quest
     """
-    use Ecto.Schema
-
-    import Ecto.Changeset
+    use PointQuest.Valuable, optional_fields: [:class]
 
     alias PointQuest.Quests.Adventurer
 
@@ -22,12 +19,6 @@ defmodule PointQuest.Quests.Event.QuestStarted do
       field :name, :string
       field :class, Adventurer.Class.NameEnum
     end
-
-    def changeset(adventurer, params \\ %{}) do
-      adventurer
-      |> cast(params, [:id, :name, :class])
-      |> validate_required([:id, :name])
-    end
   end
 
   @primary_key false
@@ -36,18 +27,5 @@ defmodule PointQuest.Quests.Event.QuestStarted do
     field :name, :string
     field :leader_id, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
-  end
-
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:insert)
-  end
-
-  def changeset(quest_started, params \\ %{}) do
-    quest_started
-    |> cast(params, [:quest_id, :name, :leader_id])
-    |> validate_required([:quest_id, :name, :leader_id])
-    |> cast_embed(:party_leaders_adventurer)
   end
 end

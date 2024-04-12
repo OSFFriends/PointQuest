@@ -1,6 +1,5 @@
 defmodule PointQuest.Quests.Event.AdventurerJoinedParty do
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable
   alias PointQuest.Quests.Adventurer
 
   embedded_schema do
@@ -14,11 +13,5 @@ defmodule PointQuest.Quests.Event.AdventurerJoinedParty do
     |> cast(params, [:quest_id, :name, :class])
     |> change(id: Nanoid.generate_non_secure())
     |> validate_required([:quest_id, :name])
-  end
-
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:insert)
   end
 end

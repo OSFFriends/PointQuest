@@ -38,8 +38,7 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   PointQuest.Quests.Commands.AddAdventurer.execute(add_adventurer_command)
   ```
   """
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable
 
   alias PointQuest.Quests
   alias PointQuest.Quests.Adventurer
@@ -58,39 +57,6 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     field :name, :string
     field :class, Adventurer.Class.NameEnum
     field :quest_id, :string
-  end
-
-  @spec new(map()) :: {:ok, t()}
-  @doc """
-  Creates a command for adding an adventurer to the quest party from params.
-
-  Returns a response object, realistically this can only be {:ok, command} in our current configuration.
-
-  ```elixir
-  {:ok, add_adventurer_command} = PointQuest.Quests.Commands.AddAdventurer.new(%{name: "JSON new(NAN)", class: :healer, quest_id: "abcd1234"})
-  ```
-  """
-  def new(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action(:update)
-  end
-
-  @spec new!(map()) :: t()
-  @doc """
-  Creates a command for adding an adventurer to the quest party from params.
-
-  Returns the command if successful, otherwise raises. Realistically, this can only succeed in our
-  current configuration.
-
-  ```elixir
-  command = PointQuest.Quests.Commands.AddAdventurer.new!(%{name: "Stevey Beevey", class: :knight, quest_id: "abcd1234"})
-  ```
-  """
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:update)
   end
 
   @spec changeset(t(), map()) :: Ecto.Changeset.t(t())

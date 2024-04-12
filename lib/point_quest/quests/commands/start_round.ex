@@ -5,8 +5,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
   Ensure that you're calling either `new/1` or `new!/1` followed by `execute/1` in order to
   update the quest.
   """
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable, optional_fields: [:quest_objective]
 
   alias PointQuest.Quests
   alias PointQuest.Authentication
@@ -23,40 +22,6 @@ defmodule PointQuest.Quests.Commands.StartRound do
   embedded_schema do
     field :quest_id, :string
     field :quest_objective, :string
-  end
-
-  @spec new(map()) :: {:ok, t()}
-  @doc """
-  Creates a command to start a round on the current quest.
-
-  Returns a response tuple with the command.
-  """
-  def new(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action(:update)
-  end
-
-  @spec new!(map()) :: t()
-  @doc """
-  Creates a command to start a round on the current quest.
-
-  Returns the command.
-  """
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:update)
-  end
-
-  @spec changeset(start_round :: t(), params :: map()) :: Ecto.Changeset.t(t())
-  @doc """
-  Creates a changeset from start_round and params.
-  """
-  def changeset(start_round, params \\ %{}) do
-    start_round
-    |> cast(params, [:quest_id, :quest_objective])
-    |> validate_required([:quest_id])
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)

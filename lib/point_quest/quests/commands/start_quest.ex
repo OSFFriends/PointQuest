@@ -5,8 +5,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   Ensure that you're calling either `new/1` or `new!/1` followed by `execute/1` in order to
   create the quest.
   """
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable, optional_fields: [:party_leaders_adventurer]
 
   alias PointQuest.Quests
 
@@ -17,9 +16,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     @moduledoc """
     The adventurer for the party leader when participating in the quest.
     """
-    use Ecto.Schema
-
-    import Ecto.Changeset
+    use PointQuest.Valuable
 
     alias PointQuest.Quests.Adventurer
 
@@ -51,70 +48,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   embedded_schema do
     field :name, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
-  end
-
-  @spec new(map()) :: t()
-  @doc """
-  Creates a command for starting the quest from params.
-
-  Returns a response tuple with the quest. Realistically, this can only succeed in our
-  current configuration.
-
-  ```elixir
-  PointQuest.Quests.Commands.StartQuest.new(%{name: "Example Quest", party_leaders_adventurer: %{class: :knight, name: "Stevey Beevey"}})
-
-  {:ok,
-    %PointQuest.Quests.Commands.StartQuest{
-     name: "Example Quest",
-     party_leaders_adventurer: %PointQuest.Quests.Commands.StartQuest.PartyLeadersAdventurer{
-       name: "Stevey Beevey",
-       class: :knight
-     }
-  }}
-  ```
-  """
-  def new(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action(:insert)
-  end
-
-  @spec new!(map()) :: t()
-  @doc """
-  Creates a command for starting the quest from params.
-
-  Returns the quest if successful, otherwise raises. Realistically, this can only succeed in our
-  current configuration.
-
-  ```elixir
-  PointQuest.Quests.Commands.StartQuest.new!(%{name: "Example Quest", party_leaders_adventurer: %{class: :knight, name: "Stevey Beevey"}})
-
-  %PointQuest.Quests.Commands.StartQuest{
-     name: "Example Quest",
-     party_leaders_adventurer: %PointQuest.Quests.Commands.StartQuest.PartyLeadersAdventurer{
-       name: "Stevey Beevey",
-       class: :knight
-     }
-  }
-  ```
-  """
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:insert)
-  end
-
-  @spec changeset(t(), map()) :: Ecto.Changeset.t(t())
-  @doc """
-  Creates a changeset from start_quest struct and params.
-
-  When backing a form, this allows for easy validation of the form state.
-  """
-  def changeset(start_quest, params \\ %{}) do
-    start_quest
-    |> cast(params, [:name])
-    |> cast_embed(:party_leaders_adventurer)
-    |> validate_required([:name])
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
