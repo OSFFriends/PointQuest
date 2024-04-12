@@ -49,4 +49,72 @@ defmodule Infra.Quests.QuestServerTest do
       assert_receive({:EXIT, ^quest_server, :shutdown}, 500)
     end
   end
+
+  describe "projection snappshotting" do
+    test "snapshot is taken after `max_events` number of events have been received" do
+      {:ok, initial_quest} = Quests.Quest.init()
+      {:ok, quest_server} = QuestServer.start_link(quest: initial_quest, max_events: 2)
+
+      # event 1
+      quest_started =
+        QuestServer.add_event(
+          quest_server,
+          Quests.Event.QuestStarted.new!(%{
+            leader_id: Nanoid.generate_non_secure(),
+            quest_id: Nanoid.generate_non_secure(),
+            name: "My Quest"
+          })
+        )
+
+      {:ok, event_1_projection} = Infra.Quests.Db.get_quest_by_id(initial_quest.id)
+
+      # snapshot not taken yet
+      assert ^initial_quest = QuestServer.get_snapshot(quest_server)
+      assert [^quest_started] = QuestServer.get_events(quest_server)
+
+      # event 2
+      adventurer_joined_1 =
+        QuestServer.add_event(
+          quest_server,
+          Quests.Event.AdventurerJoinedParty.new!(%{
+            quest_id: initial_quest.id,
+            name: "Pre Snappy Boi",
+            class: "mage"
+          })
+        )
+
+      {:ok, event_2_projection} = Infra.Quests.Db.get_quest_by_id(initial_quest.id)
+
+      # snapshot not taken yet
+      assert ^initial_quest = QuestServer.get_snapshot(quest_server)
+
+      # event 3
+      adventurer_joined_2 =
+        QuestServer.add_event(
+          quest_server,
+          Quests.Event.AdventurerJoinedParty.new!(%{
+            quest_id: initial_quest.id,
+            name: "Snappy Boi",
+            class: "healer"
+          })
+        )
+
+      assert ^event_1_projection = QuestServer.get_snapshot(quest_server)
+      assert [^adventurer_joined_1, ^adventurer_joined_2] = QuestServer.get_events(quest_server)
+
+      # event 4
+      adventurer_joined_3 =
+        QuestServer.add_event(
+          quest_server,
+          Quests.Event.AdventurerJoinedParty.new!(%{
+            quest_id: initial_quest.id,
+            name: "Again Snappy Boi",
+            class: "healer"
+          })
+        )
+
+      assert ^event_2_projection = QuestServer.get_snapshot(quest_server)
+      assert [^adventurer_joined_2, ^adventurer_joined_3] = QuestServer.get_events(quest_server)
+    end
+  end
 end
