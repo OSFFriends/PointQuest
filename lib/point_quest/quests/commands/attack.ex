@@ -2,8 +2,7 @@ defmodule PointQuest.Quests.Commands.Attack do
   @moduledoc """
   Command for an adventure to attack for round in a quest.
   """
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable
 
   alias PointQuest.Quests
   alias PointQuest.Quests.Commands
@@ -24,25 +23,6 @@ defmodule PointQuest.Quests.Commands.Attack do
     field :quest_id, :string
     field :adventurer_id, :string
     field :attack, Quests.AttackValue
-  end
-
-  @spec changeset(t(), map()) :: Ecto.Changeset.t(t())
-  def changeset(attack, params \\ %{}) do
-    attack
-    |> cast(params, [:quest_id, :adventurer_id, :attack])
-    |> validate_required([:quest_id, :adventurer_id, :attack])
-  end
-
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:update)
-  end
-
-  def new(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action(:update)
   end
 
   def execute(%__MODULE__{quest_id: quest_id} = attack_command, actor) do

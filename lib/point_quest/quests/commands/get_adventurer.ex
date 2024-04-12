@@ -6,8 +6,7 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
 
   Run the query by calling `new!/1`/`new/1` and passing the returned command to `execute/1`.
   """
-  use Ecto.Schema
-  import Ecto.Changeset
+  use PointQuest.Valuable
   alias PointQuest.Error
 
   @type t :: %__MODULE__{
@@ -19,55 +18,6 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
   embedded_schema do
     field :quest_id, :string
     field :adventurer_id, :string
-  end
-
-  @spec new(map()) :: {:ok, t()}
-  @doc """
-  Creates a new get_adventurer command, with response typing.
-
-  Pass the returned command into `execute/1` to run the query and return the adventurer.
-
-  ```elixir
-  PointQuest.Quests.Commands.GetAdventurer.new(%{quest_id: "abcd1234", adventurer_id: "jtn12345"})
-
-  {:ok,
-   %PointQuest.Quests.Commands.GetAdventurer{
-     quest_id: "abcd1234",
-     adventurer_id: "jtn12345"
-   }}
-  ```
-  """
-  def new(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action(:get)
-  end
-
-  @spec new!(map()) :: t()
-  @doc """
-  Creates a new get_adventurer command, raising on failure.
-
-  Pass the returned command into `execute/1` to run the query and return the adventurer.
-
-  ```elixir
-  PointQuest.Quests.Commands.GetAdventurer.new!(%{quest_id: "abcd1234", adventurer_id: "jtn12345"})
-
-  %PointQuest.Quests.Commands.GetAdventurer{
-   quest_id: "abcd1234",
-   adventurer_id: "jtn12345"
-  }
-  ```
-  """
-  def new!(params) do
-    %__MODULE__{}
-    |> changeset(params)
-    |> apply_action!(:get)
-  end
-
-  defp changeset(get_adventurer, params) do
-    get_adventurer
-    |> cast(params, [:quest_id, :adventurer_id])
-    |> validate_required([:quest_id, :adventurer_id])
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
