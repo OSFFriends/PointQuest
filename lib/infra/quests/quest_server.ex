@@ -5,17 +5,18 @@ defmodule Infra.Quests.QuestServer do
 
   use GenServer, restart: :transient
 
-  @type opt :: {:quest, PointQuest.Quests.Quest} | {:timeout, non_neg_integer()}
+  @type opt ::
+          {:quest, PointQuest.Quests.Quest}
+          | {:timeout, non_neg_integer()}
+          | {:max_events, non_neg_integer()}
   @type opts :: [opt(), ...]
-
-  # how many events we take in before snapshotting
-  @max_events 50
 
   def start_link(opts) do
     opts =
       opts
-      |> Keyword.take([:timeout, :quest])
+      |> Keyword.take([:timeout, :quest, :max_events])
       |> Keyword.put_new(:timeout, :timer.hours(1))
+      |> Keyword.put_new(:max_events, 50)
       |> Map.new()
 
     GenServer.start_link(
@@ -51,8 +52,8 @@ defmodule Infra.Quests.QuestServer do
     # new event gets added at the tail after possibly taking a new snapshot
     # doing this to optimize readers over writers (read doesn't need to enum reverse)
     state =
-      if length(state.events) >= @max_events do
-        drop_count = @max_events / 2
+      if length(state.events) >= state.max_events do
+        drop_count = div(state.max_events, 2)
 
         new_snapshot =
           state.events
