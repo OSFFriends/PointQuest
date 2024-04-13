@@ -28,7 +28,7 @@ defmodule PointQuest.MixProject do
   def application do
     [
       mod: {PointQuest.Application, []},
-      extra_applications: [:logger, :runtime_tools]
+      extra_applications: [:logger, :runtime_tools, :observer, :wx]
     ]
   end
 
@@ -43,12 +43,14 @@ defmodule PointQuest.MixProject do
     [
       {:bcrypt_elixir, "~> 3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dns_cluster, "~> 0.1.1"},
       {:ecto_enum, "~> 1.4"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
       {:excoveralls, "~> 0.16", only: [:test, :dev]},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.20"},
+      {:horde, "~> 0.8.5"},
       {:jason, "~> 1.2"},
       {:nanoid, "~> 2.1.0"},
       {:oauth2, "~> 2.0"},

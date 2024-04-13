@@ -22,7 +22,7 @@ defmodule Infra.Quests.QuestServer do
     GenServer.start_link(
       __MODULE__,
       opts,
-      name: {:via, Registry, {Infra.Quests.Registry, opts.quest.id}}
+      name: {:via, Horde.Registry, {Infra.Quests.Registry, opts.quest.id}}
     )
   end
 

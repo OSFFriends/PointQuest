@@ -11,6 +11,7 @@ kill_signal = 'SIGTERM'
 
 [env]
   PHX_HOST = 'pointquest.fly.dev'
+  DNS_CLUSTER_QUERY = 'pointquest.internal'
   PORT = '8080'
 
 [http_service]
