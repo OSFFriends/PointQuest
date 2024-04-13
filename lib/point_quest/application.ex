@@ -13,15 +13,17 @@ defmodule PointQuest.Application do
       # Start the Ecto repository
       Infra.Quests.QuestStore,
       # Registry for managing quest processes
-      {Registry, keys: :unique, name: Infra.Quests.Registry},
+      {Horde.Registry, keys: :unique, name: Infra.Quests.Registry, members: :auto},
       # Start the PubSub system
       {Phoenix.PubSub, name: PointQuestWeb.PubSub},
       PointQuestWeb.Presence,
       # Start Finch
       {Finch, name: PointQuest.Finch},
+      {DNSCluster, query: Application.get_env(:point_quest, :dns_cluster_query) || :ignore},
       # Start the Endpoint (http/https)
       PointQuestWeb.Endpoint,
-      {DynamicSupervisor, name: Infra.Quests.QuestSupervisor}
+      {Horde.DynamicSupervisor,
+       name: Infra.Quests.QuestSupervisor, strategy: :one_for_one, members: :auto}
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

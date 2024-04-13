@@ -22,7 +22,7 @@ defmodule Infra.Quests.QuestReader do
         %{
           data:
             Infra.Quests.QuestServer.get_snapshot(
-              {:via, Registry, {Infra.Quests.Registry, quest_id}}
+              {:via, Horde.Registry, {Infra.Quests.Registry, quest_id}}
             ),
           version: 1
         }
@@ -32,7 +32,9 @@ defmodule Infra.Quests.QuestReader do
     # we just grab all events in the current event store
     # we don't yet support persisting events anywhere
     def read(%QuestReader{snapshot?: false}, %Reader.Read{id: quest_id}) do
-      Infra.Quests.QuestServer.get_events({:via, Registry, {Infra.Quests.Registry, quest_id}})
+      Infra.Quests.QuestServer.get_events(
+        {:via, Horde.Registry, {Infra.Quests.Registry, quest_id}}
+      )
     end
 
     def stream(%QuestReader{snapshot?: true}, %Reader.Read{id: quest_id}, callback) do
@@ -42,7 +44,7 @@ defmodule Infra.Quests.QuestReader do
         %{
           data:
             Infra.Quests.QuestServer.get_snapshot(
-              {:via, Registry, {Infra.Quests.Registry, quest_id}}
+              {:via, Horde.Registry, {Infra.Quests.Registry, quest_id}}
             )
         },
         version: 1
@@ -51,7 +53,9 @@ defmodule Infra.Quests.QuestReader do
 
     def stream(%QuestReader{snapshot?: false}, %Reader.Read{id: quest_id}, callback) do
       callback.(
-        Infra.Quests.QuestServer.get_events({:via, Registry, {Infra.Quests.Registry, quest_id}})
+        Infra.Quests.QuestServer.get_events(
+          {:via, Horde.Registry, {Infra.Quests.Registry, quest_id}}
+        )
       )
     end
   end

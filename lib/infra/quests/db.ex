@@ -13,7 +13,10 @@ defmodule Infra.Quests.Db do
   @impl PointQuest.Behaviour.Quests.Repo
   def write(quest, %Event.QuestStarted{} = event) do
     {:ok, pid} =
-      DynamicSupervisor.start_child(Infra.Quests.QuestSupervisor, {QuestServer, quest: quest})
+      Horde.DynamicSupervisor.start_child(
+        Infra.Quests.QuestSupervisor,
+        {QuestServer, quest: quest}
+      )
 
     _event = QuestServer.add_event(pid, event)
     new_quest = Projectionist.Store.get(Infra.Quests.QuestStore, quest.id)
@@ -22,7 +25,7 @@ defmodule Infra.Quests.Db do
   end
 
   def write(quest, event) do
-    QuestServer.add_event({:via, Registry, {Infra.Quests.Registry, quest.id}}, event)
+    QuestServer.add_event({:via, Horde.Registry, {Infra.Quests.Registry, quest.id}}, event)
     {:ok, Projectionist.Store.get(Infra.Quests.QuestStore, quest.id)}
   end
 
@@ -79,7 +82,7 @@ defmodule Infra.Quests.Db do
   end
 
   defp lookup_quest_server(quest_id) do
-    case Registry.lookup(Infra.Quests.Registry, quest_id) do
+    case Horde.Registry.lookup(Infra.Quests.Registry, quest_id) do
       [{pid, _state}] ->
         pid
 
