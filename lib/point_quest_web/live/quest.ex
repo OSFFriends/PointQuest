@@ -60,6 +60,18 @@ defmodule PointQuestWeb.QuestLive do
         quest_id={@quest.id}
       />
     </div>
+    <.button phx-click="toggle-nerd-bar">
+      <.icon name="hero-beaker" /> Toggle Nerd Stats
+    </.button>
+    <div :if={@show_nerd_bar?} class="bg-slate-300 mt-6">
+      <p>Node: <%= Node.self() %></p>
+      <p>Liveview: <%= inspect(self()) %></p>
+      <p>
+        Game: <%= inspect(
+          GenServer.whereis({:via, Horde.Registry, {Infra.Quests.Registry, @quest.id}})
+        ) %>
+      </p>
+    </div>
     """
   end
 
@@ -162,7 +174,8 @@ defmodule PointQuestWeb.QuestLive do
             form: nil,
             round_active?: quest.round_active?,
             reveal_attacks?: not quest.round_active? and not Enum.empty?(attacks),
-            quest_objective: quest.quest_objective
+            quest_objective: quest.quest_objective,
+            show_nerd_bar?: false
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
 
@@ -222,6 +235,10 @@ defmodule PointQuestWeb.QuestLive do
     |> Commands.StopRound.execute(actor)
 
     {:noreply, socket}
+  end
+
+  def handle_event("toggle-nerd-bar", _params, socket) do
+    {:noreply, assign(socket, show_nerd_bar?: not socket.assigns.show_nerd_bar?)}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
