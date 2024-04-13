@@ -5,8 +5,6 @@ defmodule Infra.Quests.EventHandler do
 
   import PointQuest.Quests.Telemetry
 
-  alias PointQuest.Quests.Event
-
   def attach() do
     :telemetry.attach_many(
       __MODULE__,
@@ -21,42 +19,12 @@ defmodule Infra.Quests.EventHandler do
   end
 
   def handle_event(
-        attack(:stop),
+        _event,
         _measurements,
-        %{event: %Event.AdventurerAttacked{} = adventurer_attacked, actor: _actor},
+        %{event: event, actor: _actor},
         _config
       ) do
-    Phoenix.PubSub.broadcast(
-      PointQuestWeb.PubSub,
-      adventurer_attacked.quest_id,
-      adventurer_attacked
-    )
-  end
-
-  def handle_event(
-        round_started(:stop),
-        _measurements,
-        %{event: %Event.RoundStarted{} = round_started, actor: _actor},
-        _config
-      ) do
-    Phoenix.PubSub.broadcast(
-      PointQuestWeb.PubSub,
-      round_started.quest_id,
-      round_started
-    )
-  end
-
-  def handle_event(
-        round_ended(:stop),
-        _measurements,
-        %{event: %Event.RoundEnded{} = round_ended, actor: _actor},
-        _config
-      ) do
-    Phoenix.PubSub.broadcast(
-      PointQuestWeb.PubSub,
-      round_ended.quest_id,
-      round_ended
-    )
+    Phoenix.PubSub.broadcast(PointQuestWeb.PubSub, event.quest_id, event)
   end
 
   def handle_event(_unhandled, _measurements, _context, _config) do
