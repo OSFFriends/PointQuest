@@ -43,10 +43,10 @@ defmodule Infra.Quests.Db do
   @impl PointQuest.Behaviour.Quests.Repo
   def get_adventurer_by_id(quest_id, adventurer_id) do
     case get_quest_by_id(quest_id) do
-      {:ok, %{party_leader: %{adventurer: %{id: ^adventurer_id} = adventurer}}} ->
+      {:ok, %{party: %{party_leader: %{adventurer: %{id: ^adventurer_id} = adventurer}}}} ->
         {:ok, adventurer}
 
-      {:ok, %{adventurers: adventurers}} ->
+      {:ok, %{party: %{adventurers: adventurers}}} ->
         case Enum.find(adventurers, fn %{id: id} -> id == adventurer_id end) do
           nil -> {:error, Error.NotFound.exception(resource: :adventurer)}
           adventurer -> {:ok, adventurer}
@@ -60,7 +60,7 @@ defmodule Infra.Quests.Db do
   @impl PointQuest.Behaviour.Quests.Repo
   def get_party_leader_by_id(quest_id, leader_id) do
     case get_quest_by_id(quest_id) do
-      {:ok, %{party_leader: %{id: ^leader_id} = party_leader}} ->
+      {:ok, %{party: %{party_leader: %{id: ^leader_id} = party_leader}}} ->
         {:ok, party_leader}
 
       {:error, %Error.NotFound{resource: :quest}} = error ->
@@ -70,10 +70,10 @@ defmodule Infra.Quests.Db do
 
   def get_all_adventurers(quest_id) do
     case get_quest_by_id(quest_id) do
-      {:ok, %{party_leader: %{adventurer: leader}, adventurers: adventurers}} ->
+      {:ok, %{party: %{party_leader: %{adventurer: leader}, adventurers: adventurers}}} ->
         {:ok, [leader | adventurers]}
 
-      {:ok, %{adventurers: adventurers}} ->
+      {:ok, %{party: %{adventurers: adventurers}}} ->
         {:ok, adventurers}
 
       {:error, %Error.NotFound{resource: :quest}} = error ->

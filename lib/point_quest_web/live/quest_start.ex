@@ -84,7 +84,7 @@ defmodule PointQuestWeb.QuestStartLive do
     {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
     token =
-      quest.party_leader
+      quest.party.party_leader
       |> Authentication.create_actor()
       |> Authentication.actor_to_token()
 
