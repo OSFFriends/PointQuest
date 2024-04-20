@@ -8,9 +8,10 @@ defmodule QuestSetupHelper do
 
   def setup() do
     {:ok, quest_started} =
-      StartQuest.new!(%{}) |> StartQuest.execute()
+      StartQuest.new!(%{})
+      |> StartQuest.execute()
 
-    {:ok, %{party_leader: party_leader} = quest} =
+    {:ok, %{party: %{party_leader: party_leader}} = quest} =
       Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
     {:ok, quest_started} =
@@ -42,8 +43,8 @@ defmodule QuestSetupHelper do
 
     other_actor = %PointQuest.Authentication.Actor.PartyLeader{
       quest_id: other_quest.id,
-      leader_id: other_quest.party_leader.id,
-      adventurer: other_quest.party_leader.adventurer
+      leader_id: other_quest.party.party_leader.id,
+      adventurer: other_quest.party.party_leader.adventurer
     }
 
     %{

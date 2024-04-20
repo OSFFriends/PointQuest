@@ -9,16 +9,15 @@ defmodule PointQuest.Quests.Quest do
 
   alias PointQuest.Quests
   alias PointQuest.Quests.Adventurer
+  alias PointQuest.Quests.Party
   alias PointQuest.Quests.Attack
   alias PointQuest.Quests.Commands
   alias PointQuest.Quests.Event
 
   @primary_key {:id, :binary_id, autogenerate: true}
   embedded_schema do
-    embeds_many :adventurers, Adventurer
     embeds_many :attacks, Attack
-    embeds_one :party_leader, Quests.PartyLeader
-    field :all_adventurers_attacking?, :boolean
+    embeds_one :party, Party
     field :round_active?, :boolean
     field :quest_objective, :string
   end
@@ -27,27 +26,27 @@ defmodule PointQuest.Quests.Quest do
     {:ok,
      %__MODULE__{
        id: Nanoid.generate_non_secure(),
-       adventurers: [],
+       party: nil,
        attacks: [],
-       all_adventurers_attacking?: nil,
        round_active?: false,
        quest_objective: ""
      }}
   end
 
   def project(%Event.QuestStarted{party_leaders_adventurer: nil} = event, quest) do
-    party_leader =
-      %Quests.PartyLeader{}
-      |> Quests.PartyLeader.changeset(%{
-        id: event.leader_id,
-        quest_id: quest.id
+    party =
+      %Party{}
+      |> Party.changeset(%{
+        party_leader: %{
+          id: event.leader_id,
+          quest_id: quest.id
+        }
       })
       |> Ecto.Changeset.apply_action!(:insert)
 
     %__MODULE__{
       quest
-      | adventurers: [],
-        party_leader: party_leader
+      | party: party
     }
   end
 
@@ -58,21 +57,21 @@ defmodule PointQuest.Quests.Quest do
       |> Map.put(:quest_id, event.quest_id)
       |> Map.put(:id, event.leader_id)
 
-    party_leader =
-      %Quests.PartyLeader{}
-      |> Quests.PartyLeader.changeset(%{
-        id: event.leader_id,
-        quest_id: event.quest_id,
-        adventurer: party_leaders_adventurer_params
+    party =
+      %Party{}
+      |> Party.changeset(%{
+        party_leader: %{
+          id: event.leader_id,
+          quest_id: event.quest_id,
+          adventurer: party_leaders_adventurer_params
+        }
       })
       |> Ecto.Changeset.apply_action!(:insert)
 
     %__MODULE__{
       quest
       | id: event.quest_id,
-        adventurers: [],
-        party_leader: party_leader,
-        all_adventurers_attacking?: false,
+        party: party,
         round_active?: false
     }
   end
@@ -88,10 +87,15 @@ defmodule PointQuest.Quests.Quest do
       })
       |> Ecto.Changeset.apply_action!(:insert)
 
+    party =
+      %Party{
+        quest.party
+        | adventurers: [adventurer | quest.party.adventurers]
+      }
+
     %__MODULE__{
       quest
-      | adventurers: [adventurer | quest.adventurers],
-        all_adventurers_attacking?: false
+      | party: party
     }
   end
 
@@ -148,7 +152,7 @@ defmodule PointQuest.Quests.Quest do
   end
 
   def handle(%Commands.AddAdventurer{} = command, quest) do
-    if Enum.any?(quest.adventurers, fn a -> a.name == command.name end) do
+    if Enum.any?(quest.party.adventurers, fn a -> a.name == command.name end) do
       {:error, :adventurer_already_present}
     else
       {:ok, Event.AdventurerJoinedParty.new!(Ecto.embedded_dump(command, :json))}

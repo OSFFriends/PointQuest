@@ -75,7 +75,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
         quest_id: "XHCV7TZ2"
       }
     },
-    all_adventurers_attacking?: false
   }}
   ```
   """

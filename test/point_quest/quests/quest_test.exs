@@ -15,9 +15,7 @@ defmodule PointQuest.Quests.QuestTest do
     test "returns expected initial state in tuple" do
       assert {:ok,
               %Quests.Quest{
-                adventurers: [],
                 attacks: [],
-                all_adventurers_attacking?: nil,
                 quest_objective: ""
               }} = Quests.Quest.init()
     end
@@ -36,11 +34,13 @@ defmodule PointQuest.Quests.QuestTest do
 
       assert %Quests.Quest{
                id: ^quest_id,
-               party_leader: %Quests.PartyLeader{
-                 id: ^leader_id,
-                 quest_id: ^quest_id
+               party: %Quests.Party{
+                 party_leader: %Quests.PartyLeader{
+                   id: ^leader_id,
+                   quest_id: ^quest_id
+                 },
+                 adventurers: []
                },
-               adventurers: [],
                attacks: [],
                round_active?: false,
                quest_objective: ""
@@ -49,7 +49,7 @@ defmodule PointQuest.Quests.QuestTest do
 
     test "projects the QuestStarted event with party leader adventurer", %{
       other_quest:
-        %{id: quest_id, party_leader: %{id: leader_id, adventurer: adventurer}} =
+        %{id: quest_id, party: %{party_leader: %{id: leader_id, adventurer: adventurer}}} =
           quest
     } do
       event = %Quests.Event.QuestStarted{
@@ -60,10 +60,12 @@ defmodule PointQuest.Quests.QuestTest do
 
       assert %Quests.Quest{
                id: ^quest_id,
-               party_leader: %{
-                 id: ^leader_id,
-                 quest_id: ^quest_id,
-                 adventurer: ^adventurer
+               party: %Quests.Party{
+                 party_leader: %{
+                   id: ^leader_id,
+                   quest_id: ^quest_id,
+                   adventurer: ^adventurer
+                 }
                }
              } = Quests.Quest.project(event, quest)
     end
@@ -82,7 +84,9 @@ defmodule PointQuest.Quests.QuestTest do
 
       assert %Quests.Quest{
                id: ^quest_id,
-               adventurers: adventurers
+               party: %Quests.Party{
+                 adventurers: adventurers
+               }
              } = Quests.Quest.project(event, quest)
 
       assert Enum.member?(adventurers, %Quests.Adventurer{

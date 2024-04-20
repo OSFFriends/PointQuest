@@ -55,11 +55,15 @@ defmodule PointQuest.Quests.Spec do
   @doc """
   Ensures the actor is the party leader of the provided quest
   """
-  def is_party_leader?(%Quest{party_leader: %{id: id}}, %Actor.PartyLeader{leader_id: id}),
-    do: true
+  def is_party_leader?(%Quest{party: %{party_leader: %{id: id}}}, %Actor.PartyLeader{
+        leader_id: id
+      }),
+      do: true
 
-  def is_party_leader?(%Quest{party_leader: %{id: _id}}, %Actor.PartyLeader{leader_id: _other_id}),
-    do: false
+  def is_party_leader?(%Quest{party: %{party_leader: %{id: _id}}}, %Actor.PartyLeader{
+        leader_id: _other_id
+      }),
+      do: false
 
   def is_party_leader?(_quest, %Actor.Adventurer{}), do: false
 end
