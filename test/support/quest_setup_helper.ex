@@ -8,14 +8,13 @@ defmodule QuestSetupHelper do
 
   def setup() do
     {:ok, quest_started} =
-      StartQuest.new!(%{name: "proper quest"}) |> StartQuest.execute()
+      StartQuest.new!(%{}) |> StartQuest.execute()
 
     {:ok, %{party_leader: party_leader} = quest} =
       Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
     {:ok, quest_started} =
       StartQuest.new!(%{
-        name: "Steve's Shenanigans",
         party_leaders_adventurer: %{name: "Stevey Beevey", class: :mage}
       })
       |> StartQuest.execute()

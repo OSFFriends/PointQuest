@@ -25,16 +25,16 @@ defmodule Infra.Quests.LogHandler do
         %{event: %Event.QuestStarted{} = quest_started},
         _config
       ) do
-    Logger.info(~s/Quest "#{quest_started.name}" started with id: #{quest_started.quest_id}/)
+    Logger.info(~s/Quest started with id: #{quest_started.quest_id}/)
   end
 
   def handle_event(
         quest_started(:stop),
         _measurements,
-        %{command: start_quest, error: true, reason: reason},
+        %{command: _start_quest, error: true, reason: reason},
         _config
       ) do
-    Logger.info(~s/Quest "#{start_quest.name}" failed to start - #{inspect(reason)}/)
+    Logger.info(~s/Quest failed to start - #{inspect(reason)}/)
   end
 
   def handle_event(

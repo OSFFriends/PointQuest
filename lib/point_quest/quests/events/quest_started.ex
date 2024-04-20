@@ -24,7 +24,6 @@ defmodule PointQuest.Quests.Event.QuestStarted do
   @primary_key false
   embedded_schema do
     field :quest_id, :string
-    field :name, :string
     field :leader_id, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
   end

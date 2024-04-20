@@ -17,7 +17,6 @@ defmodule PointQuest.Quests.QuestTest do
               %Quests.Quest{
                 adventurers: [],
                 attacks: [],
-                name: nil,
                 all_adventurers_attacking?: nil,
                 quest_objective: ""
               }} = Quests.Quest.init()
@@ -26,19 +25,17 @@ defmodule PointQuest.Quests.QuestTest do
 
   describe "project/2" do
     test "projects the QuestStarted event with no party leader adventurer", %{
-      quest: %{id: quest_id, name: quest_name} = quest,
+      quest: %{id: quest_id} = quest,
       party_leader: %{id: leader_id}
     } do
       event = %Quests.Event.QuestStarted{
         quest_id: quest_id,
-        name: quest_name,
         leader_id: leader_id,
         party_leaders_adventurer: nil
       }
 
       assert %Quests.Quest{
                id: ^quest_id,
-               name: ^quest_name,
                party_leader: %Quests.PartyLeader{
                  id: ^leader_id,
                  quest_id: ^quest_id
@@ -52,19 +49,17 @@ defmodule PointQuest.Quests.QuestTest do
 
     test "projects the QuestStarted event with party leader adventurer", %{
       other_quest:
-        %{id: quest_id, name: quest_name, party_leader: %{id: leader_id, adventurer: adventurer}} =
+        %{id: quest_id, party_leader: %{id: leader_id, adventurer: adventurer}} =
           quest
     } do
       event = %Quests.Event.QuestStarted{
         quest_id: quest_id,
-        name: quest_name,
         leader_id: leader_id,
         party_leaders_adventurer: adventurer
       }
 
       assert %Quests.Quest{
                id: ^quest_id,
-               name: ^quest_name,
                party_leader: %{
                  id: ^leader_id,
                  quest_id: ^quest_id,
@@ -159,19 +154,15 @@ defmodule PointQuest.Quests.QuestTest do
 
   describe "handle/2" do
     test "StartQuest command with no party leader adventurer returns QuestStarted event" do
-      command = Quests.Commands.StartQuest.new!(%{name: "test quest"})
+      command = Quests.Commands.StartQuest.new!(%{})
       {:ok, init} = Quests.Quest.init()
 
-      assert {:ok,
-              %Quests.Event.QuestStarted{
-                name: "test quest"
-              }} = Quests.Quest.handle(command, init)
+      assert {:ok, %Quests.Event.QuestStarted{}} = Quests.Quest.handle(command, init)
     end
 
     test "StartQuest command with party leader adventurer returns QuestStarted event" do
       command =
         Quests.Commands.StartQuest.new!(%{
-          name: "test quest",
           party_leaders_adventurer: %{name: "Scott Stapp", class: :mage}
         })
 
@@ -179,7 +170,6 @@ defmodule PointQuest.Quests.QuestTest do
 
       assert {:ok,
               %Quests.Event.QuestStarted{
-                name: "test quest",
                 party_leaders_adventurer: %{
                   name: "Scott Stapp",
                   class: :mage

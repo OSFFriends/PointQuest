@@ -5,30 +5,16 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
   alias PointQuest.Quests.Commands.StartQuest
 
   describe "new/1" do
-    test "providing only a quest name is valid" do
-      assert {:ok, %StartQuest{name: "initial test", party_leaders_adventurer: nil}} =
-               StartQuest.new(%{
-                 name: "initial test"
-               })
-    end
-
-    test "name is required to start a quest" do
-      assert {:error,
-              %{valid?: false, errors: [name: {"can't be blank", [validation: :required]}]}} =
+    test "providing no params is valid" do
+      assert {:ok, %StartQuest{party_leaders_adventurer: nil}} =
                StartQuest.new(%{})
     end
   end
 
   describe "new!/1" do
-    test "providing only a quest name is valid" do
-      assert %StartQuest{name: "initial test", party_leaders_adventurer: nil} =
-               StartQuest.new!(%{
-                 name: "initial test"
-               })
-    end
-
-    test "failure to provide name results in error" do
-      assert_raise Ecto.InvalidChangesetError, fn -> StartQuest.new!(%{}) end
+    test "providing no params is valid" do
+      assert %StartQuest{party_leaders_adventurer: nil} =
+               StartQuest.new!(%{})
     end
 
     test "failure to provide valid adventurer params results in error" do
@@ -42,14 +28,12 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
     test "party leader can have an adventurer" do
       assert {:ok,
               %StartQuest{
-                name: "with adventurer",
                 party_leaders_adventurer: %StartQuest.PartyLeadersAdventurer{
                   name: "JSON",
                   class: :knight
                 }
               }} =
                StartQuest.new(%{
-                 name: "with adventurer",
                  party_leaders_adventurer: %{name: "JSON", class: :knight}
                })
     end
@@ -71,7 +55,6 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
     test "class chosen at random if not provided" do
       assert {:ok,
               %StartQuest{
-                name: "test",
                 party_leaders_adventurer: %{name: "JSON", class: class}
               }} = StartQuest.new(%{name: "test", party_leaders_adventurer: %{name: "JSON"}})
 
@@ -94,7 +77,6 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
                 }
               }} =
                StartQuest.new(%{
-                 name: "test",
                  party_leaders_adventurer: %{name: "bob", class: :builder}
                })
     end
@@ -102,16 +84,18 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
 
   describe "execute/1" do
     test "returns new quest state" do
-      {:ok, start_quest} = StartQuest.new(%{name: "test"})
+      {:ok, start_quest} = StartQuest.new(%{})
 
-      assert {:ok, %QuestStarted{quest_id: quest_id, name: "test"}} =
+      assert {:ok, %QuestStarted{quest_id: quest_id}} =
                StartQuest.execute(start_quest)
 
       refute is_nil(quest_id)
     end
 
     test "errors when passed invalid changeset" do
-      {:error, bad_changeset} = StartQuest.new(%{})
+      {:error, bad_changeset} =
+        StartQuest.new(%{party_leaders_adventurer: %{name: "json", class: "fake class"}})
+
       assert_raise FunctionClauseError, fn -> StartQuest.execute(bad_changeset) end
     end
   end

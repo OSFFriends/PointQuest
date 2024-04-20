@@ -40,13 +40,11 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   end
 
   @type t :: %__MODULE__{
-          name: String.t(),
           party_leaders_adventurer: PartyLeadersAdventurer.t()
         }
 
   @primary_key false
   embedded_schema do
-    field :name, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
   end
 
@@ -59,7 +57,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   Returns the new quest.
 
   ```elixir
-  PointQuest.Quests.Commands.StartQuest.new!(%{name: "Example Quest", party_leaders_adventurer: %{class: :knight, name: "Stevey Beevey"}})
+  PointQuest.Quests.Commands.StartQuest.new!(%{party_leaders_adventurer: %{class: :knight, name: "Stevey Beevey"}})
   |> PointQuest.Quests.Commands.StartQuest.execute()
 
   {:ok,
@@ -77,7 +75,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
         quest_id: "XHCV7TZ2"
       }
     },
-    name: "Example Quest",
     all_adventurers_attacking?: false
   }}
   ```
