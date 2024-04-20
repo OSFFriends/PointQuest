@@ -18,7 +18,6 @@ defmodule PointQuest.Quests.Quest do
     embeds_many :adventurers, Adventurer
     embeds_many :attacks, Attack
     embeds_one :party_leader, Quests.PartyLeader
-    field :name, :string
     field :all_adventurers_attacking?, :boolean
     field :round_active?, :boolean
     field :quest_objective, :string
@@ -30,7 +29,6 @@ defmodule PointQuest.Quests.Quest do
        id: Nanoid.generate_non_secure(),
        adventurers: [],
        attacks: [],
-       name: nil,
        all_adventurers_attacking?: nil,
        round_active?: false,
        quest_objective: ""
@@ -49,8 +47,7 @@ defmodule PointQuest.Quests.Quest do
     %__MODULE__{
       quest
       | adventurers: [],
-        party_leader: party_leader,
-        name: event.name
+        party_leader: party_leader
     }
   end
 
@@ -75,7 +72,6 @@ defmodule PointQuest.Quests.Quest do
       | id: event.quest_id,
         adventurers: [],
         party_leader: party_leader,
-        name: event.name,
         all_adventurers_attacking?: false,
         round_active?: false
     }
