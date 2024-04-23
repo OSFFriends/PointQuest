@@ -11,15 +11,15 @@ defmodule Infra.Quests.Db do
   defstruct []
 
   @impl PointQuest.Behaviour.Quests.Repo
-  def write(quest, %Event.QuestStarted{} = event) do
+  def write(_quest, %Event.QuestStarted{} = event) do
     {:ok, pid} =
       Horde.DynamicSupervisor.start_child(
         Infra.Quests.QuestSupervisor,
-        {QuestServer, quest: quest}
+        {QuestServer, quest_id: event.quest_id}
       )
 
     _event = QuestServer.add_event(pid, event)
-    new_quest = Projectionist.Store.get(Infra.Quests.QuestStore, quest.id)
+    new_quest = Projectionist.Store.get(Infra.Quests.QuestStore, event.quest_id)
 
     {:ok, new_quest}
   end

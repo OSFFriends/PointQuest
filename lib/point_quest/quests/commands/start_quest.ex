@@ -40,12 +40,30 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   end
 
   @type t :: %__MODULE__{
+          quest_id: String.t(),
           party_leaders_adventurer: PartyLeadersAdventurer.t()
         }
 
   @primary_key false
   embedded_schema do
+    field :quest_id, :string
     embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
+  end
+
+  def changeset(start_quest, params) do
+    start_quest
+    |> cast(params, [:quest_id])
+    |> maybe_new_quest_id()
+    |> validate_required([:quest_id])
+    |> cast_embed(:party_leaders_adventurer)
+  end
+
+  def maybe_new_quest_id(changeset) do
+    if get_change(changeset, :quest_id) do
+      changeset
+    else
+      change(changeset, quest_id: Nanoid.generate_non_secure())
+    end
   end
 
   defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)

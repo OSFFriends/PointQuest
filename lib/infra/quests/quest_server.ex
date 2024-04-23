@@ -6,23 +6,26 @@ defmodule Infra.Quests.QuestServer do
   use GenServer, restart: :transient
 
   @type opt ::
-          {:quest, PointQuest.Quests.Quest}
+          {:quest_id, String.t()}
           | {:timeout, non_neg_integer()}
           | {:max_events, non_neg_integer()}
   @type opts :: [opt(), ...]
 
   def start_link(opts) do
+    {:ok, init_quest} = PointQuest.Quests.Quest.init()
+
     opts =
       opts
-      |> Keyword.take([:timeout, :quest, :max_events])
+      |> Keyword.take([:timeout, :quest_id, :max_events])
       |> Keyword.put_new(:timeout, :timer.hours(1))
       |> Keyword.put_new(:max_events, 50)
+      |> Keyword.put(:snapshot, init_quest)
       |> Map.new()
 
     GenServer.start_link(
       __MODULE__,
       opts,
-      name: {:via, Horde.Registry, {Infra.Quests.Registry, opts.quest.id}}
+      name: {:via, Horde.Registry, {Infra.Quests.Registry, opts.quest_id}}
     )
   end
 
@@ -58,9 +61,9 @@ defmodule Infra.Quests.QuestServer do
         new_snapshot =
           state.events
           |> Enum.take(drop_count)
-          |> Enum.reduce(state.quest, &PointQuest.Quests.Quest.project/2)
+          |> Enum.reduce(state.snapshot, &PointQuest.Quests.Quest.project/2)
 
-        %{state | events: Enum.drop(state.events, drop_count) ++ [event], quest: new_snapshot}
+        %{state | events: Enum.drop(state.events, drop_count) ++ [event], snapshot: new_snapshot}
       else
         Map.update!(state, :events, fn events -> events ++ [event] end)
       end
@@ -69,7 +72,7 @@ defmodule Infra.Quests.QuestServer do
   end
 
   def handle_call({:get_snapshot}, _from, state) do
-    {:reply, state.quest, state}
+    {:reply, state.snapshot, state}
   end
 
   def handle_call({:get_events}, _from, state) do

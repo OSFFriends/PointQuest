@@ -6,21 +6,39 @@ defmodule PointQuest.Quests.Commands.StartQuestTest do
 
   describe "new/1" do
     test "providing no params is valid" do
-      assert {:ok, %StartQuest{party_leaders_adventurer: nil}} =
+      assert {:ok, %StartQuest{quest_id: quest_id, party_leaders_adventurer: nil}} =
                StartQuest.new(%{})
+
+      refute is_nil(quest_id)
+    end
+
+    test "quest id can be specified" do
+      quest_id = "abc123"
+
+      assert {:ok, %StartQuest{quest_id: ^quest_id, party_leaders_adventurer: nil}} =
+               StartQuest.new(%{quest_id: quest_id})
     end
   end
 
   describe "new!/1" do
     test "providing no params is valid" do
-      assert %StartQuest{party_leaders_adventurer: nil} =
+      assert %StartQuest{quest_id: quest_id, party_leaders_adventurer: nil} =
                StartQuest.new!(%{})
+
+      refute is_nil(quest_id)
     end
 
     test "failure to provide valid adventurer params results in error" do
       assert_raise Ecto.InvalidChangesetError, fn ->
         StartQuest.new!(%{name: "borked", party_leaders_adventurer: %{class: :knight}})
       end
+    end
+
+    test "quest id can be specified" do
+      quest_id = "abc123"
+
+      assert %StartQuest{quest_id: ^quest_id, party_leaders_adventurer: nil} =
+               StartQuest.new!(%{quest_id: quest_id})
     end
   end
 
