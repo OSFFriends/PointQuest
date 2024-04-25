@@ -20,7 +20,8 @@ defmodule Infra.Quests.QuestServerTest do
 
       Process.flag(:trap_exit, true)
 
-      {:ok, quest_server} = QuestServer.start_link(quest: quest, timeout: 500)
+      {:ok, quest_server} =
+        QuestServer.start_link(quest_id: Nanoid.generate_non_secure(), timeout: 500)
 
       {:ok, quest: quest, quest_server: quest_server}
     end
@@ -53,7 +54,8 @@ defmodule Infra.Quests.QuestServerTest do
   describe "projection snappshotting" do
     test "snapshot is taken after `max_events` number of events have been received" do
       {:ok, initial_quest} = Quests.Quest.init()
-      {:ok, quest_server} = QuestServer.start_link(quest: initial_quest, max_events: 2)
+      quest_id = Nanoid.generate_non_secure()
+      {:ok, quest_server} = QuestServer.start_link(quest_id: quest_id, max_events: 2)
 
       # event 1
       quest_started =
@@ -61,12 +63,12 @@ defmodule Infra.Quests.QuestServerTest do
           quest_server,
           Quests.Event.QuestStarted.new!(%{
             leader_id: Nanoid.generate_non_secure(),
-            quest_id: Nanoid.generate_non_secure(),
+            quest_id: quest_id,
             name: "My Quest"
           })
         )
 
-      {:ok, event_1_projection} = Infra.Quests.Db.get_quest_by_id(initial_quest.id)
+      {:ok, event_1_projection} = Infra.Quests.Db.get_quest_by_id(quest_id)
 
       # snapshot not taken yet
       assert ^initial_quest = QuestServer.get_snapshot(quest_server)
@@ -77,13 +79,13 @@ defmodule Infra.Quests.QuestServerTest do
         QuestServer.add_event(
           quest_server,
           Quests.Event.AdventurerJoinedParty.new!(%{
-            quest_id: initial_quest.id,
+            quest_id: quest_id,
             name: "Pre Snappy Boi",
             class: "mage"
           })
         )
 
-      {:ok, event_2_projection} = Infra.Quests.Db.get_quest_by_id(initial_quest.id)
+      {:ok, event_2_projection} = Infra.Quests.Db.get_quest_by_id(quest_id)
 
       # snapshot not taken yet
       assert ^initial_quest = QuestServer.get_snapshot(quest_server)
@@ -93,7 +95,7 @@ defmodule Infra.Quests.QuestServerTest do
         QuestServer.add_event(
           quest_server,
           Quests.Event.AdventurerJoinedParty.new!(%{
-            quest_id: initial_quest.id,
+            quest_id: quest_id,
             name: "Snappy Boi",
             class: "healer"
           })
@@ -107,7 +109,7 @@ defmodule Infra.Quests.QuestServerTest do
         QuestServer.add_event(
           quest_server,
           Quests.Event.AdventurerJoinedParty.new!(%{
-            quest_id: initial_quest.id,
+            quest_id: quest_id,
             name: "Again Snappy Boi",
             class: "healer"
           })

@@ -25,7 +25,7 @@ defmodule PointQuest.Quests.Quest do
   def init() do
     {:ok,
      %__MODULE__{
-       id: Nanoid.generate_non_secure(),
+       id: nil,
        party: nil,
        attacks: [],
        round_active?: false,
@@ -39,14 +39,15 @@ defmodule PointQuest.Quests.Quest do
       |> Party.changeset(%{
         party_leader: %{
           id: event.leader_id,
-          quest_id: quest.id
+          quest_id: event.quest_id
         }
       })
       |> Ecto.Changeset.apply_action!(:insert)
 
     %__MODULE__{
       quest
-      | party: party
+      | id: event.quest_id,
+        party: party
     }
   end
 
@@ -128,23 +129,23 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
-  def handle(%Commands.StartQuest{party_leaders_adventurer: nil} = command, quest) do
+  def handle(%Commands.StartQuest{party_leaders_adventurer: nil} = command, _quest) do
     event =
       command
       |> Ecto.embedded_dump(:json)
-      |> Map.merge(%{quest_id: quest.id, leader_id: Nanoid.generate_non_secure()})
+      |> Map.merge(%{leader_id: Nanoid.generate_non_secure()})
       |> Event.QuestStarted.new!()
 
     {:ok, event}
   end
 
-  def handle(%Commands.StartQuest{} = command, quest) do
+  def handle(%Commands.StartQuest{} = command, _quest) do
     leader_id = Nanoid.generate_non_secure()
 
     event =
       command
       |> Ecto.embedded_dump(:json)
-      |> Map.merge(%{quest_id: quest.id, leader_id: leader_id})
+      |> Map.merge(%{leader_id: leader_id})
       |> update_in([:party_leaders_adventurer, :id], fn _ -> leader_id end)
       |> Event.QuestStarted.new!()
 
