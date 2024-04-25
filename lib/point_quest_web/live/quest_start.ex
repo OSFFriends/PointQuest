@@ -80,7 +80,6 @@ defmodule PointQuestWeb.QuestStartLive do
       params
       |> StartQuest.new!()
       |> StartQuest.execute()
-      |> dbg()
 
     {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
 
