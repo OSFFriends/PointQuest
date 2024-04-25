@@ -22,6 +22,9 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 import Sortable from "../vendor/sortable";
+import createAudioManager from "./audioManager"
+
+const audioManager = createAudioManager()
 
 let Hooks = {};
 
@@ -44,7 +47,7 @@ let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
 let liveSocket = new LiveSocket("/live", Socket, {
-  params: { _csrf_token: csrfToken },
+  params: { _csrf_token: csrfToken, audio_preferences: audioManager.checkEnabled()},
   hooks: Hooks,
 });
 
@@ -71,3 +74,4 @@ window.addEventListener("phx:copy", (event) => {
     alert("Sorry, your browser does not support copy to clipboard.");
   }
 });
+

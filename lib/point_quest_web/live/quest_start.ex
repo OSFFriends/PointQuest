@@ -42,6 +42,7 @@ defmodule PointQuestWeb.QuestStartLive do
   end
 
   def mount(_params, _session, socket) do
+    IO.inspect(get_connect_params(socket)["enable_audio"])
     classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()
 
     changeset = StartQuest.changeset(%StartQuest{}, %{})

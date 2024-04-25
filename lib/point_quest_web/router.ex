@@ -46,7 +46,8 @@ defmodule PointQuestWeb.Router do
     live_session :ensure_actor,
       on_mount: [
         PointQuestWeb.Middleware.LoadActor.Hook,
-        PointQuestWeb.Middleware.EnsureActor.Hook
+        PointQuestWeb.Middleware.EnsureActor.Hook,
+        PointQuestWeb.Middleware.AudioPreferences.Hook
       ] do
       live "/quest/:id", QuestLive
 
