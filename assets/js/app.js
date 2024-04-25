@@ -22,6 +22,7 @@ import { Socket } from "phoenix";
 import { LiveSocket } from "phoenix_live_view";
 import topbar from "../vendor/topbar";
 import Sortable from "../vendor/sortable";
+import AudioPreferences from "./components/audioPreferences"
 
 let Hooks = {};
 
@@ -71,3 +72,4 @@ window.addEventListener("phx:copy", (event) => {
     alert("Sorry, your browser does not support copy to clipboard.");
   }
 });
+

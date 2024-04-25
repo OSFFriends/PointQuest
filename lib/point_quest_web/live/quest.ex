@@ -9,6 +9,7 @@ defmodule PointQuestWeb.QuestLive do
   alias PointQuest.Quests.Commands
   alias PointQuest.Quests.Event
   alias PointQuestWeb.Live.Components
+  alias PointQuestWeb.QuestAudioLive
 
   require Logger
 
@@ -20,15 +21,21 @@ defmodule PointQuestWeb.QuestLive do
         actor={@actor}
         quest_objective={@quest_objective}
       />
-      <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center"}>
-        <.icon name="hero-arrow-top-right-on-square" />
-        <%= if @quest_objective != "" do %>
-          <a href={@quest_objective} target="_blank" class="text-indigo-500">
-            <%= @quest_objective %>
-          </a>
-        <% else %>
-          N/A
-        <% end %>
+      <div class="flex justify-between">
+        <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center"}>
+          <.icon name="hero-arrow-top-right-on-square" />
+          <%= if @quest_objective != "" do %>
+            <a href={@quest_objective} target="_blank" class="text-indigo-500">
+              <%= @quest_objective %>
+            </a>
+          <% else %>
+            N/A
+          <% end %>
+        </div>
+        <%= live_render(@socket, QuestAudioLive,
+          id: "quest-audio-preferences",
+          session: %{"quest_id" => @quest.id}
+        ) %>
       </div>
       <div class="flex gap-4 justify-center">
         <%!-- Adventurer --%>
@@ -257,10 +264,7 @@ defmodule PointQuestWeb.QuestLive do
       ) do
     attacks = Map.put(socket.assigns.attacks, adventurer_id, attack_value)
 
-    {
-      :noreply,
-      assign(socket, attacks: attacks)
-    }
+    {:noreply, assign(socket, attacks: attacks)}
   end
 
   def handle_info(%Event.RoundStarted{quest_objective: link}, socket) do
