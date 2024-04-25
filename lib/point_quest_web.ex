@@ -17,8 +17,8 @@ defmodule PointQuestWeb do
   those modules here.
   """
 
-  @prod_static_paths ~w(assets fonts images favicon.ico robots.txt)
-  @dev_static_paths ~w(assets fonts images favicon.ico robots.txt excoveralls.html)
+  @prod_static_paths ~w(assets fonts images audio favicon.ico robots.txt)
+  @dev_static_paths ~w(assets fonts images audio favicon.ico robots.txt excoveralls.html)
 
   @spec static_paths(atom) :: [String.t()]
   def static_paths(:prod), do: @prod_static_paths
