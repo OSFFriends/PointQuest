@@ -9,6 +9,7 @@ defmodule PointQuest.Quests.Telemetry do
 
   defevent(:attack, @prefix ++ [:attack])
   defevent(:add_adventurer, @prefix ++ [:add_adventurer])
+  defevent(:add_objective, @prefix ++ [:add_objective])
   defevent(:quest_started, @prefix ++ [:quest_started])
   defevent(:round_started, @prefix ++ [:round_started])
   defevent(:round_ended, @prefix ++ [:round_ended])
