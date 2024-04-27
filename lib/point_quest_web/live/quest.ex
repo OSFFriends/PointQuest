@@ -176,6 +176,7 @@ defmodule PointQuestWeb.QuestLive do
             round_active?: quest.round_active?,
             reveal_attacks?: not quest.round_active? and not Enum.empty?(attacks),
             quest_objective: quest.quest_objective,
+            objectives: quest.objectives,
             show_nerd_bar?: false
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
