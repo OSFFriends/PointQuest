@@ -10,4 +10,6 @@ defmodule PointQuest.Behaviour.Quests.Repo do
               {:ok, Quests.Adventurer.t()} | {:error, Error.NotFound.t(:adventurer | :quest)}
   @callback get_party_leader_by_id(quest_id :: String.t(), leader_id: String.t()) ::
               {:ok, Quests.PartyLeader.t()} | {:error, Error.NotFound.t(:quest)}
+  @callback get_all_adventurers(quest_id :: String.t()) ::
+              {:ok, [Quests.Adventurer.t()]} | {:error, Error.NotFound.t(:quest)}
 end

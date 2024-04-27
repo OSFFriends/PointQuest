@@ -11,8 +11,8 @@ defmodule PointQuest.Application do
       PointQuestWeb.Telemetry,
       {DNSCluster, query: Application.get_env(:point_quest, :dns_cluster_query) || :ignore},
       {Finch, name: PointQuest.Finch},
-      # Use in memory quest db behavior
       Infra.Quests.InMemory.Supervisor,
+      Infra.Quests.SimpleInMemory.Supervisor,
       {Phoenix.PubSub, name: PointQuestWeb.PubSub},
       PointQuestWeb.Presence,
       PointQuestWeb.Endpoint

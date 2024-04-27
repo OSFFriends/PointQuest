@@ -16,6 +16,9 @@ config :point_quest, PointQuestWeb.Endpoint,
   secret_key_base: "NSik0XTnIRg5eOWsWCHiqI2WMSFVFAdwlCKIvTGqB+nQX5AfhAKfahQ7wCLf46+X",
   server: false
 
+# Configures dependency injection
+config :point_quest, PointQuest.Behaviour.Quests.Repo, Infra.Quests.SimpleInMemory.Db
+
 # In test we don't send emails.
 config :point_quest, PointQuest.Mailer, adapter: Swoosh.Adapters.Test
 

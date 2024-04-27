@@ -72,11 +72,9 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     |> ensure_unique_name()
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   defp ensure_unique_name(changeset) do
     with {:ok, %{party: %{adventurers: adventurers, party_leader: leader}}} <-
-           repo().get_quest_by_id(get_field(changeset, :quest_id)) do
+           PointQuest.quest_repo().get_quest_by_id(get_field(changeset, :quest_id)) do
       name = get_field(changeset, :name)
 
       adventurers =
@@ -111,10 +109,10 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   def execute(%__MODULE__{quest_id: quest_id} = add_adventurer_command) do
     Telemetrex.span event: Quests.Telemetry.add_adventurer(),
                     context: %{command: add_adventurer_command} do
-      with {:ok, quest} <- repo().get_quest_by_id(quest_id),
+      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
            {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest),
            {:ok, _quest} <-
-             repo().write(
+             PointQuest.quest_repo().write(
                quest,
                event
              ) do

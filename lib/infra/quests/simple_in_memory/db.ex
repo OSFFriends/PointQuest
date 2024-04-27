@@ -1,42 +1,45 @@
-defmodule Infra.Quests.InMemory.Db do
-  @moduledoc """
-  In-memory DB system
-  """
+defmodule Infra.Quests.SimpleInMemory.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
-  alias Infra.Quests.InMemory
+  alias Infra.Quests.SimpleInMemory
   alias PointQuest.Error
   alias PointQuest.Quests.Event
-
-  defstruct []
 
   @impl PointQuest.Behaviour.Quests.Repo
   def write(_quest, %Event.QuestStarted{} = event) do
     {:ok, pid} =
-      Horde.DynamicSupervisor.start_child(
-        Infra.Quests.InMemory.QuestSupervisor,
-        {InMemory.QuestServer, quest_id: event.quest_id}
+      DynamicSupervisor.start_child(
+        SimpleInMemory.QuestSupervisor,
+        {SimpleInMemory.EventServer, quest_id: event.quest_id}
       )
 
-    _event = InMemory.QuestServer.add_event(pid, event)
-    new_quest = Projectionist.Store.get(InMemory.QuestStore, event.quest_id)
+    _event = SimpleInMemory.EventServer.add_event(pid, event)
+    new_quest = SimpleInMemory.EventServer.get_quest(pid)
 
     {:ok, new_quest}
   end
 
   def write(quest, event) do
-    InMemory.QuestServer.add_event({:via, Horde.Registry, {InMemory.Registry, quest.id}}, event)
-    {:ok, Projectionist.Store.get(InMemory.QuestStore, quest.id)}
+    event_store = {:via, Registry, {SimpleInMemory.Registry, quest.id}}
+
+    SimpleInMemory.EventServer.add_event(
+      event_store,
+      event
+    )
+
+    new_quest = SimpleInMemory.EventServer.get_quest(event_store)
+
+    {:ok, new_quest}
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
-    case lookup_quest_server(quest_id) do
-      nil ->
+    case Registry.lookup(SimpleInMemory.Registry, quest_id) do
+      [] ->
         {:error, Error.NotFound.exception(resource: :quest)}
 
-      _pid ->
-        {:ok, Projectionist.Store.get(InMemory.QuestStore, quest_id)}
+      [{pid, _state}] ->
+        {:ok, SimpleInMemory.EventServer.get_quest(pid)}
     end
   end
 
@@ -79,16 +82,6 @@ defmodule Infra.Quests.InMemory.Db do
 
       {:error, %Error.NotFound{resource: :quest}} = error ->
         error
-    end
-  end
-
-  defp lookup_quest_server(quest_id) do
-    case Horde.Registry.lookup(InMemory.Registry, quest_id) do
-      [{pid, _state}] ->
-        pid
-
-      _not_found ->
-        nil
     end
   end
 end
