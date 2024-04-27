@@ -24,8 +24,6 @@ defmodule PointQuest.Quests.Commands.StartRound do
     field :quest_objective, :string
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   @spec execute(start_round_command :: t(), actor :: Authentication.PartyLeader.t()) ::
           {:ok, Quests.Event.RoundStarted.t()}
           | {:error, Error.NotFound.exception(resource: :quest)}
@@ -39,10 +37,10 @@ defmodule PointQuest.Quests.Commands.StartRound do
   def execute(%__MODULE__{} = start_round_command, actor) do
     Telemetrex.span event: Quests.Telemetry.round_started(),
                     context: %{command: start_round_command, actor: actor} do
-      with {:ok, quest} <- repo().get_quest_by_id(start_round_command.quest_id),
+      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(start_round_command.quest_id),
            true <- can_start_round?(quest, actor),
            {:ok, event} <- Quests.Quest.handle(start_round_command, quest),
-           {:ok, _quest} <- repo().write(quest, event) do
+           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       else
         false -> {:error, :must_be_leader_of_quest_party}

@@ -20,8 +20,6 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
     field :adventurer_id, :string
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   @spec execute(t()) ::
           {:ok, PointQuest.Quests.Adventurer.t()}
           | {:error, Error.NotFound.t(:adventurer | :quest)}
@@ -42,6 +40,6 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
   ```
   """
   def execute(%__MODULE__{quest_id: quest_id, adventurer_id: adventurer_id}) do
-    repo().get_adventurer_by_id(quest_id, adventurer_id)
+    PointQuest.quest_repo().get_adventurer_by_id(quest_id, adventurer_id)
   end
 end

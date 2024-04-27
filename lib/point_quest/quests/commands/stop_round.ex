@@ -22,8 +22,6 @@ defmodule PointQuest.Quests.Commands.StopRound do
     field :quest_id
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   @spec execute(stop_round_command :: t(), actor :: Authentication.PartyLeader.t()) ::
           {:ok, t()}
           | {:error, Error.NotFound.exception(resource: :quest)}
@@ -37,10 +35,10 @@ defmodule PointQuest.Quests.Commands.StopRound do
   def execute(%__MODULE__{} = stop_round_command, actor) do
     Telemetrex.span event: Quests.Telemetry.round_ended(),
                     context: %{command: stop_round_command, actor: actor} do
-      with {:ok, quest} <- repo().get_quest_by_id(stop_round_command.quest_id),
+      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(stop_round_command.quest_id),
            true <- can_stop_round?(quest, actor),
            {:ok, event} <- Quests.Quest.handle(stop_round_command, quest),
-           {:ok, _quest} <- repo().write(quest, event) do
+           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       else
         false -> {:error, :must_be_leader_of_quest_party}

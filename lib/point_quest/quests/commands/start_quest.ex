@@ -66,8 +66,6 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     end
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   @spec execute(t()) :: PointQuest.Quests.Quest.t()
   @doc """
   Executes the command to start the quest.
@@ -102,7 +100,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     Telemetrex.span event: Quests.Telemetry.quest_started(),
                     context: %{command: start_quest_command} do
       with {:ok, event} <- Quests.Quest.handle(start_quest_command, quest),
-           {:ok, _quest} <- repo().write(quest, event) do
+           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       end
     after

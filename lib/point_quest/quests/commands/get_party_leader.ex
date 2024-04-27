@@ -23,8 +23,6 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
     field :leader_id, :string
   end
 
-  defp repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
-
   @spec execute(t()) ::
           {:ok, PointQuest.Quests.PartyLeader.t()}
           | {:error, Error.NotFound.t(:quest)}
@@ -49,6 +47,6 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
   ```
   """
   def execute(%__MODULE__{quest_id: quest_id, leader_id: leader_id}) do
-    repo().get_party_leader_by_id(quest_id, leader_id)
+    PointQuest.quest_repo().get_party_leader_by_id(quest_id, leader_id)
   end
 end
