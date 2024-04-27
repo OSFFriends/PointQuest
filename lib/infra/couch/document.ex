@@ -47,12 +47,16 @@ defmodule Infra.Couch.Document do
   defp document_type_for(%Event.QuestStarted{}), do: "quest_started"
   defp document_type_for(%Event.AdventurerJoinedParty{}), do: "adventurer_joined_party"
   defp document_type_for(%Event.AdventurerAttacked{}), do: "adventurer_attacked"
+  defp document_type_for(%Event.ObjectiveAdded{}), do: "objective_added"
+  defp document_type_for(%Event.ObjectiveSorted{}), do: "objective_sorted"
   defp document_type_for(%Event.RoundStarted{}), do: "round_started"
   defp document_type_for(%Event.RoundEnded{}), do: "round_ended"
 
   defp type_from_document("quest_started"), do: Event.QuestStarted
   defp type_from_document("adventurer_joined_party"), do: Event.AdventurerJoinedParty
   defp type_from_document("adventurer_attacked"), do: Event.AdventurerAttacked
+  defp type_from_document("objective_added"), do: Event.ObjectiveAdded
+  defp type_from_document("objective_sorted"), do: Event.ObjectiveSorted
   defp type_from_document("round_started"), do: Event.RoundStarted
   defp type_from_document("round_ended"), do: Event.RoundEnded
 end

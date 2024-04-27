@@ -22,21 +22,20 @@ defmodule PointQuest.Quests.Commands.AddSimpleObjectiveTest do
     } do
       Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest_id)
 
-      quest_objective =
-        Objective.changeset(%Objective{}, %{id: "make the test pass"})
-        |> Ecto.Changeset.apply_action!(:insert)
-
-      objective_added_event = %PointQuest.Quests.Event.ObjectiveAdded{
-        quest_id: quest_id,
-        objective: quest_objective
-      }
-
-      assert {:ok, ^objective_added_event} =
+      assert {:ok, %PointQuest.Quests.Event.ObjectiveAdded{objectives: returned_objectives}} =
                %{quest_id: quest_id, quest_objective: "make the test pass"}
                |> AddSimpleObjective.new!()
                |> AddSimpleObjective.execute(actor)
 
-      assert_received ^objective_added_event
+      assert_received %PointQuest.Quests.Event.ObjectiveAdded{objectives: broadcast_objectives}
+
+      assert Enum.any?(returned_objectives, fn o ->
+               o.title == "make the test pass" and o.sort_order == 1.0
+             end)
+
+      assert Enum.any?(broadcast_objectives, fn o ->
+               o.title == "make the test pass" and o.sort_order == 1.0
+             end)
     end
 
     test "fails if quest ID doesn't exist", %{party_leader_actor: actor} do
@@ -66,7 +65,7 @@ defmodule PointQuest.Quests.Commands.AddSimpleObjectiveTest do
         quest_objective: objective
       })
 
-    assert %Objective{id: ^objective, title: nil, description: nil} =
-             Questable.to_objective(command)
+    assert %Objective{title: ^objective, description: nil} =
+             Questable.to_objective(command, %{})
   end
 end

@@ -28,19 +28,19 @@ let Hooks = {};
 
 Hooks.Sortable = {
   mounted() {
-    let sorter = new Sortable(this.el, {
+    new Sortable(this.el, {
       animation: 150,
       dragClass: "shadow-2xl",
       ghostClass: "bg-yellow-100",
       onEnd: (evt) => {
-        const elements = Array.from(this.el.children);
-        const ids = elements.map((elm) => elm.id);
-        this.pushEvent("update-sorting", { ids: ids });
+        this.pushEvent("update-sorting", {
+          old: evt.oldIndex,
+          new: evt.newIndex,
+        });
       },
     });
   },
 };
-
 let csrfToken = document
   .querySelector("meta[name='csrf-token']")
   .getAttribute("content");
