@@ -9,14 +9,17 @@ defmodule PointQuest.Quests.Quest do
 
   alias PointQuest.Quests
   alias PointQuest.Quests.Adventurer
-  alias PointQuest.Quests.Party
   alias PointQuest.Quests.Attack
   alias PointQuest.Quests.Commands
   alias PointQuest.Quests.Event
+  alias PointQuest.Quests.Objectives.Objective
+  alias PointQuest.Quests.Objectives.Questable
+  alias PointQuest.Quests.Party
 
   @primary_key {:id, :binary_id, autogenerate: true}
   embedded_schema do
     embeds_many :attacks, Attack
+    embeds_many :objectives, Objective
     embeds_one :party, Party
     field :round_active?, :boolean
     field :quest_objective, :string
@@ -129,6 +132,16 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
+  def project(
+        %Event.ObjectiveAdded{objective: quest_objective},
+        %__MODULE__{objectives: objectives} = quest
+      ) do
+    %__MODULE__{
+      quest
+      | objectives: [quest_objective | objectives]
+    }
+  end
+
   def handle(%Commands.StartQuest{party_leaders_adventurer: nil} = command, _quest) do
     event =
       command
@@ -177,6 +190,15 @@ defmodule PointQuest.Quests.Quest do
       {:ok, Event.RoundEnded.new!(Ecto.embedded_dump(command, :json))}
     else
       {:error, :round_not_active}
+    end
+  end
+
+  def handle(%Commands.AddSimpleObjective{} = command, quest) do
+    if Enum.any?(quest.objectives, fn objective -> objective.id == command.quest_objective end) do
+      {:error, :objective_already_exists}
+    else
+      objective = Questable.to_objective(command) |> Ecto.embedded_dump(:json)
+      {:ok, Event.ObjectiveAdded.new!(%{quest_id: command.quest_id, objective: objective})}
     end
   end
 end

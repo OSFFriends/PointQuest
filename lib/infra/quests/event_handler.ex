@@ -10,6 +10,7 @@ defmodule Infra.Quests.EventHandler do
       __MODULE__,
       [
         attack(:stop),
+        add_objective(:stop),
         round_started(:stop),
         round_ended(:stop)
       ],
