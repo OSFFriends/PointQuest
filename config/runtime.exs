@@ -101,6 +101,11 @@ if config_env() == :prod do
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
 end
 
+config :point_quest, Infra.Couch.Client,
+  base_url: System.get_env("COUCH_URL"),
+  username: System.get_env("COUCH_USER"),
+  password: System.get_env("COUCH_PASS")
+
 config :point_quest, Infra.Linear,
   api_key: System.get_env("LINEAR_API_KEY", nil),
   team_name: "PAYME",
