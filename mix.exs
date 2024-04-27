@@ -46,6 +46,7 @@ defmodule PointQuest.MixProject do
       {:dns_cluster, "~> 0.1.1"},
       {:ecto_enum, "~> 1.4"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},
+      {:ex_ulid, "~> 0.1.0"},
       {:excoveralls, "~> 0.16", only: [:test, :dev]},
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
@@ -65,9 +66,9 @@ defmodule PointQuest.MixProject do
       {:projectionist, github: "skbolton/projectionist", ref: "main", depth: 1},
       {:swoosh, "~> 1.3"},
       {:tailwind, "~> 0.2.0", runtime: Mix.env() == :dev},
+      {:telemetrex, "~> 0.2"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:telemetrex, "~> 0.2"},
       {:tesla, "~> 1.7"},
       {:timex, "~> 3.7"}
     ]

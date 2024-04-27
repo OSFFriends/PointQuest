@@ -1,0 +1,13 @@
+volumes:
+  couch-data:
+
+services:
+  couchdb:
+    image: couchdb
+    ports: 
+      - "5984:5984"
+    volumes:
+      - couch-data:/opt/couchdb/data
+    environment:
+      COUCHDB_USER: couchdb
+      COUCHDB_PASSWORD: password
