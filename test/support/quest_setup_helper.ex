@@ -12,7 +12,7 @@ defmodule QuestSetupHelper do
       |> StartQuest.execute()
 
     {:ok, %{party: %{party_leader: party_leader}} = quest} =
-      Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
+      Infra.Quests.InMemory.Db.get_quest_by_id(quest_started.quest_id)
 
     {:ok, quest_started} =
       StartQuest.new!(%{
@@ -20,7 +20,7 @@ defmodule QuestSetupHelper do
       })
       |> StartQuest.execute()
 
-    {:ok, other_quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
+    {:ok, other_quest} = Infra.Quests.InMemory.Db.get_quest_by_id(quest_started.quest_id)
 
     {:ok, %{id: adventurer_id}} =
       AddAdventurer.new!(%{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id})

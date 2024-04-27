@@ -68,7 +68,7 @@ defmodule PointQuestWeb.QuestLive do
       <p>Liveview: <%= inspect(self()) %></p>
       <p>
         Game: <%= inspect(
-          GenServer.whereis({:via, Horde.Registry, {Infra.Quests.Registry, @quest.id}})
+          GenServer.whereis({:via, Horde.Registry, {Infra.Quests.InMemory.Registry, @quest.id}})
         ) %>
       </p>
     </div>
@@ -152,13 +152,13 @@ defmodule PointQuestWeb.QuestLive do
 
   def mount(params, _session, socket) do
     socket =
-      case Infra.Quests.Db.get_quest_by_id(params["id"]) do
+      case Infra.Quests.InMemory.Db.get_quest_by_id(params["id"]) do
         {:ok, quest} ->
           user_meta = actor_to_meta(socket.assigns.actor)
           PointQuestWeb.Presence.track(self(), quest.id, user_meta.user_id, user_meta)
           Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest.id)
 
-          {:ok, adventurers} = Infra.Quests.Db.get_all_adventurers(quest.id)
+          {:ok, adventurers} = Infra.Quests.InMemory.Db.get_all_adventurers(quest.id)
 
           attacks =
             Enum.reduce(quest.attacks, %{}, fn a, attacks ->
@@ -222,7 +222,7 @@ defmodule PointQuestWeb.QuestLive do
     |> Commands.StartRound.new!()
     |> Commands.StartRound.execute(actor)
 
-    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest.id)
+    {:ok, quest} = Infra.Quests.InMemory.Db.get_quest_by_id(quest.id)
 
     {:noreply, assign(socket, quest: quest)}
   end
@@ -282,7 +282,7 @@ defmodule PointQuestWeb.QuestLive do
   end
 
   def handle_joins(socket, joins) do
-    {:ok, adventurers} = Infra.Quests.Db.get_all_adventurers(socket.assigns.quest.id)
+    {:ok, adventurers} = Infra.Quests.InMemory.Db.get_all_adventurers(socket.assigns.quest.id)
 
     Enum.reduce(joins, socket, fn {user, %{metas: [meta | _]}}, socket ->
       meta = Map.put(meta, :connected?, true)

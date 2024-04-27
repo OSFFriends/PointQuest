@@ -1,7 +1,7 @@
-defmodule Infra.Quests.QuestServerTest do
+defmodule Infra.Quests.InMemory.QuestServerTest do
   use ExUnit.Case, async: true
 
-  alias Infra.Quests.QuestServer
+  alias Infra.Quests.InMemory.QuestServer
   alias PointQuest.Quests
 
   describe "automatic cleanup of old sessions" do
@@ -68,7 +68,7 @@ defmodule Infra.Quests.QuestServerTest do
           })
         )
 
-      {:ok, event_1_projection} = Infra.Quests.Db.get_quest_by_id(quest_id)
+      {:ok, event_1_projection} = Infra.Quests.InMemory.Db.get_quest_by_id(quest_id)
 
       # snapshot not taken yet
       assert ^initial_quest = QuestServer.get_snapshot(quest_server)
@@ -85,7 +85,7 @@ defmodule Infra.Quests.QuestServerTest do
           })
         )
 
-      {:ok, event_2_projection} = Infra.Quests.Db.get_quest_by_id(quest_id)
+      {:ok, event_2_projection} = Infra.Quests.InMemory.Db.get_quest_by_id(quest_id)
 
       # snapshot not taken yet
       assert ^initial_quest = QuestServer.get_snapshot(quest_server)

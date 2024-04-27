@@ -8,22 +8,14 @@ defmodule PointQuest.Application do
   @impl true
   def start(_type, _args) do
     children = [
-      # Start the Telemetry supervisor
       PointQuestWeb.Telemetry,
-      # Start the Ecto repository
-      Infra.Quests.QuestStore,
-      # Registry for managing quest processes
-      {Horde.Registry, keys: :unique, name: Infra.Quests.Registry, members: :auto},
-      # Start the PubSub system
+      {DNSCluster, query: Application.get_env(:point_quest, :dns_cluster_query) || :ignore},
+      {Finch, name: PointQuest.Finch},
+      # Use in memory quest db behavior
+      Infra.Quests.InMemory.Supervisor,
       {Phoenix.PubSub, name: PointQuestWeb.PubSub},
       PointQuestWeb.Presence,
-      # Start Finch
-      {Finch, name: PointQuest.Finch},
-      {DNSCluster, query: Application.get_env(:point_quest, :dns_cluster_query) || :ignore},
-      # Start the Endpoint (http/https)
-      PointQuestWeb.Endpoint,
-      {Horde.DynamicSupervisor,
-       name: Infra.Quests.QuestSupervisor, strategy: :one_for_one, members: :auto}
+      PointQuestWeb.Endpoint
     ]
 
     # See https://hexdocs.pm/elixir/Supervisor.html

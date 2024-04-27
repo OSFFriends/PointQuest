@@ -1,10 +1,10 @@
-defmodule Infra.Quests.Db do
+defmodule Infra.Quests.InMemory.Db do
   @moduledoc """
   In-memory DB system
   """
   @behaviour PointQuest.Behaviour.Quests.Repo
 
-  alias Infra.Quests.QuestServer
+  alias Infra.Quests.InMemory
   alias PointQuest.Error
   alias PointQuest.Quests.Event
 
@@ -14,19 +14,19 @@ defmodule Infra.Quests.Db do
   def write(_quest, %Event.QuestStarted{} = event) do
     {:ok, pid} =
       Horde.DynamicSupervisor.start_child(
-        Infra.Quests.QuestSupervisor,
-        {QuestServer, quest_id: event.quest_id}
+        Infra.Quests.InMemory.QuestSupervisor,
+        {InMemory.QuestServer, quest_id: event.quest_id}
       )
 
-    _event = QuestServer.add_event(pid, event)
-    new_quest = Projectionist.Store.get(Infra.Quests.QuestStore, event.quest_id)
+    _event = InMemory.QuestServer.add_event(pid, event)
+    new_quest = Projectionist.Store.get(InMemory.QuestStore, event.quest_id)
 
     {:ok, new_quest}
   end
 
   def write(quest, event) do
-    QuestServer.add_event({:via, Horde.Registry, {Infra.Quests.Registry, quest.id}}, event)
-    {:ok, Projectionist.Store.get(Infra.Quests.QuestStore, quest.id)}
+    InMemory.QuestServer.add_event({:via, Horde.Registry, {InMemory.Registry, quest.id}}, event)
+    {:ok, Projectionist.Store.get(InMemory.QuestStore, quest.id)}
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
@@ -36,7 +36,7 @@ defmodule Infra.Quests.Db do
         {:error, Error.NotFound.exception(resource: :quest)}
 
       _pid ->
-        {:ok, Projectionist.Store.get(Infra.Quests.QuestStore, quest_id)}
+        {:ok, Projectionist.Store.get(InMemory.QuestStore, quest_id)}
     end
   end
 
@@ -82,7 +82,7 @@ defmodule Infra.Quests.Db do
   end
 
   defp lookup_quest_server(quest_id) do
-    case Horde.Registry.lookup(Infra.Quests.Registry, quest_id) do
+    case Horde.Registry.lookup(InMemory.Registry, quest_id) do
       [{pid, _state}] ->
         pid
 
