@@ -9,6 +9,6 @@ defmodule PointQuest.Quests.Event.ObjectiveAdded do
   @primary_key false
   embedded_schema do
     field :quest_id, :string
-    embeds_one :objective, Objective
+    embeds_many :objectives, Objective
   end
 end

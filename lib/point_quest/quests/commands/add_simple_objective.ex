@@ -50,10 +50,10 @@ defmodule PointQuest.Quests.Commands.AddSimpleObjective do
   end
 
   defimpl PointQuest.Quests.Objectives.Questable do
-    def to_objective(add_objective_command) do
-      Objective.changeset(%Objective{}, %{
-        id: add_objective_command.quest_objective
-      })
+    def to_objective(add_objective_command, params \\ %{}) do
+      params = Map.put(params, :title, add_objective_command.quest_objective)
+
+      Objective.changeset(%Objective{}, params)
       |> Ecto.Changeset.apply_action!(:insert)
     end
   end

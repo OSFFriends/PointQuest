@@ -133,12 +133,22 @@ defmodule PointQuest.Quests.Quest do
   end
 
   def project(
-        %Event.ObjectiveAdded{objective: quest_objective},
-        %__MODULE__{objectives: objectives} = quest
+        %Event.ObjectiveAdded{objectives: objectives},
+        %__MODULE__{} = quest
       ) do
     %__MODULE__{
       quest
-      | objectives: [quest_objective | objectives]
+      | objectives: objectives
+    }
+  end
+
+  def project(
+        %Event.ObjectiveSorted{objectives: objectives},
+        %__MODULE__{} = quest
+      ) do
+    %__MODULE__{
+      quest
+      | objectives: objectives
     }
   end
 
@@ -194,11 +204,43 @@ defmodule PointQuest.Quests.Quest do
   end
 
   def handle(%Commands.AddSimpleObjective{} = command, quest) do
-    if Enum.any?(quest.objectives, fn objective -> objective.id == command.quest_objective end) do
+    if Enum.any?(quest.objectives, fn objective -> objective.title == command.quest_objective end) do
       {:error, :objective_already_exists}
     else
-      objective = Questable.to_objective(command) |> Ecto.embedded_dump(:json)
-      {:ok, Event.ObjectiveAdded.new!(%{quest_id: command.quest_id, objective: objective})}
+      end_sort_value =
+        Enum.max_by(quest.objectives, fn o -> o.sort_order end, fn -> %{sort_order: 0} end).sort_order
+
+      new_objective =
+        Questable.to_objective(command, %{sort_order: end_sort_value + 1})
+        |> Ecto.embedded_dump(:json)
+
+      objectives =
+        [
+          new_objective | Enum.map(quest.objectives, fn o -> Ecto.embedded_dump(o, :json) end)
+        ]
+        |> Enum.sort_by(fn o -> o.sort_order end)
+
+      {:ok, Event.ObjectiveAdded.new!(%{quest_id: command.quest_id, objectives: objectives})}
     end
+  end
+
+  def handle(%Commands.SortObjective{} = command, quest) do
+    objectives =
+      quest.objectives
+      |> Enum.reduce([], fn o, acc ->
+        if o.id == command.objective_id do
+          [%{o | sort_order: command.sort_value} | acc]
+        else
+          [o | acc]
+        end
+      end)
+      |> Enum.sort_by(& &1.sort_order)
+      |> Enum.map(fn o -> Ecto.embedded_dump(o, :json) end)
+
+    {:ok,
+     Event.ObjectiveSorted.new!(%{
+       quest_id: command.quest_id,
+       objectives: objectives
+     })}
   end
 end
