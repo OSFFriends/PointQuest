@@ -81,7 +81,7 @@ defmodule PointQuestWeb.QuestStartLive do
       |> StartQuest.new!()
       |> StartQuest.execute()
 
-    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
+    {:ok, quest} = Infra.Quests.InMemory.Db.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party.party_leader
@@ -101,7 +101,7 @@ defmodule PointQuestWeb.QuestStartLive do
       |> StartQuest.new!()
       |> StartQuest.execute()
 
-    {:ok, quest} = Infra.Quests.Db.get_quest_by_id(quest_started.quest_id)
+    {:ok, quest} = Infra.Quests.InMemory.Db.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party.party_leader

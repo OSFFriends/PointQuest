@@ -1,4 +1,4 @@
-defmodule Infra.Quests.QuestServer do
+defmodule Infra.Quests.InMemory.QuestServer do
   @moduledoc """
   Agent to hold quest state
   """
@@ -25,7 +25,7 @@ defmodule Infra.Quests.QuestServer do
     GenServer.start_link(
       __MODULE__,
       opts,
-      name: {:via, Horde.Registry, {Infra.Quests.Registry, opts.quest_id}}
+      name: {:via, Horde.Registry, {Infra.Quests.InMemory.Registry, opts.quest_id}}
     )
   end
 
