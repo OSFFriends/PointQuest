@@ -84,7 +84,7 @@ defmodule PointQuest.Quests.Quest do
     adventurer =
       %Quests.Adventurer{}
       |> Adventurer.create_changeset(%{
-        id: event.id,
+        id: event.adventurer_id,
         name: event.name,
         class: event.class,
         quest_id: event.quest_id
