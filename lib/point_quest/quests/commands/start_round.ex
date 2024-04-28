@@ -40,7 +40,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
       with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(start_round_command.quest_id),
            true <- can_start_round?(quest, actor),
            {:ok, event} <- Quests.Quest.handle(start_round_command, quest),
-           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
+           :ok <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       else
         false -> {:error, :must_be_leader_of_quest_party}

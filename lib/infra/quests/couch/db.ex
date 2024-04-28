@@ -8,25 +8,23 @@ defmodule Infra.Quests.Couch.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def write(_init_quest, %Event.QuestStarted{} = event) do
-    Couch.Client.put(
-      "/events/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
-      Couch.Document.to_doc(event)
-    )
-    |> case do
-      {:ok, _body} ->
-        get_quest_by_id(event.quest_id)
-    end
+    {:ok, _doc} =
+      Couch.Client.put(
+        "/events/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
+        Couch.Document.to_doc(event)
+      )
+
+    :ok
   end
 
   def write(quest, event) do
-    Couch.Client.put(
-      "/events/quest-#{quest.id}:#{ExULID.ULID.generate()}",
-      Couch.Document.to_doc(event)
-    )
-    |> case do
-      {:ok, _body} ->
-        get_quest_by_id(quest.id)
-    end
+    {:ok, _doc} =
+      Couch.Client.put(
+        "/events/quest-#{quest.id}:#{ExULID.ULID.generate()}",
+        Couch.Document.to_doc(event)
+      )
+
+    :ok
   end
 
   @impl PointQuest.Behaviour.Quests.Repo

@@ -30,7 +30,7 @@ defmodule PointQuest.Quests.Commands.AddSimpleObjective do
              PointQuest.quest_repo().get_quest_by_id(add_objective_command.quest_id),
            true <- can_add_objective(quest, actor),
            {:ok, event} <- Quests.Quest.handle(add_objective_command, quest),
-           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
+           :ok <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       else
         false -> {:error, :must_be_leader_of_party}

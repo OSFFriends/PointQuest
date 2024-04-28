@@ -19,14 +19,13 @@ defmodule Infra.Quests.InMemory.Db do
       )
 
     _event = InMemory.QuestServer.add_event(pid, event)
-    new_quest = Projectionist.Store.get(InMemory.QuestStore, event.quest_id)
 
-    {:ok, new_quest}
+    :ok
   end
 
   def write(quest, event) do
     InMemory.QuestServer.add_event({:via, Horde.Registry, {InMemory.Registry, quest.id}}, event)
-    {:ok, Projectionist.Store.get(InMemory.QuestStore, quest.id)}
+    :ok
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
