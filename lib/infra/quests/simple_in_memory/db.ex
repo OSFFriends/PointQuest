@@ -14,9 +14,7 @@ defmodule Infra.Quests.SimpleInMemory.Db do
       )
 
     _event = SimpleInMemory.EventServer.add_event(pid, event)
-    new_quest = SimpleInMemory.EventServer.get_quest(pid)
-
-    {:ok, new_quest}
+    :ok
   end
 
   def write(quest, event) do
@@ -27,9 +25,7 @@ defmodule Infra.Quests.SimpleInMemory.Db do
       event
     )
 
-    new_quest = SimpleInMemory.EventServer.get_quest(event_store)
-
-    {:ok, new_quest}
+    :ok
   end
 
   @impl PointQuest.Behaviour.Quests.Repo

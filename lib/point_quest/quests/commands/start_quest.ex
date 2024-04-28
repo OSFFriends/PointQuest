@@ -100,7 +100,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     Telemetrex.span event: Quests.Telemetry.quest_started(),
                     context: %{command: start_quest_command} do
       with {:ok, event} <- Quests.Quest.handle(start_quest_command, quest),
-           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
+           :ok <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       end
     after

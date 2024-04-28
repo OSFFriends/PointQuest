@@ -36,7 +36,7 @@ defmodule PointQuest.Quests.Commands.Attack do
              ),
            true <- can_attack?(adventurer, quest, actor),
            {:ok, event} <- Quests.Quest.handle(attack_command, quest),
-           {:ok, _quest} <- PointQuest.quest_repo().write(quest, event) do
+           :ok <- PointQuest.quest_repo().write(quest, event) do
         {:ok, event}
       else
         false ->

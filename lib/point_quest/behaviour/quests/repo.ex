@@ -3,7 +3,7 @@ defmodule PointQuest.Behaviour.Quests.Repo do
   alias PointQuest.Quests
   alias PointQuest.Quests.Event
 
-  @callback write(Quests.Quest.t(), Event.QuestStarted.t()) :: {:ok, Quest.t()}
+  @callback write(Quests.Quest.t(), Event.QuestStarted.t()) :: :ok
   @callback get_quest_by_id(quest_id :: String.t()) ::
               {:ok, Quests.Quest.t()} | {:error, Error.NotFound.t(:quest)}
   @callback get_adventurer_by_id(quest_id :: String.t(), adventurer_id :: String.t()) ::

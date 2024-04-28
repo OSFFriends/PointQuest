@@ -111,7 +111,7 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
                     context: %{command: add_adventurer_command} do
       with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
            {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest),
-           {:ok, _quest} <-
+           :ok <-
              PointQuest.quest_repo().write(
                quest,
                event
