@@ -92,7 +92,7 @@ defmodule PointQuest.Quests.QuestTest do
       assert Enum.member?(adventurers, %Quests.Adventurer{
                name: event.name,
                class: event.class,
-               id: event.id,
+               id: event.adventurer_id,
                quest_id: event.quest_id
              })
     end

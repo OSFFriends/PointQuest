@@ -22,7 +22,7 @@ defmodule QuestSetupHelper do
 
     {:ok, other_quest} = PointQuest.quest_repo().get_quest_by_id(quest_started.quest_id)
 
-    {:ok, %{id: adventurer_id}} =
+    {:ok, %{adventurer_id: adventurer_id}} =
       AddAdventurer.new!(%{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id})
       |> AddAdventurer.execute()
 
