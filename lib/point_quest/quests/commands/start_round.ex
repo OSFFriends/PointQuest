@@ -5,7 +5,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
   Ensure that you're calling either `new/1` or `new!/1` followed by `execute/1` in order to
   update the quest.
   """
-  use PointQuest.Valuable, optional_fields: [:quest_objective]
+  use PointQuest.Valuable
 
   alias PointQuest.Quests
   alias PointQuest.Authentication
@@ -14,14 +14,12 @@ defmodule PointQuest.Quests.Commands.StartRound do
   require Telemetrex
 
   @type t :: %__MODULE__{
-          quest_id: String.t(),
-          quest_objective: String.t()
+          quest_id: String.t()
         }
 
   @primary_key false
   embedded_schema do
     field :quest_id, :string
-    field :quest_objective, :string
   end
 
   @spec execute(start_round_command :: t(), actor :: Authentication.PartyLeader.t()) ::

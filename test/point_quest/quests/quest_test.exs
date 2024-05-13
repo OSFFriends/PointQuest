@@ -225,15 +225,14 @@ defmodule PointQuest.Quests.QuestTest do
     } do
       command =
         %{
-          quest_id: quest_id,
-          quest_objective: "https://bitsonthemind.com"
+          quest_id: quest_id
         }
         |> Quests.Commands.StartRound.new!()
 
       {:ok,
        %{
          quest_id: ^quest_id,
-         quest_objective: "https://bitsonthemind.com"
+         objectives: []
        }} = Quests.Quest.handle(command, quest)
     end
 
@@ -252,6 +251,72 @@ defmodule PointQuest.Quests.QuestTest do
        %{
          quest_id: ^quest_id
        }} = Quests.Quest.handle(command, quest)
+    end
+  end
+
+  describe "quest objectives functionality" do
+    test "starting round moves next incomplete objective to current objective", %{
+      quest: %{id: quest_id},
+      party_leader_actor: actor
+    } do
+      %{quest_id: quest_id, quest_objective: "test1"}
+      |> Quests.Commands.AddSimpleObjective.new!()
+      |> Quests.Commands.AddSimpleObjective.execute(actor)
+
+      %{quest_id: quest_id, quest_objective: "test2"}
+      |> Quests.Commands.AddSimpleObjective.new!()
+      |> Quests.Commands.AddSimpleObjective.execute(actor)
+
+      # ensure we have 2 incomplete objectives
+      {:ok, %{objectives: objectives} = quest} = PointQuest.quest_repo().get_quest_by_id(quest_id)
+      assert length(Enum.filter(objectives, fn o -> o.status == :incomplete end)) == 2
+
+      command = Quests.Commands.StartRound.new!(%{quest_id: quest_id})
+
+      {:ok,
+       %{
+         quest_id: ^quest_id,
+         objectives: updated_objectives
+       }} = Quests.Quest.handle(command, quest)
+
+      updated_objectives = Enum.group_by(updated_objectives, fn o -> o.status end)
+
+      assert length(updated_objectives.current) == 1
+      assert updated_objectives.current |> List.first() |> Map.get(:title) == "test1"
+
+      assert length(updated_objectives.incomplete) == 1
+      assert updated_objectives.incomplete |> List.first() |> Map.get(:title) == "test2"
+    end
+
+    test "stopping round moves current objective to complete", %{
+      quest: %{id: quest_id},
+      party_leader_actor: actor
+    } do
+      %{quest_id: quest_id, quest_objective: "test1"}
+      |> Quests.Commands.AddSimpleObjective.new!()
+      |> Quests.Commands.AddSimpleObjective.execute(actor)
+
+      %{quest_id: quest_id}
+      |> Quests.Commands.StartRound.new!()
+      |> Quests.Commands.StartRound.execute(actor)
+
+      {:ok, %{objectives: objectives} = quest} = PointQuest.quest_repo().get_quest_by_id(quest_id)
+      assert length(Enum.filter(objectives, fn o -> o.status == :current end)) == 1
+
+      command =
+        %{quest_id: quest_id}
+        |> Quests.Commands.StopRound.new!()
+
+      {:ok,
+       %{
+         quest_id: ^quest_id,
+         objectives: updated_objectives
+       }} = Quests.Quest.handle(command, quest)
+
+      updated_objectives = Enum.group_by(updated_objectives, fn o -> o.status end)
+
+      assert length(updated_objectives.complete) == 1
+      assert updated_objectives.complete |> List.first() |> Map.get(:title) == "test1"
     end
   end
 end
