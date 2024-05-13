@@ -115,20 +115,20 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
-  def project(%Event.RoundStarted{quest_objective: objective}, %__MODULE__{} = quest) do
+  def project(%Event.RoundStarted{objectives: objectives}, %__MODULE__{} = quest) do
     %__MODULE__{
       quest
       | round_active?: true,
         attacks: [],
-        quest_objective: objective
+        objectives: objectives
     }
   end
 
-  def project(%Event.RoundEnded{}, %__MODULE__{} = quest) do
+  def project(%Event.RoundEnded{objectives: objectives}, %__MODULE__{} = quest) do
     %__MODULE__{
       quest
       | round_active?: false,
-        quest_objective: ""
+        objectives: objectives
     }
   end
 
@@ -187,41 +187,68 @@ defmodule PointQuest.Quests.Quest do
     {:ok, Event.AdventurerAttacked.new!(Ecto.embedded_dump(command, :json))}
   end
 
+  def handle(%Commands.StartRound{}, %{round_active?: true}), do: {:error, :round_already_active}
+
   def handle(%Commands.StartRound{} = command, quest) do
-    if quest.round_active? do
-      {:error, :round_already_active}
-    else
-      {:ok, Event.RoundStarted.new!(Ecto.embedded_dump(command, :json))}
-    end
+    objectives =
+      case Enum.find(quest.objectives, fn o -> o.status == :incomplete end) do
+        nil ->
+          Enum.map(quest.objectives, fn o -> Ecto.embedded_dump(o, :json) end)
+
+        first ->
+          Enum.map(quest.objectives, fn o ->
+            if o.id == first.id do
+              %{o | status: :current} |> Ecto.embedded_dump(:json)
+            else
+              Ecto.embedded_dump(o, :json)
+            end
+          end)
+      end
+
+    {:ok,
+     Event.RoundStarted.new!(%{
+       quest_id: command.quest_id,
+       objectives: objectives
+     })}
   end
 
+  def handle(%Commands.StopRound{} = _command, %{round_active?: false}),
+    do: {:error, :round_not_active}
+
   def handle(%Commands.StopRound{} = command, quest) do
-    if quest.round_active? do
-      {:ok, Event.RoundEnded.new!(Ecto.embedded_dump(command, :json))}
-    else
-      {:error, :round_not_active}
-    end
+    objectives =
+      case Enum.find(quest.objectives, fn o -> o.status == :current end) do
+        nil ->
+          Enum.map(quest.objectives, fn o -> Ecto.embedded_dump(o, :json) end)
+
+        current ->
+          Enum.map(quest.objectives, fn o ->
+            if o.id == current.id do
+              %{o | status: :complete} |> Ecto.embedded_dump(:json)
+            else
+              Ecto.embedded_dump(o, :json)
+            end
+          end)
+      end
+
+    {:ok, Event.RoundEnded.new!(%{quest_id: command.quest_id, objectives: objectives})}
   end
 
   def handle(%Commands.AddSimpleObjective{} = command, quest) do
-    if Enum.any?(quest.objectives, fn objective -> objective.title == command.quest_objective end) do
-      {:error, :objective_already_exists}
-    else
-      end_sort_value =
-        Enum.max_by(quest.objectives, fn o -> o.sort_order end, fn -> %{sort_order: 0} end).sort_order
+    end_sort_value =
+      Enum.max_by(quest.objectives, fn o -> o.sort_order end, fn -> %{sort_order: 0} end).sort_order
 
-      new_objective =
-        Questable.to_objective(command, %{sort_order: end_sort_value + 1})
-        |> Ecto.embedded_dump(:json)
+    new_objective =
+      Questable.to_objective(command, %{sort_order: end_sort_value + 1})
+      |> Ecto.embedded_dump(:json)
 
-      objectives =
-        [
-          new_objective | Enum.map(quest.objectives, fn o -> Ecto.embedded_dump(o, :json) end)
-        ]
-        |> Enum.sort_by(fn o -> o.sort_order end)
+    objectives =
+      [
+        new_objective | Enum.map(quest.objectives, fn o -> Ecto.embedded_dump(o, :json) end)
+      ]
+      |> Enum.sort_by(fn o -> o.sort_order end)
 
-      {:ok, Event.ObjectiveAdded.new!(%{quest_id: command.quest_id, objectives: objectives})}
-    end
+    {:ok, Event.ObjectiveAdded.new!(%{quest_id: command.quest_id, objectives: objectives})}
   end
 
   def handle(%Commands.SortObjective{} = command, quest) do

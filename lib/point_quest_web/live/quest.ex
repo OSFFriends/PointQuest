@@ -29,7 +29,7 @@ defmodule PointQuestWeb.QuestLive do
               id={objective.id}
               phx-click="select-objective"
               phx-value-objective_id={objective.title}
-              class="p-2 mb-2 bg-white rounded-lg"
+              class={["p-2 mb-2 rounded-lg", get_objective_background(objective)]}
             >
               <%= objective.title %>
             </div>
@@ -77,13 +77,9 @@ defmodule PointQuestWeb.QuestLive do
           <div class="flex justify-between">
             <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center"}>
               <.icon name="hero-arrow-top-right-on-square" />
-              <%= if @quest_objective != "" do %>
-                <a href={@quest_objective} target="_blank" class="text-indigo-500">
-                  <%= @quest_objective %>
-                </a>
-              <% else %>
-                N/A
-              <% end %>
+              <a href={@quest_objective} target="_blank" class="text-indigo-500">
+                <%= @quest_objective %>
+              </a>
             </div>
             <%= live_render(@socket, QuestAudioLive,
               id: "quest-audio-preferences",
@@ -154,7 +150,7 @@ defmodule PointQuestWeb.QuestLive do
           />
         </div>
         <div>
-          <.button type="submit" disabled={not @add_objective_form.source.valid?}>
+          <.button type="submit">
             Add Objective
           </.button>
         </div>
@@ -172,19 +168,6 @@ defmodule PointQuestWeb.QuestLive do
             <.icon name="hero-arrow-path" /> New round
           </.button>
         </div>
-        <.form
-          for={%{"quest_objective" => @quest_objective}}
-          phx-change="validate_link"
-          phx-submit="start_round"
-        >
-          <.input
-            name={:quest_objective}
-            value={@quest_objective}
-            type="text"
-            placeholder="Issue Link"
-            class="mt-0"
-          />
-        </.form>
       </div>
       <div id="meta-actions">
         <.button phx-click="copy_link" class="flex items-center justify-around gap-x-2">
@@ -266,6 +249,7 @@ defmodule PointQuestWeb.QuestLive do
             adventurers: adventurers,
             attacks: attacks,
             form: nil,
+            modal_active?: false,
             objectives: quest.objectives,
             quest: quest,
             quest_objective: quest.quest_objective,
@@ -306,17 +290,7 @@ defmodule PointQuestWeb.QuestLive do
   def handle_event("start_round", _params, socket) do
     %{actor: actor, quest: quest} = socket.assigns
 
-    params =
-      if String.length(socket.assigns.quest_objective) > 0 do
-        %{
-          quest_id: quest.id,
-          quest_objective: socket.assigns.quest_objective
-        }
-      else
-        %{quest_id: quest.id}
-      end
-
-    params
+    %{quest_id: quest.id}
     |> Commands.StartRound.new!()
     |> Commands.StartRound.execute(actor)
 
@@ -403,7 +377,14 @@ defmodule PointQuestWeb.QuestLive do
     })
     |> Commands.AddSimpleObjective.execute(socket.assigns.actor)
 
-    {:noreply, socket}
+    form =
+      Commands.AddSimpleObjective.changeset(
+        Map.delete(socket.assigns.add_objective_form.data, :quest_objective),
+        %{}
+      )
+      |> to_form()
+
+    {:noreply, assign(socket, add_objective_form: form, modal_active?: false)}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
@@ -424,22 +405,32 @@ defmodule PointQuestWeb.QuestLive do
     {:noreply, assign(socket, attacks: attacks)}
   end
 
-  def handle_info(%Event.RoundStarted{quest_objective: link}, socket) do
+  def handle_info(%Event.RoundStarted{objectives: objectives}, socket) do
+    link =
+      case Enum.find(objectives, fn o -> o.status == :current end) do
+        nil ->
+          "n/a"
+
+        objective ->
+          objective.title
+      end
+
     {
       :noreply,
       assign(socket,
         round_active?: true,
         reveal_attacks?: false,
         attacks: %{},
+        objectives: objectives,
         quest_objective: link
       )
     }
   end
 
-  def handle_info(%Event.RoundEnded{}, socket) do
+  def handle_info(%Event.RoundEnded{objectives: objectives}, socket) do
     {
       :noreply,
-      assign(socket, round_active?: false, reveal_attacks?: true, quest_objective: "")
+      assign(socket, round_active?: false, reveal_attacks?: true, objectives: objectives)
     }
   end
 
@@ -509,4 +500,7 @@ defmodule PointQuestWeb.QuestLive do
 
   defp show_attack_panel?(%PartyLeader{adventurer: nil}, _round_active?), do: false
   defp show_attack_panel?(_actor, round_active?), do: round_active?
+
+  defp get_objective_background(%{status: :incomplete}), do: ["bg-white"]
+  defp get_objective_background(%{status: :current}), do: ["bg-green-200"]
 end
