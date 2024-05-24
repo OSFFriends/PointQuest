@@ -322,13 +322,13 @@ defmodule PointQuestWeb.QuestLive do
     ending_index = length(objectives) - 1
     updated_objective = Enum.at(objectives, old_index)
 
-    sort_value =
+    sort_order =
       case new_index do
         0 ->
-          hd(objectives).sort_value - 0.001
+          hd(objectives).sort_order - 0.001
 
         ^ending_index ->
-          List.last(objectives).sort_value + 0.001
+          List.last(objectives).sort_order + 0.001
 
         index ->
           floor = Enum.at(objectives, index - 1)
@@ -339,7 +339,7 @@ defmodule PointQuestWeb.QuestLive do
     Commands.SortObjective.new!(%{
       quest_id: socket.assigns.quest.id,
       objective_id: updated_objective.id,
-      sort_value: sort_value
+      sort_order: sort_order
     })
     |> Commands.SortObjective.execute(socket.assigns.actor)
 

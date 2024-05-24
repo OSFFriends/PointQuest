@@ -30,7 +30,7 @@ defmodule PointQuest.Quests.Commands.SortObjectiveTest do
     %{id: objective_id} = moving_objective = List.last(objectives)
     sorted_objective = %{moving_objective | sort_order: first.sort_order - 0.01}
 
-    %{quest_id: quest_id, objective_id: objective_id, sort_value: first.sort_order - 0.01}
+    %{quest_id: quest_id, objective_id: objective_id, sort_order: first.sort_order - 0.01}
     |> SortObjective.new!()
     |> SortObjective.execute(actor)
 
@@ -60,7 +60,7 @@ defmodule PointQuest.Quests.Commands.SortObjectiveTest do
     last = List.last(objectives)
     sorted_objective = %{moving_objective | sort_order: last.sort_order + 0.01}
 
-    %{quest_id: quest_id, objective_id: objective_id, sort_value: last.sort_order + 0.01}
+    %{quest_id: quest_id, objective_id: objective_id, sort_order: last.sort_order + 0.01}
     |> SortObjective.new!()
     |> SortObjective.execute(actor)
 
@@ -103,7 +103,7 @@ defmodule PointQuest.Quests.Commands.SortObjectiveTest do
     %{
       quest_id: quest_id,
       objective_id: objective_id,
-      sort_value: (first.sort_order + middle.sort_order) / 2
+      sort_order: (first.sort_order + middle.sort_order) / 2
     }
     |> SortObjective.new!()
     |> SortObjective.execute(actor)
