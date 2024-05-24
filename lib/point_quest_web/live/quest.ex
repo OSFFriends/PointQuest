@@ -16,7 +16,7 @@ defmodule PointQuestWeb.QuestLive do
   def render(assigns) do
     ~H"""
     <div id="top-level-wrapper" class="w-full flex mb-5">
-      <div id="objectives" class="w-1/5 mr-5">
+      <div :if={is_party_leader?(@actor)} id="objectives" class="w-1/5 mr-5">
         <div class="pb-5 w-full">
           <div id="sortable-list" phx-hook="Sortable" class="shadow-sm">
             <div
