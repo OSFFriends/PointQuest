@@ -4,10 +4,12 @@ defmodule PointQuestWeb.QuestLive do
   """
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Authentication.Actor
   alias PointQuest.Authentication.Actor.PartyLeader
   alias PointQuest.Error
   alias PointQuest.Quests.Commands
   alias PointQuest.Quests.Event
+  alias PointQuestWeb.Events, as: WebEvents
   alias PointQuestWeb.Live.Components
   alias PointQuestWeb.QuestAudioLive
 
@@ -83,7 +85,7 @@ defmodule PointQuestWeb.QuestLive do
             </div>
             <%= live_render(@socket, QuestAudioLive,
               id: "quest-audio-preferences",
-              session: %{"quest_id" => @quest.id}
+              session: %{"quest_id" => @quest.id, "actor_id" => Actor.get_actor_id(@actor)}
             ) %>
           </div>
           <div class="flex gap-4 justify-center">
@@ -109,6 +111,11 @@ defmodule PointQuestWeb.QuestLive do
                 Enum.find(@users, fn {_id, u} -> u.name == name and u.connected? end)
               } />
               <p class="text-bold"><%= name %></p>
+              <.render_adventurer_interaction_icons
+                :if={is_party_leader?(@actor)}
+                adventurer={id}
+                name={name}
+              />
             </div>
           </div>
           <.live_component
@@ -217,6 +224,21 @@ defmodule PointQuestWeb.QuestLive do
       <% else %>
         <div class="rounded-l-lg bg-red-400 w-1/4 h-full"></div>
       <% end %>
+    </div>
+    """
+  end
+
+  def render_adventurer_interaction_icons(assigns) do
+    ~H"""
+    <div class="flex items-start">
+      <a
+        phx-click="alert-adventurer"
+        phx-value-adventurer-id={@adventurer}
+        phx-value-adventurer-name={@name}
+        class="items-center"
+      >
+        <.icon name="hero-signal" />
+      </a>
     </div>
     """
   end
@@ -387,6 +409,18 @@ defmodule PointQuestWeb.QuestLive do
     {:noreply, assign(socket, add_objective_form: form, modal_active?: false)}
   end
 
+  def handle_event(
+        "alert-adventurer",
+        %{"adventurer-id" => id, "adventurer-name" => name},
+        socket
+      ) do
+    event = WebEvents.AdventurerAlerted.new!(%{adventurer_id: id})
+
+    Phoenix.PubSub.broadcast(PointQuestWeb.PubSub, socket.assigns.quest.id, event)
+
+    {:noreply, put_flash(socket, :info, "#{name} notified")}
+  end
+
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do
     {
       :noreply,
@@ -440,6 +474,11 @@ defmodule PointQuestWeb.QuestLive do
 
   def handle_info(%Event.ObjectiveSorted{objectives: objectives}, socket) do
     {:noreply, assign(socket, objectives: objectives)}
+  end
+
+  # catch it
+  def handle_info(_event, socket) do
+    {:noreply, socket}
   end
 
   def handle_joins(socket, joins) do
