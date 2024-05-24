@@ -12,14 +12,14 @@ defmodule PointQuest.Quests.Commands.SortObjective do
   @type t :: %__MODULE__{
           quest_id: String.t(),
           objective_id: String.t(),
-          sort_value: float()
+          sort_order: float()
         }
 
   @primary_key false
   embedded_schema do
     field :quest_id, :string
     field :objective_id, :string
-    field :sort_value, :float
+    field :sort_order, :float
   end
 
   @spec execute(t(), PointQuest.Authentication.Actor.t()) ::

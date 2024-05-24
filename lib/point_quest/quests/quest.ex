@@ -256,7 +256,7 @@ defmodule PointQuest.Quests.Quest do
       quest.objectives
       |> Enum.reduce([], fn o, acc ->
         if o.id == command.objective_id do
-          [%{o | sort_order: command.sort_value} | acc]
+          [%{o | sort_order: command.sort_order} | acc]
         else
           [o | acc]
         end
