@@ -4,6 +4,7 @@ defmodule PointQuestWeb.QuestAudioLive do
   """
   use PointQuestWeb, :live_view
   alias PointQuest.Quests.Event
+  alias PointQuestWeb.Events, as: WebEvents
 
   def render(assigns) do
     ~H"""
@@ -14,7 +15,7 @@ defmodule PointQuestWeb.QuestAudioLive do
   def mount(_params, session, socket) do
     Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, session["quest_id"])
 
-    {:ok, socket}
+    {:ok, assign(socket, actor_id: session["actor_id"])}
   end
 
   def handle_info(%Event.AdventurerAttacked{}, socket) do
@@ -35,6 +36,13 @@ defmodule PointQuestWeb.QuestAudioLive do
       _not_a_win ->
         {:noreply, socket}
     end
+  end
+
+  def handle_info(
+        %WebEvents.AdventurerAlerted{adventurer_id: adventurer_id},
+        %{assigns: %{actor_id: adventurer_id}} = socket
+      ) do
+    {:noreply, push_event(socket, "play-sound", %{event: "alert"})}
   end
 
   def handle_info(_event, socket) do
