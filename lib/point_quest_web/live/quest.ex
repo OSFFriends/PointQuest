@@ -209,11 +209,21 @@ defmodule PointQuestWeb.QuestLive do
     <div class={[
       "#{if @attack, do: "visible", else: "invisible"} relative flex justify-center items-center",
       "w-16 h-28 mb-8 bg-stone-300 border-2 border-stone-200 rounded-lg",
+      "#{get_random_rotation()}",
       "after:absolute after:w-[104%] after:h-[102%] after:top-[5px] after:left-0 after:bg-stone-400 after:-z-10 after:rounded-lg after:shadow-sm"
     ]}>
       <span :if={@reveal_attacks?} class="text-2xl text-stone-700"><%= @attack %></span>
     </div>
     """
+  end
+
+  def get_random_rotation() do
+    [
+      "-rotate-6",
+      "rotate-0",
+      "rotate-6"
+    ]
+    |> Enum.random()
   end
 
   def render_health_bar(assigns) do
