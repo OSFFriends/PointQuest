@@ -7,6 +7,7 @@ defmodule Infra.Quests.InMemory.Db do
   alias Infra.Quests.InMemory
   alias PointQuest.Error
   alias PointQuest.Quests.Event
+  alias PointQuest.Quests.Quest
 
   defstruct []
 
@@ -34,8 +35,13 @@ defmodule Infra.Quests.InMemory.Db do
       nil ->
         {:error, Error.NotFound.exception(resource: :quest)}
 
-      _pid ->
-        {:ok, Projectionist.Store.get(InMemory.QuestStore, quest_id)}
+      pid ->
+        quest =
+          pid
+          |> InMemory.QuestServer.get_events()
+          |> Enum.reduce(InMemory.QuestServer.get_snapshot(pid), &Quest.project/2)
+
+        {:ok, quest}
     end
   end
 

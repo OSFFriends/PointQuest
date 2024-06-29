@@ -12,7 +12,7 @@ defmodule Infra.Quests.InMemory.QuestServer do
   @type opts :: [opt(), ...]
 
   def start_link(opts) do
-    {:ok, init_quest} = PointQuest.Quests.Quest.init()
+    init_quest = PointQuest.Quests.Quest.init()
 
     opts =
       opts
