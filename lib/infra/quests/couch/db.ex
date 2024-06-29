@@ -2,6 +2,7 @@ defmodule Infra.Quests.Couch.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
   alias PointQuest.Error
+  alias PointQuest.Quests.Quest
   alias PointQuest.Quests.Event
 
   alias Infra.Couch
@@ -29,7 +30,13 @@ defmodule Infra.Quests.Couch.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
-    case Projectionist.Store.get(Infra.Quests.Couch.Store, quest_id) do
+    # TODO: Add snapshots
+    init_quest = Quest.init()
+
+    "/events/_partition/quest-#{quest_id}/_all_docs"
+    |> Couch.Client.paginate_view(%{})
+    |> Enum.reduce(init_quest, &Quest.project/2)
+    |> case do
       %{id: nil} ->
         {:error, Error.NotFound.exception(reource: :quest)}
 

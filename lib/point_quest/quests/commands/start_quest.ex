@@ -95,7 +95,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   ```
   """
   def execute(%__MODULE__{} = start_quest_command) do
-    {:ok, quest} = Quests.Quest.init()
+    quest = Quests.Quest.init()
 
     Telemetrex.span event: Quests.Telemetry.quest_started(),
                     context: %{command: start_quest_command} do

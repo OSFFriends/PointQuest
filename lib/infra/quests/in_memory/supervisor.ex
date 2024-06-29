@@ -15,9 +15,7 @@ defmodule Infra.Quests.InMemory.Supervisor do
       {Horde.Registry, keys: :unique, name: InMemory.Registry, members: :auto},
       # Manage Game Servers across the cluster
       {Horde.DynamicSupervisor,
-       name: InMemory.QuestSupervisor, strategy: :one_for_one, members: :auto},
-      # Projections across in memory quest servers
-      InMemory.QuestStore
+       name: InMemory.QuestSupervisor, strategy: :one_for_one, members: :auto}
     ]
     |> Supervisor.init(strategy: :one_for_one)
   end

@@ -3,8 +3,6 @@ defmodule PointQuest.Quests.Quest do
   Object for holding the current voting context
   """
 
-  @behaviour Projectionist.Projection
-
   use Ecto.Schema
 
   alias PointQuest.Quests
@@ -26,14 +24,13 @@ defmodule PointQuest.Quests.Quest do
   end
 
   def init() do
-    {:ok,
-     %__MODULE__{
-       id: nil,
-       party: nil,
-       attacks: [],
-       round_active?: false,
-       quest_objective: ""
-     }}
+    %__MODULE__{
+      id: nil,
+      party: nil,
+      attacks: [],
+      round_active?: false,
+      quest_objective: ""
+    }
   end
 
   def project(%Event.QuestStarted{party_leaders_adventurer: nil} = event, quest) do

@@ -6,7 +6,7 @@ defmodule Infra.Quests.InMemory.QuestServerTest do
 
   describe "automatic cleanup of old sessions" do
     setup do
-      {:ok, quest} = Quests.Quest.init()
+      quest = Quests.Quest.init()
 
       quest =
         Quests.Quest.project(
@@ -53,7 +53,7 @@ defmodule Infra.Quests.InMemory.QuestServerTest do
 
   describe "projection snappshotting" do
     test "snapshot is taken after `max_events` number of events have been received" do
-      {:ok, initial_quest} = Quests.Quest.init()
+      initial_quest = Quests.Quest.init()
       quest_id = Nanoid.generate_non_secure()
       {:ok, quest_server} = QuestServer.start_link(quest_id: quest_id, max_events: 2)
 

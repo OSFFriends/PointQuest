@@ -16,7 +16,7 @@ defmodule Infra.Quests.SimpleInMemory.EventServer do
 
   def get_quest(event_store) do
     Agent.get(event_store, fn events ->
-      {:ok, quest} = Quest.init()
+      quest = Quest.init()
 
       events
       |> Enum.reverse()

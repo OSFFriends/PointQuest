@@ -13,11 +13,10 @@ defmodule PointQuest.Quests.QuestTest do
 
   describe "init/0" do
     test "returns expected initial state in tuple" do
-      assert {:ok,
-              %Quests.Quest{
-                attacks: [],
-                quest_objective: ""
-              }} = Quests.Quest.init()
+      assert %Quests.Quest{
+               attacks: [],
+               quest_objective: ""
+             } = Quests.Quest.init()
     end
   end
 
@@ -159,7 +158,7 @@ defmodule PointQuest.Quests.QuestTest do
   describe "handle/2" do
     test "StartQuest command with no party leader adventurer returns QuestStarted event" do
       command = Quests.Commands.StartQuest.new!(%{})
-      {:ok, init} = Quests.Quest.init()
+      init = Quests.Quest.init()
 
       assert {:ok, %Quests.Event.QuestStarted{}} = Quests.Quest.handle(command, init)
     end
@@ -170,7 +169,7 @@ defmodule PointQuest.Quests.QuestTest do
           party_leaders_adventurer: %{name: "Scott Stapp", class: :mage}
         })
 
-      {:ok, init} = Quests.Quest.init()
+      init = Quests.Quest.init()
 
       assert {:ok,
               %Quests.Event.QuestStarted{
