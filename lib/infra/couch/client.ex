@@ -7,6 +7,8 @@ defmodule Infra.Couch.Client do
           start_key: String.t() | nil
         }
 
+  def last_string_char(), do: "\ufff0"
+
   def put(url, doc, opts \\ []) do
     client()
     |> Tesla.put(url, doc, opts)
@@ -65,7 +67,7 @@ defmodule Infra.Couch.Client do
   def paginate_view(view_name, page_opts, _opts \\ []) do
     page_opts =
       page_opts
-      |> Map.put_new(:end_key, "\ufff0")
+      |> Map.put_new(:end_key, last_string_char())
       |> Map.put_new(:limit, 100)
       |> Map.put_new(:start_key, "")
       |> Map.put(:inclusive_end, true)
@@ -79,7 +81,7 @@ defmodule Infra.Couch.Client do
           {:ok, %{"rows" => [_has_row | _rest] = rows}} ->
             page_opts =
               page_opts
-              |> Map.put(:start_key, List.last(rows)["id"] <> "\ufff0")
+              |> Map.put(:start_key, List.last(rows)["id"] <> last_string_char())
 
             rows = Enum.map(rows, &Couch.Document.from_doc(&1["doc"]))
 

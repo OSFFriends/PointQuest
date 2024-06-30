@@ -30,19 +30,50 @@ defmodule Infra.Quests.Couch.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
-    # TODO: Add snapshots
-    init_quest = Quest.init()
+    with {:ok, %{"rows" => [snapshot]}} <-
+           Couch.Client.get("/quest-snapshots/_partition/quest-#{quest_id}/_all_docs",
+             query: [limit: 1, sorted: true, descending: true]
+           ) do
+      quest_snapshot = Couch.Document.from_doc(snapshot["doc"])
 
-    "/events/_partition/quest-#{quest_id}/_all_docs"
-    |> Couch.Client.paginate_view(%{})
-    |> Enum.reduce(init_quest, &Quest.project/2)
-    |> case do
-      %{id: nil} ->
-        {:error, Error.NotFound.exception(reource: :quest)}
+      "/events/_partition/quest-#{quest_id}/_all_docs"
+      |> Couch.Client.paginate_view(%{
+        starting_key: snapshot["id"] <> Couch.Client.last_string_char()
+      })
+      |> Enum.reduce(quest_snapshot, &Quest.project/2)
+      |> case do
+        %{id: nil} ->
+          {:error, Error.NotFound.exception(reource: :quest)}
 
-      quest ->
-        {:ok, quest}
+        quest ->
+          {:ok, quest}
+      end
+    else
+      {:ok, %{"rows" => []}} ->
+        init_quest = Quest.init()
+
+        "/events/_partition/quest-#{quest_id}/_all_docs"
+        |> Couch.Client.paginate_view(%{})
+        |> Enum.reduce(init_quest, &Quest.project/2)
+        |> case do
+          %{id: nil} ->
+            {:error, Error.NotFound.exception(reource: :quest)}
+
+          quest ->
+            {:ok, quest}
+        end
     end
+
+    # "/events/_partition/quest-#{quest_id}/_all_docs"
+    # |> Couch.Client.paginate_view(%{})
+    # |> Enum.reduce(init_quest, &Quest.project/2)
+    # |> case do
+    #   %{id: nil} ->
+    #     {:error, Error.NotFound.exception(reource: :quest)}
+    #
+    #   quest ->
+    #     {:ok, quest}
+    # end
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
