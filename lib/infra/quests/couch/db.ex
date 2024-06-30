@@ -32,15 +32,16 @@ defmodule Infra.Quests.Couch.Db do
   def get_quest_by_id(quest_id) do
     with {:ok, %{"rows" => [snapshot]}} <-
            Couch.Client.get("/quest-snapshots/_partition/quest-#{quest_id}/_all_docs",
-             query: [limit: 1, sorted: true, descending: true]
+             query: [limit: 1, sorted: true, descending: true, include_docs: true]
            ) do
       quest_snapshot = Couch.Document.from_doc(snapshot["doc"])
 
       "/events/_partition/quest-#{quest_id}/_all_docs"
       |> Couch.Client.paginate_view(%{
-        starting_key: snapshot["id"] <> Couch.Client.last_string_char()
+        start_key: snapshot["id"] <> Couch.Client.last_string_char()
       })
-      |> Enum.reduce(quest_snapshot, &Quest.project/2)
+      |> Stream.map(&IO.inspect/1)
+      |> Enum.reduce(Map.put(quest_snapshot, :id, quest_id), &Quest.project/2)
       |> case do
         %{id: nil} ->
           {:error, Error.NotFound.exception(reource: :quest)}

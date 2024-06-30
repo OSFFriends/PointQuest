@@ -3,6 +3,7 @@ defmodule Infra.Couch.Document do
   Utilities for working with CouchDB documents.
   """
   alias PointQuest.Quests.Event
+  alias PointQuest.Quests.Quest
 
   @doc """
   Merges id and rev from `doc` into `struct`.
@@ -51,6 +52,7 @@ defmodule Infra.Couch.Document do
   defp document_type_for(%Event.ObjectiveSorted{}), do: "objective_sorted"
   defp document_type_for(%Event.RoundStarted{}), do: "round_started"
   defp document_type_for(%Event.RoundEnded{}), do: "round_ended"
+  defp document_type_for(%Quest{}), do: "quest_snapshot"
 
   defp type_from_document("quest_started"), do: Event.QuestStarted
   defp type_from_document("adventurer_joined_party"), do: Event.AdventurerJoinedParty
@@ -59,4 +61,5 @@ defmodule Infra.Couch.Document do
   defp type_from_document("objective_sorted"), do: Event.ObjectiveSorted
   defp type_from_document("round_started"), do: Event.RoundStarted
   defp type_from_document("round_ended"), do: Event.RoundEnded
+  defp type_from_document("quest_snapshot"), do: Quest
 end
