@@ -12,6 +12,7 @@ defmodule PointQuest.Quests.Telemetry do
   defevent(:add_objective, @prefix ++ [:add_objective])
   defevent(:objective_sorted, @prefix ++ [:objective_sorted])
   defevent(:quest_started, @prefix ++ [:quest_started])
+  defevent(:remove_adventurer, @prefix ++ [:remove_adventurer])
   defevent(:round_started, @prefix ++ [:round_started])
   defevent(:round_ended, @prefix ++ [:round_ended])
 end

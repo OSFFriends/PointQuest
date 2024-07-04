@@ -19,27 +19,32 @@ defmodule PointQuest.Quests.Spec do
   @doc """
   Ensure the provided attacker id is the actor
   """
-  def is_attacker?(_attacker, %Actor.PartyLeader{adventurer: nil}), do: false
+  def is_attacker?(attacker, actor), do: actor_is_target?(attacker, actor)
 
-  def is_attacker?(%Adventurer{id: attacker_id}, %Actor.PartyLeader{
-        adventurer: %{id: attacker_id}
+  @doc """
+  Ensure that the actor is targetting themselves as an adventurer
+  """
+  def actor_is_target?(_target, %Actor.PartyLeader{adventurer: nil}), do: false
+
+  def actor_is_target?(%Adventurer{id: target_id}, %Actor.PartyLeader{
+        adventurer: %{id: target_id}
       }),
       do: true
 
-  def is_attacker?(%Adventurer{id: _attacker_id}, %Actor.PartyLeader{
+  def actor_is_target?(%Adventurer{id: _target_id}, %Actor.PartyLeader{
         adventurer: %{id: _other_adventurer}
       }),
       do: false
 
-  def is_attacker?(%Adventurer{id: attacker_id}, %Actor.Adventurer{adventurer: %{id: attacker_id}}),
+  def actor_is_target?(%Adventurer{id: target_id}, %Actor.Adventurer{adventurer: %{id: target_id}}),
       do: true
 
-  def is_attacker?(%Adventurer{id: _attacker_id}, %Actor.Adventurer{
+  def actor_is_target?(%Adventurer{id: _target_id}, %Actor.Adventurer{
         adventurer: %{id: _other_adventurer}
       }),
       do: false
 
-  def is_attacker?(nil, _actor), do: false
+  def actor_is_target?(nil, _actor), do: false
 
   @spec is_in_party?(quest :: Quest.t(), actor :: Actor.t()) :: boolean
   @doc """

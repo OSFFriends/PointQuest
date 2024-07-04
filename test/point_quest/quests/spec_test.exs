@@ -33,6 +33,32 @@ defmodule PointQuest.Quests.SpecTest do
     end
   end
 
+  describe "actor_is_target?/2" do
+    test "policy check succeeds if actor is the target adventurer", %{
+      adventurer_actor: adventurer,
+      other_actor: party_leader
+    } do
+      assert Spec.actor_is_target?(adventurer.adventurer, adventurer)
+      assert Spec.actor_is_target?(party_leader.adventurer, party_leader)
+    end
+
+    test "policy check fails if actor is not target", %{
+      adventurer: adventurer,
+      other_actor: other_actor
+    } do
+      refute Spec.actor_is_target?(adventurer, other_actor)
+    end
+
+    test "policy check fails if party leader with no adventurer attempts to target other adventurer",
+         %{party_leader_actor: actor, adventurer: adventurer} do
+      refute Spec.actor_is_target?(adventurer, actor)
+    end
+
+    test "policy check fails if nil target is provided", %{party_leader_actor: actor} do
+      refute Spec.actor_is_target?(nil, actor)
+    end
+  end
+
   describe "is_in_party?/2" do
     test "policy check succeeds if adventurer is in party", %{
       quest: quest,
