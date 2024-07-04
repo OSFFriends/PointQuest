@@ -100,6 +100,18 @@ defmodule PointQuest.Quests.Quest do
     }
   end
 
+  def project(%Event.AdventurerRemovedFromParty{} = event, quest) do
+    adventurers = Enum.reject(quest.party.adventurers, fn a -> a.id == event.adventurer_id end)
+
+    %__MODULE__{
+      quest
+      | party: %PointQuest.Quests.Party{
+          quest.party
+          | adventurers: adventurers
+        }
+    }
+  end
+
   def project(%Event.AdventurerAttacked{} = command, %__MODULE__{attacks: attacks} = quest) do
     # adventurer could be updating their previous attack
     updated_attacks =
@@ -178,6 +190,10 @@ defmodule PointQuest.Quests.Quest do
     else
       {:ok, Event.AdventurerJoinedParty.new!(Ecto.embedded_dump(command, :json))}
     end
+  end
+
+  def handle(%Commands.RemoveAdventurer{} = command, _quest) do
+    {:ok, Event.AdventurerRemovedFromParty.new!(Ecto.embedded_dump(command, :json))}
   end
 
   def handle(%Commands.Attack{} = command, _quest) do
