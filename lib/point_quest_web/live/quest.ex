@@ -439,6 +439,30 @@ defmodule PointQuestWeb.QuestLive do
     {:noreply, assign(socket, attacks: attacks)}
   end
 
+  # remove from quest if you were just booted
+  def handle_info(
+        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id},
+        %{assigns: %{actor: %Actor.Adventurer{adventurer: %{id: adventurer_id}}}} = socket
+      ) do
+    socket = put_flash(socket, :info, "your bitch ass was removed")
+
+    {:noreply, push_navigate(socket, to: "/quest")}
+  end
+
+  def handle_info(
+        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id},
+        %{assigns: %{actor: _not_removed_adventurer}} = socket
+      ) do
+    adventurers = Enum.reject(socket.assigns.adventurers, fn %{id: id} -> id == adventurer_id end)
+
+    socket =
+      socket
+      |> assign(adventurers: adventurers)
+      |> handle_kick(adventurer_id)
+
+    {:noreply, socket}
+  end
+
   def handle_info(%Event.RoundStarted{objectives: objectives}, socket) do
     link =
       case Enum.find(objectives, fn o -> o.status == :current end) do
@@ -502,6 +526,12 @@ defmodule PointQuestWeb.QuestLive do
         end)
       )
     end)
+  end
+
+  defp handle_kick(socket, adventurer_id) do
+    users = Map.delete(socket.assigns.users, adventurer_id)
+
+    assign(socket, users: users)
   end
 
   defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
