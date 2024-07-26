@@ -230,7 +230,7 @@ defmodule PointQuestWeb.QuestLive do
 
   def render_adventurer_interaction_icons(assigns) do
     ~H"""
-    <div class="flex items-start">
+    <div class="flex items-start visible-on-parent-hover">
       <a
         phx-click="alert-adventurer"
         phx-value-adventurer-id={@adventurer}
@@ -238,6 +238,9 @@ defmodule PointQuestWeb.QuestLive do
         class="items-center"
       >
         <.icon name="hero-signal" />
+      </a>
+      <a phx-click="kick-adventurer" phx-value-adventurer-id={@adventurer} class="items-center">
+        <.icon name="hero-x-circle" class="text-red-500" />
       </a>
     </div>
     """
@@ -419,6 +422,13 @@ defmodule PointQuestWeb.QuestLive do
     Phoenix.PubSub.broadcast(PointQuestWeb.PubSub, socket.assigns.quest.id, event)
 
     {:noreply, put_flash(socket, :info, "#{name} notified")}
+  end
+
+  def handle_event("kick-adventurer", %{"adventurer-id" => id}, socket) do
+    Commands.RemoveAdventurer.new!(%{adventurer_id: id, quest_id: socket.assigns.quest.id})
+    |> Commands.RemoveAdventurer.execute(socket.assigns.actor)
+
+    {:noreply, socket}
   end
 
   def handle_info(%Phoenix.Socket.Broadcast{event: "presence_diff", payload: diff}, socket) do

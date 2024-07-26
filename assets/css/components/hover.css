@@ -1,0 +1,7 @@
+*:has(>.visible-on-parent-hover):not(:hover)>.visible-on-parent-hover {
+  opacity: 0;
+}
+
+*:has(>*>.visible-on-grandparent-hover):not(:hover)>*>.visible-on-grandparent-hover {
+  opacity: 0;
+}
