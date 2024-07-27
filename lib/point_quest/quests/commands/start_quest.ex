@@ -66,7 +66,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
     end
   end
 
-  @spec execute(t()) :: PointQuest.Quests.Quest.t()
+  @spec execute(t(), keyword()) :: PointQuest.Quests.Quest.t()
   @doc """
   Executes the command to start the quest.
 
@@ -94,13 +94,14 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   }}
   ```
   """
-  def execute(%__MODULE__{} = start_quest_command) do
+  def execute(%__MODULE__{} = start_quest_command, opts \\ []) do
+    repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
     quest = Quests.Quest.init()
 
     Telemetrex.span event: Quests.Telemetry.quest_started(),
                     context: %{command: start_quest_command} do
       with {:ok, event} <- Quests.Quest.handle(start_quest_command, quest) do
-        PointQuest.quest_repo().write(quest, event)
+        repo.write(quest, event)
       end
     after
       {:ok, event} -> %{event: event}

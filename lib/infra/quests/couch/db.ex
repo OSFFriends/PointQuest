@@ -6,6 +6,7 @@ defmodule Infra.Quests.Couch.Db do
   alias PointQuest.Quests.Event
 
   alias Infra.Couch
+  alias Infra.Quests.Couch, as: QuestCouch
 
   @impl PointQuest.Behaviour.Quests.Repo
   def write(_init_quest, %Event.QuestStarted{} = event) do
@@ -30,17 +31,29 @@ defmodule Infra.Quests.Couch.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
-    # TODO: Add snapshots
     init_quest = Quest.init()
 
-    "/events-v2/_partition/quest-#{quest_id}/_all_docs"
-    |> Couch.Client.paginate_view(%{})
-    |> Enum.reduce(init_quest, &Quest.project/2)
-    |> case do
-      %{id: nil} ->
-        {:error, Error.NotFound.exception(reource: :quest)}
+    case QuestCouch.QuestSnapshots.get_snapshot(quest_id) do
+      nil ->
+        "/events-v2/_partition/quest-#{quest_id}/_all_docs"
+        |> Couch.Client.paginate_view(%{})
+        |> Enum.reduce(init_quest, &Quest.project/2)
+        |> case do
+          %{id: nil} ->
+            {:error, Error.NotFound.exception(reource: :quest)}
 
-      quest ->
+          quest ->
+            {:ok, quest}
+        end
+
+      %{snapshot: snapshot, version: version} ->
+        quest =
+          "events-v2/_partition/quest-#{quest_id}/_all_docs"
+          |> Couch.Client.paginate_view(%{
+            start_key: version <> "\ufff0"
+          })
+          |> Enum.reduce(snapshot, &Quest.project/2)
+
         {:ok, quest}
     end
   end
