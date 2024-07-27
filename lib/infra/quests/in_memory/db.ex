@@ -19,14 +19,12 @@ defmodule Infra.Quests.InMemory.Db do
         {InMemory.QuestServer, quest_id: event.quest_id}
       )
 
-    _event = InMemory.QuestServer.add_event(pid, event)
-
-    :ok
+    {:ok, InMemory.QuestServer.add_event(pid, event)}
   end
 
   def write(quest, event) do
-    InMemory.QuestServer.add_event({:via, Horde.Registry, {InMemory.Registry, quest.id}}, event)
-    :ok
+    {:ok,
+     InMemory.QuestServer.add_event({:via, Horde.Registry, {InMemory.Registry, quest.id}}, event)}
   end
 
   @impl PointQuest.Behaviour.Quests.Repo

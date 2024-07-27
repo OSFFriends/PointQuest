@@ -35,9 +35,8 @@ defmodule PointQuest.Quests.Commands.Attack do
                })
              ),
            true <- can_attack?(adventurer, quest, actor),
-           {:ok, event} <- Quests.Quest.handle(attack_command, quest),
-           :ok <- PointQuest.quest_repo().write(quest, event) do
-        {:ok, event}
+           {:ok, event} <- Quests.Quest.handle(attack_command, quest) do
+        PointQuest.quest_repo().write(quest, event)
       else
         false ->
           {:error, "attack disallowed"}

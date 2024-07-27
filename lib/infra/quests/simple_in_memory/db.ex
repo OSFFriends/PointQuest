@@ -13,19 +13,17 @@ defmodule Infra.Quests.SimpleInMemory.Db do
         {SimpleInMemory.EventServer, quest_id: event.quest_id}
       )
 
-    _event = SimpleInMemory.EventServer.add_event(pid, event)
-    :ok
+    {:ok, SimpleInMemory.EventServer.add_event(pid, event)}
   end
 
   def write(quest, event) do
     event_store = {:via, Registry, {SimpleInMemory.Registry, quest.id}}
 
-    SimpleInMemory.EventServer.add_event(
-      event_store,
-      event
-    )
-
-    :ok
+    {:ok,
+     SimpleInMemory.EventServer.add_event(
+       event_store,
+       event
+     )}
   end
 
   @impl PointQuest.Behaviour.Quests.Repo

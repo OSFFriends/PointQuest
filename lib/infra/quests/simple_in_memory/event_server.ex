@@ -9,9 +9,13 @@ defmodule Infra.Quests.SimpleInMemory.EventServer do
   end
 
   def add_event(event_store, event) do
+    event = Map.put(event, :id, Nanoid.generate())
+
     Agent.update(event_store, fn events ->
       [event | events]
     end)
+
+    event
   end
 
   def get_quest(event_store) do

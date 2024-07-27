@@ -52,6 +52,7 @@ defmodule Infra.Quests.InMemory.QuestServer do
 
   def handle_call({:add_event, event}, _from, state) do
     :erlang.cancel_timer(state.timeout_ref)
+    event = Map.put(event, :id, Nanoid.generate())
     # new event gets added at the tail after possibly taking a new snapshot
     # doing this to optimize readers over writers (read doesn't need to enum reverse)
     state =

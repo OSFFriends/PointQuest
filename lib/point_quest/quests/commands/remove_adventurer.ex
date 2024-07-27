@@ -48,10 +48,8 @@ defmodule PointQuest.Quests.Commands.RemoveAdventurer do
                remove_adventurer_command.adventurer_id
              ),
            true <- can_remove_adventurer?(adventurer, quest, actor),
-           {:ok, event} <- Quests.Quest.handle(remove_adventurer_command, quest),
-           :ok <-
-             PointQuest.quest_repo().write(quest, event) do
-        {:ok, event}
+           {:ok, event} <- Quests.Quest.handle(remove_adventurer_command, quest) do
+        PointQuest.quest_repo().write(quest, event)
       else
         false ->
           {:error, "not authorized to remove adventurer"}

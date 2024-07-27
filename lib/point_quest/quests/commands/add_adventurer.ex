@@ -110,13 +110,11 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     Telemetrex.span event: Quests.Telemetry.add_adventurer(),
                     context: %{command: add_adventurer_command} do
       with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
-           {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest),
-           :ok <-
-             PointQuest.quest_repo().write(
-               quest,
-               event
-             ) do
-        {:ok, event}
+           {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest) do
+        PointQuest.quest_repo().write(
+          quest,
+          event
+        )
       end
     after
       {:ok, event} -> %{event: event}

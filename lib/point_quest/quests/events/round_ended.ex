@@ -6,7 +6,6 @@ defmodule PointQuest.Quests.Event.RoundEnded do
 
   alias PointQuest.Quests.Objectives.Objective
 
-  @primary_key false
   embedded_schema do
     field :quest_id, :string
     embeds_many :objectives, Objective

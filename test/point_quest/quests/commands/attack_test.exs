@@ -88,18 +88,22 @@ defmodule PointQuest.Quests.Commands.AttackTest do
     } do
       Phoenix.PubSub.subscribe(PointQuestWeb.PubSub, quest_id)
 
-      attacked_event = %PointQuest.Quests.Event.AdventurerAttacked{
-        quest_id: quest_id,
-        adventurer_id: adventurer_id,
-        attack: 3
-      }
-
-      assert {:ok, ^attacked_event} =
+      assert {:ok,
+              %PointQuest.Quests.Event.AdventurerAttacked{
+                quest_id: ^quest_id,
+                adventurer_id: ^adventurer_id,
+                attack: 3
+              }} =
                %{quest_id: quest_id, adventurer_id: adventurer_id, attack: 3}
                |> Attack.new!()
                |> Attack.execute(adventurer_actor)
 
-      assert_receive ^attacked_event, 500
+      assert_receive %PointQuest.Quests.Event.AdventurerAttacked{
+                       quest_id: ^quest_id,
+                       adventurer_id: ^adventurer_id,
+                       attack: 3
+                     },
+                     500
     end
 
     test "succeeds if party leader is adventurer attacking", %{other_actor: actor} do
