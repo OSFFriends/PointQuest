@@ -9,23 +9,23 @@ defmodule Infra.Quests.Couch.Db do
 
   @impl PointQuest.Behaviour.Quests.Repo
   def write(_init_quest, %Event.QuestStarted{} = event) do
-    {:ok, _doc} =
-      Couch.Client.put(
-        "/events/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
-        Couch.Document.to_doc(event)
-      )
-
-    :ok
+    with {:ok, doc} <-
+           Couch.Client.put(
+             "/events-v2/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
+             Couch.Document.to_doc(event)
+           ) do
+      {:ok, Map.put(event, :id, doc["id"])}
+    end
   end
 
   def write(quest, event) do
-    {:ok, _doc} =
-      Couch.Client.put(
-        "/events/quest-#{quest.id}:#{ExULID.ULID.generate()}",
-        Couch.Document.to_doc(event)
-      )
-
-    :ok
+    with {:ok, doc} <-
+           Couch.Client.put(
+             "/events-v2/quest-#{quest.id}:#{ExULID.ULID.generate()}",
+             Couch.Document.to_doc(event)
+           ) do
+      {:ok, Map.put(event, :id, doc["id"])}
+    end
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
@@ -33,7 +33,7 @@ defmodule Infra.Quests.Couch.Db do
     # TODO: Add snapshots
     init_quest = Quest.init()
 
-    "/events/_partition/quest-#{quest_id}/_all_docs"
+    "/events-v2/_partition/quest-#{quest_id}/_all_docs"
     |> Couch.Client.paginate_view(%{})
     |> Enum.reduce(init_quest, &Quest.project/2)
     |> case do

@@ -4,7 +4,6 @@ defmodule PointQuest.Quests.Event.AdventurerAttacked do
 
   alias PointQuest.Quests.AttackValue
 
-  @primary_key false
   embedded_schema do
     field :quest_id, :string
     field :adventurer_id, :string

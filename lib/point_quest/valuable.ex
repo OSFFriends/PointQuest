@@ -98,7 +98,7 @@ defmodule PointQuest.Valuable do
         local_changeset =
           valuable
           |> cast(params, local_fields)
-          |> validate_required(local_fields -- unquote(optional_fields))
+          |> validate_required(local_fields -- [:id | unquote(optional_fields)])
 
         Enum.reduce(__schema__(:embeds), local_changeset, fn embed, changeset ->
           changeset

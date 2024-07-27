@@ -12,7 +12,6 @@ defmodule PointQuest.Quests.Event.ObjectiveSorted do
           objectives: [Objective.t()]
         }
 
-  @primary_key false
   embedded_schema do
     field :quest_id, :string
     embeds_many :objectives, Objective

@@ -2,7 +2,6 @@ defmodule PointQuest.Quests.Event.AdventurerJoinedParty do
   use PointQuest.Valuable
   alias PointQuest.Quests.Adventurer
 
-  @primary_key false
   embedded_schema do
     field :quest_id
     field :adventurer_id

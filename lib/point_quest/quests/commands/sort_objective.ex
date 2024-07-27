@@ -29,9 +29,8 @@ defmodule PointQuest.Quests.Commands.SortObjective do
                     context: %{command: sort_objective_command, actor: actor} do
       with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
            true <- can_sort?(quest, actor),
-           {:ok, event} <- Quests.Quest.handle(sort_objective_command, quest),
-           :ok <- PointQuest.quest_repo().write(quest, event) do
-        {:ok, event}
+           {:ok, event} <- Quests.Quest.handle(sort_objective_command, quest) do
+        PointQuest.quest_repo().write(quest, event)
       else
         false -> {:error, :must_be_leader_of_party}
         {:error, _error} = error -> error
