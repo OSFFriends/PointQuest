@@ -69,33 +69,9 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
     add_adventurer
     |> cast(params, [:quest_id, :name, :class])
     |> validate_required([:quest_id, :name])
-    |> ensure_unique_name()
   end
 
-  defp ensure_unique_name(changeset) do
-    with {:ok, %{party: %{adventurers: adventurers, party_leader: leader}}} <-
-           PointQuest.quest_repo().get_quest_by_id(get_field(changeset, :quest_id)) do
-      name = get_field(changeset, :name)
-
-      adventurers =
-        if is_nil(leader.adventurer) do
-          adventurers
-        else
-          [leader.adventurer | adventurers]
-        end
-
-      if not is_nil(name) and
-           Enum.any?(adventurers, fn a ->
-             String.downcase(a.name) == String.downcase(name)
-           end) do
-        Ecto.Changeset.add_error(changeset, :name, "name must be unique among party members")
-      else
-        changeset
-      end
-    end
-  end
-
-  @spec execute(t()) :: PointQuest.Quests.Quest.t()
+  @spec execute(t(), keyword()) :: PointQuest.Quests.Quest.t()
   @doc """
   Executes the command to update the quest state.
 
@@ -106,12 +82,14 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   PointQuest.Quests.Commands.AddAdventurer.execute(command)
   ```
   """
-  def execute(%__MODULE__{quest_id: quest_id} = add_adventurer_command) do
+  def execute(%__MODULE__{quest_id: quest_id} = add_adventurer_command, opts \\ []) do
     Telemetrex.span event: Quests.Telemetry.add_adventurer(),
                     context: %{command: add_adventurer_command} do
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
+      repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+
+      with {:ok, quest} <- repo.get_quest_by_id(quest_id),
            {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest) do
-        PointQuest.quest_repo().write(
+        repo.write(
           quest,
           event
         )

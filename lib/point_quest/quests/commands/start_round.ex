@@ -22,7 +22,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
     field :quest_id, :string
   end
 
-  @spec execute(start_round_command :: t(), actor :: Authentication.PartyLeader.t()) ::
+  @spec execute(start_round_command :: t(), actor :: Authentication.PartyLeader.t(), keyword()) ::
           {:ok, Quests.Event.RoundStarted.t()}
           | {:error, Error.NotFound.exception(resource: :quest)}
           | {:error, :must_be_leader_of_quest_party}
@@ -32,13 +32,15 @@ defmodule PointQuest.Quests.Commands.StartRound do
 
   Returns a result tuple.
   """
-  def execute(%__MODULE__{} = start_round_command, actor) do
+  def execute(%__MODULE__{} = start_round_command, actor, opts \\ []) do
     Telemetrex.span event: Quests.Telemetry.round_started(),
                     context: %{command: start_round_command, actor: actor} do
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(start_round_command.quest_id),
+      repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+
+      with {:ok, quest} <- repo.get_quest_by_id(start_round_command.quest_id),
            true <- can_start_round?(quest, actor),
            {:ok, event} <- Quests.Quest.handle(start_round_command, quest) do
-        PointQuest.quest_repo().write(quest, event)
+        repo.write(quest, event)
       else
         false -> {:error, :must_be_leader_of_quest_party}
         {:error, _error} = error -> error
