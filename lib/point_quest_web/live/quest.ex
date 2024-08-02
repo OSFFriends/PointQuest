@@ -92,15 +92,21 @@ defmodule PointQuestWeb.QuestLive do
             <%!-- Adventurer --%>
             <div
               :for={%{id: id, class: class, name: name} <- @adventurers}
-              class="flex flex-col items-center justify-between w-1/5"
+              class="adventurer flex flex-col items-center justify-between w-1/5 relative"
             >
               <%!-- Attack --%>
               <.render_attack_choice
                 reveal_attacks?={@reveal_attacks?}
                 attack={Map.get(@attacks, id)}
               />
+              <%!-- Kick adventurer --%>
+              <div :if={is_party_leader?(@actor)} class="icon-container w-24 text-right">
+                <a class="cursor-pointer" phx-click="kick-adventurer" phx-value-adventurer-id={id}>
+                  <.icon name="hero-x-circle" class="icon text-red-500" />
+                </a>
+              </div>
               <%!-- Sprite --%>
-              <div class="w-16 mb-2">
+              <div class="sprite-container w-16 mb-2" data-is-party-leader={is_party_leader?(@actor)}>
                 <img
                   src={"/images/#{class}.png"}
                   alt={"small sprite representing #{class} class"}
@@ -111,11 +117,16 @@ defmodule PointQuestWeb.QuestLive do
                 Enum.find(@users, fn {_id, u} -> u.name == name and u.connected? end)
               } />
               <p class="text-bold"><%= name %></p>
-              <.render_adventurer_interaction_icons
-                :if={is_party_leader?(@actor)}
-                adventurer={id}
-                name={name}
-              />
+              <div :if={is_party_leader?(@actor)} class="icon-container flex items-start">
+                <a
+                  phx-click="alert-adventurer"
+                  phx-value-adventurer-id={id}
+                  phx-value-adventurer-name={name}
+                  class="items-center cursor-pointer"
+                >
+                  <.icon name="hero-signal" class="icon" />
+                </a>
+              </div>
             </div>
           </div>
           <.live_component
@@ -224,24 +235,6 @@ defmodule PointQuestWeb.QuestLive do
       <% else %>
         <div class="rounded-l-lg bg-red-400 w-1/4 h-full"></div>
       <% end %>
-    </div>
-    """
-  end
-
-  def render_adventurer_interaction_icons(assigns) do
-    ~H"""
-    <div class="flex items-start visible-on-parent-hover">
-      <a
-        phx-click="alert-adventurer"
-        phx-value-adventurer-id={@adventurer}
-        phx-value-adventurer-name={@name}
-        class="items-center"
-      >
-        <.icon name="hero-signal" />
-      </a>
-      <a phx-click="kick-adventurer" phx-value-adventurer-id={@adventurer} class="items-center">
-        <.icon name="hero-x-circle" class="text-red-500" />
-      </a>
     </div>
     """
   end
