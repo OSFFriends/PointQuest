@@ -1,0 +1,35 @@
+@layer components {
+  .adventurer {
+    & .icon-container {
+      @apply opacity-0;
+    }
+
+    & .sprite-container {
+      @apply opacity-100;
+    }
+  }
+
+  .adventurer:hover {
+    & .icon-container {
+      @apply opacity-100;
+    }
+
+    & .sprite-container[data-is-party-leader] {
+      @apply opacity-50 saturate-0;
+    }
+  }
+
+  .icon,
+  .icon-container,
+  .sprite-container {
+    @apply transition-all;
+  }
+
+  .icon-container:hover .icon {
+    @apply scale-110;
+  }
+
+  .icon-container:active .icon {
+    @apply scale-95;
+  }
+}
