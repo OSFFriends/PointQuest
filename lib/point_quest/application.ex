@@ -13,6 +13,7 @@ defmodule PointQuest.Application do
       {Finch, name: PointQuest.Finch},
       Infra.Quests.InMemory.Supervisor,
       Infra.Quests.SimpleInMemory.Supervisor,
+      Infra.Quests.Couch.Supervisor,
       {Phoenix.PubSub, name: PointQuestWeb.PubSub},
       PointQuestWeb.Presence,
       PointQuestWeb.Endpoint
