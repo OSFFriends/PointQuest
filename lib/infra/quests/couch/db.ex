@@ -2,7 +2,6 @@ defmodule Infra.Quests.Couch.Db do
   @behaviour PointQuest.Behaviour.Quests.Repo
 
   alias PointQuest.Error
-  alias PointQuest.Quests.Quest
   alias PointQuest.Quests.Event
 
   alias Infra.Couch
@@ -14,47 +13,40 @@ defmodule Infra.Quests.Couch.Db do
            Couch.Client.put(
              "/events-v2/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
              Couch.Document.to_doc(event)
+           ),
+         {:ok, pid} <-
+           Horde.DynamicSupervisor.start_child(
+             QuestCouch.QuestSupervisor,
+             {QuestCouch.QuestServer, quest_id: event.quest_id}
            ) do
+      QuestCouch.QuestServer.get(pid)
       {:ok, Map.put(event, :id, doc["id"])}
     end
   end
 
   def write(quest, event) do
-    with {:ok, doc} <-
-           Couch.Client.put(
-             "/events-v2/quest-#{quest.id}:#{ExULID.ULID.generate()}",
-             Couch.Document.to_doc(event)
-           ) do
-      {:ok, Map.put(event, :id, doc["id"])}
-    end
+    quest.id
+    |> lookup_quest_server()
+    |> QuestCouch.QuestServer.add_event(event)
   end
 
   @impl PointQuest.Behaviour.Quests.Repo
   def get_quest_by_id(quest_id) do
-    init_quest = Quest.init()
-
-    case QuestCouch.QuestSnapshots.get_snapshot(quest_id) do
+    case lookup_quest_server(quest_id) do
       nil ->
-        "/events-v2/_partition/quest-#{quest_id}/_all_docs"
-        |> Couch.Client.paginate_view(%{})
-        |> Enum.reduce(init_quest, &Quest.project/2)
-        |> case do
-          %{id: nil} ->
-            {:error, Error.NotFound.exception(reource: :quest)}
+        case Horde.DynamicSupervisor.start_child(
+               QuestCouch.QuestSupervisor,
+               {QuestCouch.QuestServer, quest_id: quest_id}
+             ) do
+          {:error, %PointQuest.Error.NotFound{}} = not_found ->
+            not_found
 
-          quest ->
-            {:ok, quest}
+          {:ok, pid} ->
+            {:ok, QuestCouch.QuestServer.get(pid)}
         end
 
-      %{snapshot: snapshot, version: version} ->
-        quest =
-          "events-v2/_partition/quest-#{quest_id}/_all_docs"
-          |> Couch.Client.paginate_view(%{
-            start_key: version <> "\ufff0"
-          })
-          |> Enum.reduce(snapshot, &Quest.project/2)
-
-        {:ok, quest}
+      pid ->
+        {:ok, QuestCouch.QuestServer.get(pid)}
     end
   end
 
@@ -97,6 +89,16 @@ defmodule Infra.Quests.Couch.Db do
 
       {:error, %Error.NotFound{resource: :quest}} = error ->
         error
+    end
+  end
+
+  defp lookup_quest_server(quest_id) do
+    case Horde.Registry.lookup(Infra.Quests.Couch.Registry, quest_id) do
+      [{pid, _state}] ->
+        pid
+
+      _not_found ->
+        nil
     end
   end
 end

@@ -7,6 +7,10 @@ defmodule Infra.Couch.Client do
           start_key: String.t() | nil
         }
 
+  def last_string_char() do
+    "\ufff0"
+  end
+
   def put(url, doc, opts \\ []) do
     client()
     |> Tesla.put(url, doc, opts)
