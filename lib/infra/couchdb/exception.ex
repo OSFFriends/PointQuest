@@ -1,4 +1,4 @@
-defmodule Infra.Couch.DocumentConflict do
+defmodule CouchDB.DocumentConflict do
   defexception [:document_id, :message]
 
   def exception(opts) do
@@ -9,18 +9,18 @@ defmodule Infra.Couch.DocumentConflict do
   end
 end
 
-defmodule Infra.Couch.Unauthorized do
+defmodule CouchDB.Unauthorized do
   defexception [:message]
 end
 
-defmodule Infra.Couch.NotFound do
+defmodule CouchDB.NotFound do
   defexception [:message]
 end
 
-defmodule Infra.Couch.BadRequest do
+defmodule CouchDB.BadRequest do
   defexception [:message]
 end
 
-defmodule Infra.Couch.PreconditionFailed do
+defmodule CouchDB.PreconditionFailed do
   defexception [:message]
 end

@@ -2,7 +2,6 @@ defmodule Infra.Quests.Couch.QuestSnapshots do
   @moduledoc """
   Retrieve and Store Quest Snapshots.
   """
-  alias Infra.Couch.Client, as: CouchDB
   alias PointQuest.Quests.Quest
 
   @type version :: String.t()

@@ -1,4 +1,4 @@
-defmodule Infra.Couch.Document do
+defmodule CouchDB.Document do
   @moduledoc """
   Utilities for working with CouchDB documents.
   """

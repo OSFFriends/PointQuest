@@ -4,15 +4,14 @@ defmodule Infra.Quests.Couch.Db do
   alias PointQuest.Error
   alias PointQuest.Quests.Event
 
-  alias Infra.Couch
   alias Infra.Quests.Couch, as: QuestCouch
 
   @impl PointQuest.Behaviour.Quests.Repo
   def write(_init_quest, %Event.QuestStarted{} = event) do
     with {:ok, doc} <-
-           Couch.Client.put(
+           CouchDB.put(
              "/events-v2/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
-             Couch.Document.to_doc(event)
+             CouchDB.Document.to_doc(event)
            ),
          {:ok, pid} <-
            Horde.DynamicSupervisor.start_child(

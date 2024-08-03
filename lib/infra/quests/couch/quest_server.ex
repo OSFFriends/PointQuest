@@ -2,7 +2,6 @@ defmodule Infra.Quests.Couch.QuestServer do
   use GenServer
   alias Infra.Quests.Couch.QuestSnapshots
   alias PointQuest.Quests.Quest
-  alias Infra.Couch
 
   def start_link(opts) do
     opts =
@@ -54,9 +53,9 @@ defmodule Infra.Quests.Couch.QuestServer do
 
   def handle_call({:add_event, event}, _from, state) do
     with {:ok, doc} <-
-           Couch.Client.put(
+           CouchDB.put(
              "/events-v2/quest-#{state.quest_id}:#{ExULID.ULID.generate()}",
-             Couch.Document.to_doc(event)
+             CouchDB.Document.to_doc(event)
            ),
          {:ok, quest_state} <- fetch_quest(state.quest_id) do
       state = Map.merge(state, quest_state)
@@ -90,7 +89,7 @@ defmodule Infra.Quests.Couch.QuestServer do
         init_quest = Quest.init()
 
         "/events-v2/_partition/quest-#{quest_id}/_all_docs"
-        |> Couch.Client.paginate_view(%{})
+        |> CouchDB.paginate_view(%{})
         |> maybe_limit(limit)
         |> Enum.reduce({init_quest, 0, _last_event_seen = nil}, fn event,
                                                                    {quest, events_seen,
@@ -112,7 +111,7 @@ defmodule Infra.Quests.Couch.QuestServer do
       %{snapshot: snapshot, version: version} ->
         {quest, events_seen, last_event_id} =
           "events-v2/_partition/quest-#{quest_id}/_all_docs"
-          |> Couch.Client.paginate_view(%{
+          |> CouchDB.paginate_view(%{
             start_key: version <> "\ufff0"
           })
           |> maybe_limit(limit)
