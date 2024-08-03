@@ -11,7 +11,7 @@ defmodule Infra.Quests.Couch.Db do
     with {:ok, doc} <-
            CouchDB.put(
              "/events-v2/quest-#{event.quest_id}:#{ExULID.ULID.generate()}",
-             CouchDB.Document.to_doc(event)
+             event
            ),
          {:ok, pid} <-
            Horde.DynamicSupervisor.start_child(
