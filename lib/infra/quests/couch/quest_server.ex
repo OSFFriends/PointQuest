@@ -55,7 +55,7 @@ defmodule Infra.Quests.Couch.QuestServer do
     with {:ok, doc} <-
            CouchDB.put(
              "/events-v2/quest-#{state.quest_id}:#{ExULID.ULID.generate()}",
-             CouchDB.Document.to_doc(event)
+             event
            ),
          {:ok, quest_state} <- fetch_quest(state.quest_id) do
       state = Map.merge(state, quest_state)
