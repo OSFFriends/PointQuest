@@ -1,6 +1,4 @@
-defmodule Infra.Couch.Client do
-  alias Infra.Couch
-
+defmodule CouchDB.Client do
   @type page_opts :: %{
           end_key: String.t() | nil,
           limit: non_neg_integer() | nil,
@@ -16,13 +14,13 @@ defmodule Infra.Couch.Client do
     |> Tesla.put(url, doc, opts)
     |> case do
       {:ok, %{status: 400, body: %{"reason" => reason}}} ->
-        {:error, Couch.BadRequest.exception(reason)}
+        {:error, CouchDB.BadRequest.exception(reason)}
 
       {:ok, %{status: 401, body: %{"reason" => reason}}} ->
-        {:error, Couch.Unauthorized.exception(reason)}
+        {:error, CouchDB.Unauthorized.exception(reason)}
 
       {:ok, %{status: 412, body: %{"reason" => reason}}} ->
-        {:error, Couch.PreconditionFailed.exception(reason)}
+        {:error, CouchDB.PreconditionFailed.exception(reason)}
 
       {:ok, %{body: body}} ->
         {:ok, body}
@@ -34,13 +32,13 @@ defmodule Infra.Couch.Client do
     |> Tesla.post(url, doc, opts)
     |> case do
       {:ok, %{status: 400, body: %{"reason" => reason}}} ->
-        {:error, Couch.BadRequest.exception(reason)}
+        {:error, CouchDB.BadRequest.exception(reason)}
 
       {:ok, %{status: 401, body: %{"reason" => reason}}} ->
-        {:error, Couch.Unauthorized.exception(reason)}
+        {:error, CouchDB.Unauthorized.exception(reason)}
 
       {:ok, %{status: 412, body: %{"reason" => reason}}} ->
-        {:error, Couch.PreconditionFailed.exception(reason)}
+        {:error, CouchDB.PreconditionFailed.exception(reason)}
 
       {:ok, %{body: body}} ->
         {:ok, body}
@@ -52,13 +50,13 @@ defmodule Infra.Couch.Client do
     |> Tesla.get(url, opts)
     |> case do
       {:ok, %{status: 400, body: %{"reason" => reason}}} ->
-        {:error, Couch.BadRequest.exception(reason)}
+        {:error, CouchDB.BadRequest.exception(reason)}
 
       {:ok, %{status: 401, body: %{"reason" => reason}}} ->
-        {:error, Couch.Unauthorized.exception(reason)}
+        {:error, CouchDB.Unauthorized.exception(reason)}
 
       {:ok, %{status: 404, body: %{"reason" => reason}}} ->
-        {:error, Couch.NotFound.exception(reason)}
+        {:error, CouchDB.NotFound.exception(reason)}
 
       {:ok, %{body: body}} ->
         {:ok, body}
@@ -84,8 +82,6 @@ defmodule Infra.Couch.Client do
             page_opts =
               page_opts
               |> Map.put(:start_key, List.last(rows)["id"] <> "\ufff0")
-
-            rows = Enum.map(rows, &Couch.Document.from_doc(&1["doc"]))
 
             {rows, page_opts}
 
