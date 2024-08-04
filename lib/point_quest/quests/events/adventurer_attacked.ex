@@ -7,7 +7,7 @@ defmodule PointQuest.Quests.Event.AdventurerAttacked do
   embedded_schema do
     field :quest_id, :string
     field :adventurer_id, :string
-    field :attack, AttackValue
+    field :attack, AttackValue, redact: true
   end
 
   def new!(params) do
