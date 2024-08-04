@@ -142,14 +142,24 @@ defmodule PointQuestWeb.QuestLive do
     <.button phx-click="toggle-nerd-bar">
       <.icon name="hero-beaker" /> Toggle Nerd Stats
     </.button>
-    <div :if={@show_nerd_bar?} class="bg-slate-300 mt-6">
+    <div :if={@show_nerd_bar?} class="bg-slate-300 mt-6 p-6">
       <p>Node: <%= Node.self() %></p>
       <p>Liveview: <%= inspect(self()) %></p>
       <p>
         Game: <%= inspect(
-          GenServer.whereis({:via, Horde.Registry, {Infra.Quests.InMemory.Registry, @quest.id}})
+          GenServer.whereis({:via, Horde.Registry, {Infra.Quests.Couch.Registry, @quest.id}})
         ) %>
       </p>
+      <header class="mt-6 mb-4">
+        <span class="text-xl underline font-bold">Event Feed</span> - <span>Newest on top</span>
+      </header>
+      <div id="nerd-bar-event-stream" phx-update="stream">
+        <div :for={{dom_id, event} <- @streams.events} class="mb-4" id={dom_id}>
+          <code>
+            <%= inspect(event) %>
+          </code>
+        </div>
+      </div>
     </div>
     <.modal id="add-objective">
       <.form
@@ -278,6 +288,7 @@ defmodule PointQuestWeb.QuestLive do
             users: %{}
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
+          |> stream(:events, [], at: 0, limit: 15)
 
         {:error, :missing} ->
           redirect(socket, to: ~p"/quest/#{params["id"]}/join")
@@ -434,26 +445,35 @@ defmodule PointQuestWeb.QuestLive do
   end
 
   def handle_info(
-        %Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack_value},
+        %Event.AdventurerAttacked{adventurer_id: adventurer_id, attack: attack_value} = event,
         socket
       ) do
     attacks = Map.put(socket.assigns.attacks, adventurer_id, attack_value)
 
-    {:noreply, assign(socket, attacks: attacks)}
+    socket =
+      socket
+      |> assign(attacks: attacks)
+      |> handle_event_stream(event)
+
+    {:noreply, socket}
   end
 
   # remove from quest if you were just booted
   def handle_info(
-        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id},
+        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id} = event,
         %{assigns: %{actor: %Actor.Adventurer{adventurer: %{id: adventurer_id}}}} = socket
       ) do
-    socket = put_flash(socket, :info, "your bitch ass was removed")
+    socket =
+      socket
+      |> put_flash(:info, "your bitch ass was removed")
+      |> handle_event_stream(event)
+      |> push_navigate(to: "/quest")
 
-    {:noreply, push_navigate(socket, to: "/quest")}
+    {:noreply, socket}
   end
 
   def handle_info(
-        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id},
+        %Event.AdventurerRemovedFromParty{adventurer_id: adventurer_id} = event,
         %{assigns: %{actor: _not_removed_adventurer}} = socket
       ) do
     adventurers = Enum.reject(socket.assigns.adventurers, fn %{id: id} -> id == adventurer_id end)
@@ -462,11 +482,12 @@ defmodule PointQuestWeb.QuestLive do
       socket
       |> assign(adventurers: adventurers)
       |> handle_kick(adventurer_id)
+      |> handle_event_stream(event)
 
     {:noreply, socket}
   end
 
-  def handle_info(%Event.RoundStarted{objectives: objectives}, socket) do
+  def handle_info(%Event.RoundStarted{objectives: objectives} = event, socket) do
     link =
       case Enum.find(objectives, fn o -> o.status == :current end) do
         nil ->
@@ -476,36 +497,49 @@ defmodule PointQuestWeb.QuestLive do
           objective.title
       end
 
-    {
-      :noreply,
-      assign(socket,
+    socket =
+      socket
+      |> assign(
         round_active?: true,
         reveal_attacks?: false,
         attacks: %{},
         objectives: objectives,
         quest_objective: link
       )
-    }
-  end
+      |> handle_event_stream(event)
 
-  def handle_info(%Event.RoundEnded{objectives: objectives}, socket) do
-    {
-      :noreply,
-      assign(socket, round_active?: false, reveal_attacks?: true, objectives: objectives)
-    }
-  end
-
-  def handle_info(%Event.ObjectiveAdded{objectives: objectives}, socket) do
-    {:noreply, assign(socket, objectives: objectives)}
-  end
-
-  def handle_info(%Event.ObjectiveSorted{objectives: objectives}, socket) do
-    {:noreply, assign(socket, objectives: objectives)}
-  end
-
-  # catch it
-  def handle_info(_event, socket) do
     {:noreply, socket}
+  end
+
+  def handle_info(%Event.RoundEnded{objectives: objectives} = event, socket) do
+    socket =
+      socket
+      |> assign(round_active?: false, reveal_attacks?: true, objectives: objectives)
+      |> handle_event_stream(event)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%Event.ObjectiveAdded{objectives: objectives} = event, socket) do
+    socket =
+      socket
+      |> assign(objectives: objectives)
+      |> handle_event_stream(event)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(%Event.ObjectiveSorted{objectives: objectives} = event, socket) do
+    socket =
+      socket
+      |> assign(objectives: objectives)
+      |> handle_event_stream(event)
+
+    {:noreply, socket}
+  end
+
+  def handle_info(event, socket) when is_struct(event) do
+    {:noreply, handle_event_stream(socket, event)}
   end
 
   def handle_joins(socket, joins) do
@@ -535,6 +569,10 @@ defmodule PointQuestWeb.QuestLive do
     users = Map.delete(socket.assigns.users, adventurer_id)
 
     assign(socket, users: users)
+  end
+
+  def handle_event_stream(socket, event) do
+    stream_insert(socket, :events, event, at: 0, limit: 15)
   end
 
   defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
