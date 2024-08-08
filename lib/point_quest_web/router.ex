@@ -33,6 +33,15 @@ defmodule PointQuestWeb.Router do
     live_dashboard "/dashboard", metrics: PointQuestWeb.Telemetry
   end
 
+  scope "/auth" do
+    pipe_through [:browser]
+
+    get "/github", PointQuestWeb.AuthController, :request
+    get "/github/callback", PointQuestWeb.AuthController, :callback
+    post "/github/callback", PointQuestWeb.AuthController, :callback
+    delete "/logout", PointQuestWeb.AuthController, :delete
+  end
+
   scope "/", PointQuestWeb do
     pipe_through [:browser]
 

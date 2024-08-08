@@ -111,3 +111,7 @@ config :point_quest, Infra.Linear,
   team_name: "PAYME",
   client_id: "a79e5ef8c1c5084c6caed995243bd21c",
   client_secret: System.get_env("LINEAR_CLIENT_SECRET", nil)
+
+config :ueberauth, Ueberauth.Strategy.Github.OAuth,
+  client_id: System.get_env("GITHUB_AUTH_CLIENT_ID"),
+  client_secret: System.get_env("GITHUB_AUTH_CLIENT_SECRET")
