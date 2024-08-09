@@ -21,6 +21,7 @@ config :point_quest, PointQuestWeb.Endpoint,
 # config :point_quest, PointQuest.Behaviour.Linear, PointQuest.Linear
 # config :point_quest, PointQuest.Behaviour.Linear.Client, PointQuest.Linear.Client
 # config :point_quest, PointQuest.Behaviour.Linear.Repo, PointQuest.Linear.Repo
+config :point_quest, PointQuest.Behaviour.Players.Repo, Infra.Players.Couch.Db
 config :point_quest, PointQuest.Behaviour.Quests, PointQuest.Quests
 config :point_quest, PointQuest.Behaviour.Quests.Repo, Infra.Quests.Couch.Db
 # config :point_quest, PointQuest.Behaviour.Ticket, Infra.Linear.Linear
@@ -70,6 +71,11 @@ config :phoenix, :json_library, Jason
 config :nanoid,
   size: 8,
   alphabet: "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+config :ueberauth, Ueberauth,
+  providers: [
+    github: {Ueberauth.Strategy.Github, []}
+  ]
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.
