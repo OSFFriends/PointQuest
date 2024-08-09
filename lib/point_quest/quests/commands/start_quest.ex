@@ -94,7 +94,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   }}
   ```
   """
-  def execute(%__MODULE__{} = start_quest_command, opts \\ []) do
+  def execute(%__MODULE__{} = start_quest_command, actor, opts \\ []) do
     repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
     quest = Quests.Quest.init()
 
@@ -108,4 +108,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
       {:error, error} -> %{error: true, reason: error}
     end
   end
+
+  defp can_start_quest?(%Actor{glyph: %Glyph{guild: :vagabond}}), do: false
+  defp can_start_quest?(_actor), do: true
 end

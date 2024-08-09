@@ -8,6 +8,7 @@ defmodule PointQuest do
   """
 
   @spec quest_service() :: module()
+  def player_repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Players.Repo)
   def quest_service(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests)
   def quest_repo(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Quests.Repo)
   def ticket_service(), do: Application.get_env(:point_quest, PointQuest.Behaviour.Ticket)

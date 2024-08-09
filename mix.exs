@@ -51,6 +51,7 @@ defmodule PointQuest.MixProject do
       {:finch, "~> 0.13"},
       {:floki, ">= 0.30.0", only: :test},
       {:gettext, "~> 0.20"},
+      {:guardian, "~> 2.3"},
       {:horde, "~> 0.8.5"},
       {:jason, "~> 1.2"},
       {:nanoid, "~> 2.1.0"},
@@ -69,7 +70,9 @@ defmodule PointQuest.MixProject do
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
       {:tesla, "~> 1.7"},
-      {:timex, "~> 3.7"}
+      {:timex, "~> 3.7"},
+      {:ueberauth, "~> 0.10"},
+      {:ueberauth_github, "~> 0.8"}
     ]
   end
 
