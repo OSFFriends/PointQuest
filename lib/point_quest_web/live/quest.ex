@@ -288,7 +288,7 @@ defmodule PointQuestWeb.QuestLive do
             users: %{}
           )
           |> handle_joins(PointQuestWeb.Presence.list(quest.id))
-          |> stream(:events, [], at: 0, limit: 15)
+          |> stream(:events, [], at: 0, limit: 30)
 
         {:error, :missing} ->
           redirect(socket, to: ~p"/quest/#{params["id"]}/join")
@@ -572,7 +572,7 @@ defmodule PointQuestWeb.QuestLive do
   end
 
   def handle_event_stream(socket, event) do
-    stream_insert(socket, :events, event, at: 0, limit: 15)
+    stream_insert(socket, :events, event, at: 0, limit: 30)
   end
 
   defp actor_to_meta(%PointQuest.Authentication.Actor.PartyLeader{
