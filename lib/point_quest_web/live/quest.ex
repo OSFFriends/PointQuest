@@ -18,6 +18,7 @@ defmodule PointQuestWeb.QuestLive do
   def render(assigns) do
     ~H"""
     <div id="top-level-wrapper" class="w-full flex mb-5">
+      <!-- Objective sidebar -->
       <div :if={is_party_leader?(@actor)} id="objectives" class="w-1/5 mr-5">
         <div class="pb-5 w-full">
           <div id="sortable-list" phx-hook="Sortable" class="shadow-sm">
@@ -69,6 +70,7 @@ defmodule PointQuestWeb.QuestLive do
           </div>
         </div>
       </div>
+      <!-- Objective sidebar end -->
       <div id="quest-view" class="w-4/5">
         <div class="flex flex-col gap-y-8">
           <.render_party_leader_controls
@@ -77,7 +79,7 @@ defmodule PointQuestWeb.QuestLive do
             quest_objective={@quest_objective}
           />
           <div class="flex justify-between">
-            <div class={"#{if @round_active?, do: "visible", else: "invisible"} flex gap-x-2 items-center"}>
+            <div class="flex gap-x-2 items-center">
               <.icon name="hero-arrow-top-right-on-square" />
               <a href={@quest_objective} target="_blank" class="text-indigo-500">
                 <%= @quest_objective %>
