@@ -68,8 +68,7 @@ defmodule PointQuest.MixProject do
       {:telemetrex, "~> 0.2"},
       {:telemetry_metrics, "~> 0.6"},
       {:telemetry_poller, "~> 1.0"},
-      {:tesla, "~> 1.7"},
-      {:timex, "~> 3.7"}
+      {:tesla, "~> 1.7"}
     ]
   end
 

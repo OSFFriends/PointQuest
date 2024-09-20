@@ -118,10 +118,20 @@ defmodule PointQuest.Quests.QuestTest do
       assert Enum.member?(attacks, %Quests.Attack{adventurer_id: adventurer_id, attack: 5})
     end
 
-    test "projects RoundStarted event", %{
+    test "projects RoundStarted event with current objective", %{
       quest: %{id: quest_id} = quest,
       party_leader_actor: actor
     } do
+      {:ok, objective_event} =
+        %{quest_id: quest_id, quest_objective: "this is a test"}
+        |> Quests.Commands.AddSimpleObjective.new!()
+        |> Quests.Commands.AddSimpleObjective.execute(actor)
+
+      assert %Quests.Quest{
+               id: ^quest_id,
+               objectives: [%{title: "this is a test"}]
+             } = quest = Quests.Quest.project(objective_event, quest)
+
       {:ok, event} =
         %{quest_id: quest_id}
         |> Quests.Commands.StartRound.new!()
@@ -129,7 +139,8 @@ defmodule PointQuest.Quests.QuestTest do
 
       assert %Quests.Quest{
                id: ^quest_id,
-               round_active?: true
+               round_active?: true,
+               quest_objective: "this is a test"
              } = Quests.Quest.project(event, quest)
     end
 

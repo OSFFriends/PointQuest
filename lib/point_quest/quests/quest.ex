@@ -125,11 +125,23 @@ defmodule PointQuest.Quests.Quest do
   end
 
   def project(%Event.RoundStarted{objectives: objectives}, %__MODULE__{} = quest) do
+    quest_objective =
+      objectives
+      |> Enum.find(&(&1.status == :current))
+      |> case do
+        nil ->
+          ""
+
+        objective ->
+          objective.title
+      end
+
     %__MODULE__{
       quest
       | round_active?: true,
         attacks: [],
-        objectives: objectives
+        objectives: objectives,
+        quest_objective: quest_objective
     }
   end
 
