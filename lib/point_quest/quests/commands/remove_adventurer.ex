@@ -5,6 +5,7 @@ defmodule PointQuest.Quests.Commands.RemoveAdventurer do
   use PointQuest.Valuable
 
   alias PointQuest.Authentication.Actor
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests
 
   require PointQuest.Quests.Telemetry
@@ -41,15 +42,15 @@ defmodule PointQuest.Quests.Commands.RemoveAdventurer do
   def execute(%__MODULE__{quest_id: quest_id} = remove_adventurer_command, actor) do
     Telemetrex.span event: Quests.Telemetry.remove_adventurer(),
                     context: %{command: remove_adventurer_command, actor: actor} do
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
+      with {:ok, quest} <- QuestRepo.get_quest_by_id(quest_id),
            {:ok, adventurer} <-
-             PointQuest.quest_repo().get_adventurer_by_id(
+             QuestRepo.get_adventurer_by_id(
                quest_id,
                remove_adventurer_command.adventurer_id
              ),
            true <- can_remove_adventurer?(adventurer, quest, actor),
            {:ok, event} <- Quests.Quest.handle(remove_adventurer_command, quest) do
-        PointQuest.quest_repo().write(quest, event)
+        QuestRepo.write(quest, event)
       else
         false ->
           {:error, "not authorized to remove adventurer"}

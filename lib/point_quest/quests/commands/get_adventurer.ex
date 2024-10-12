@@ -7,6 +7,7 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
   Run the query by calling `new!/1`/`new/1` and passing the returned command to `execute/1`.
   """
   use PointQuest.Valuable
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Error
 
   @type t :: %__MODULE__{
@@ -40,6 +41,6 @@ defmodule PointQuest.Quests.Commands.GetAdventurer do
   ```
   """
   def execute(%__MODULE__{quest_id: quest_id, adventurer_id: adventurer_id}) do
-    PointQuest.quest_repo().get_adventurer_by_id(quest_id, adventurer_id)
+    QuestRepo.get_adventurer_by_id(quest_id, adventurer_id)
   end
 end

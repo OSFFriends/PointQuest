@@ -10,6 +10,7 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
   parsed from a token is a valid party leader.
   """
   use PointQuest.Valuable
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Error
 
   @type t :: %__MODULE__{
@@ -47,6 +48,6 @@ defmodule PointQuest.Quests.Commands.GetPartyLeader do
   ```
   """
   def execute(%__MODULE__{quest_id: quest_id, leader_id: leader_id}) do
-    PointQuest.quest_repo().get_party_leader_by_id(quest_id, leader_id)
+    QuestRepo.get_party_leader_by_id(quest_id, leader_id)
   end
 end

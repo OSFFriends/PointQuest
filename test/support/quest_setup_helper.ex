@@ -2,6 +2,7 @@ defmodule QuestSetupHelper do
   @moduledoc """
   A simple helper for tests requiring quest setup.
   """
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests.Commands.AddAdventurer
   alias PointQuest.Quests.Commands.GetAdventurer
   alias PointQuest.Quests.Commands.StartQuest
@@ -12,7 +13,7 @@ defmodule QuestSetupHelper do
       |> StartQuest.execute()
 
     {:ok, %{party: %{party_leader: party_leader}} = quest} =
-      PointQuest.quest_repo().get_quest_by_id(quest_started.quest_id)
+      QuestRepo.get_quest_by_id(quest_started.quest_id)
 
     {:ok, quest_started} =
       StartQuest.new!(%{
@@ -20,7 +21,7 @@ defmodule QuestSetupHelper do
       })
       |> StartQuest.execute()
 
-    {:ok, other_quest} = PointQuest.quest_repo().get_quest_by_id(quest_started.quest_id)
+    {:ok, other_quest} = QuestRepo.get_quest_by_id(quest_started.quest_id)
 
     {:ok, %{adventurer_id: adventurer_id}} =
       AddAdventurer.new!(%{name: "Sir Stephen Bolton", class: :knight, quest_id: quest.id})

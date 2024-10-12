@@ -19,7 +19,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
 
   @primary_key false
   embedded_schema do
-    field :quest_id, :string
+    field(:quest_id, :string)
   end
 
   @spec execute(start_round_command :: t(), actor :: Authentication.PartyLeader.t(), keyword()) ::
@@ -35,7 +35,7 @@ defmodule PointQuest.Quests.Commands.StartRound do
   def execute(%__MODULE__{} = start_round_command, actor, opts \\ []) do
     Telemetrex.span event: Quests.Telemetry.round_started(),
                     context: %{command: start_round_command, actor: actor} do
-      repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+      repo = Keyword.get(opts, :quest_repo, PointQuest.Behaviour.Quests.Repo)
 
       with {:ok, quest} <- repo.get_quest_by_id(start_round_command.quest_id),
            true <- can_start_round?(quest, actor),

@@ -1,6 +1,7 @@
 defmodule PointQuest.Quests.QuestTest do
   use ExUnit.Case
 
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests
 
   # gonna break this up into two sections, doing direct unit testing of the
@@ -278,7 +279,7 @@ defmodule PointQuest.Quests.QuestTest do
       |> Quests.Commands.AddSimpleObjective.execute(actor)
 
       # ensure we have 2 incomplete objectives
-      {:ok, %{objectives: objectives} = quest} = PointQuest.quest_repo().get_quest_by_id(quest_id)
+      {:ok, %{objectives: objectives} = quest} = QuestRepo.get_quest_by_id(quest_id)
       assert length(Enum.filter(objectives, fn o -> o.status == :incomplete end)) == 2
 
       command = Quests.Commands.StartRound.new!(%{quest_id: quest_id})
@@ -310,7 +311,7 @@ defmodule PointQuest.Quests.QuestTest do
       |> Quests.Commands.StartRound.new!()
       |> Quests.Commands.StartRound.execute(actor)
 
-      {:ok, %{objectives: objectives} = quest} = PointQuest.quest_repo().get_quest_by_id(quest_id)
+      {:ok, %{objectives: objectives} = quest} = QuestRepo.get_quest_by_id(quest_id)
       assert length(Enum.filter(objectives, fn o -> o.status == :current end)) == 1
 
       command =

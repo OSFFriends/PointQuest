@@ -19,7 +19,7 @@ defmodule PointQuest.Quests.Commands.StopRound do
 
   @primary_key false
   embedded_schema do
-    field :quest_id
+    field(:quest_id)
   end
 
   @spec execute(stop_round_command :: t(), actor :: Authentication.PartyLeader.t(), keyword()) ::
@@ -35,7 +35,7 @@ defmodule PointQuest.Quests.Commands.StopRound do
   def execute(%__MODULE__{} = stop_round_command, actor, opts \\ []) do
     Telemetrex.span event: Quests.Telemetry.round_ended(),
                     context: %{command: stop_round_command, actor: actor} do
-      repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+      repo = Keyword.get(opts, :quest_repo, PointQuest.Behaviour.Quests.Repo)
 
       with {:ok, quest} <- repo.get_quest_by_id(stop_round_command.quest_id),
            true <- can_stop_round?(quest, actor),

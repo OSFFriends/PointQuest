@@ -4,6 +4,7 @@ defmodule PointQuest.Quests.Commands.SortObjective do
   """
   use PointQuest.Valuable
 
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests
 
   require PointQuest.Quests.Telemetry
@@ -27,10 +28,10 @@ defmodule PointQuest.Quests.Commands.SortObjective do
   def execute(%__MODULE__{quest_id: quest_id} = sort_objective_command, actor) do
     Telemetrex.span event: Quests.Telemetry.objective_sorted(),
                     context: %{command: sort_objective_command, actor: actor} do
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
+      with {:ok, quest} <- QuestRepo.get_quest_by_id(quest_id),
            true <- can_sort?(quest, actor),
            {:ok, event} <- Quests.Quest.handle(sort_objective_command, quest) do
-        PointQuest.quest_repo().write(quest, event)
+        QuestRepo.write(quest, event)
       else
         false -> {:error, :must_be_leader_of_party}
         {:error, _error} = error -> error

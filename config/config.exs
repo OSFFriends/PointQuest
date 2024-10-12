@@ -7,6 +7,8 @@
 # General application configuration
 import Config
 
+config :dependable, otp_app: :point_quest
+
 # Configures the endpoint
 config :point_quest, PointQuestWeb.Endpoint,
   url: [host: "localhost"],
