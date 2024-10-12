@@ -43,6 +43,7 @@ defmodule PointQuest.MixProject do
     [
       {:bcrypt_elixir, "~> 3.0"},
       {:credo, "~> 1.6", only: [:dev, :test], runtime: false},
+      {:dependable, "~> 0.1.0"},
       {:dns_cluster, "~> 0.1.1"},
       {:ecto_enum, "~> 1.4"},
       {:esbuild, "~> 0.7", runtime: Mix.env() == :dev},

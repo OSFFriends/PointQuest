@@ -4,6 +4,7 @@ defmodule PointQuest.Quests.Commands.Attack do
   """
   use PointQuest.Valuable
 
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests
   alias PointQuest.Quests.Commands
 
@@ -26,7 +27,7 @@ defmodule PointQuest.Quests.Commands.Attack do
   def execute(%__MODULE__{quest_id: quest_id} = attack_command, actor) do
     Telemetrex.span event: Quests.Telemetry.attack(),
                     context: %{command: attack_command, actor: actor} do
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
+      with {:ok, quest} <- QuestRepo.get_quest_by_id(quest_id),
            {:ok, adventurer} <-
              Commands.GetAdventurer.execute(
                Commands.GetAdventurer.new!(%{
@@ -36,7 +37,7 @@ defmodule PointQuest.Quests.Commands.Attack do
              ),
            true <- can_attack?(adventurer, quest, actor),
            {:ok, event} <- Quests.Quest.handle(attack_command, quest) do
-        PointQuest.quest_repo().write(quest, event)
+        QuestRepo.write(quest, event)
       else
         false ->
           {:error, "attack disallowed"}

@@ -3,6 +3,8 @@ defmodule PointQuestWeb.QuestAudioLive do
   LiveView to push audio events from quest events.
   """
   use PointQuestWeb, :live_view
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
+  alias PointQuest.Quests.Event
   alias PointQuest.Quests.Event
   alias PointQuestWeb.Events, as: WebEvents
 
@@ -27,7 +29,7 @@ defmodule PointQuestWeb.QuestAudioLive do
 
   def handle_info(%Event.RoundEnded{quest_id: quest_id}, socket) do
     # Check if every adventurer attacked and chose the same value
-    with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(quest_id),
+    with {:ok, quest} <- QuestRepo.get_quest_by_id(quest_id),
          # leader could also be an attacker so +1 is okay
          true <- length(quest.attacks) >= length(quest.party.adventurers),
          [_same_attack] <- Enum.uniq_by(quest.attacks, &Map.get(&1, :attack)) do

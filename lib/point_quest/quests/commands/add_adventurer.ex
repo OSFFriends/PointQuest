@@ -85,7 +85,7 @@ defmodule PointQuest.Quests.Commands.AddAdventurer do
   def execute(%__MODULE__{quest_id: quest_id} = add_adventurer_command, opts \\ []) do
     Telemetrex.span event: Quests.Telemetry.add_adventurer(),
                     context: %{command: add_adventurer_command} do
-      repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+      repo = Keyword.get(opts, :quest_repo, PointQuest.Behaviour.Quests.Repo)
 
       with {:ok, quest} <- repo.get_quest_by_id(quest_id),
            {:ok, event} <- Quests.Quest.handle(add_adventurer_command, quest) do

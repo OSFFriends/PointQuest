@@ -1,4 +1,5 @@
 defmodule PointQuest.Behaviour.Quests.Repo do
+  use Dependable
   alias PointQuest.Error
   alias PointQuest.Quests
 

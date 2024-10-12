@@ -27,8 +27,8 @@ defmodule PointQuest.Quests.Commands.StartQuest do
 
     @primary_key false
     embedded_schema do
-      field :name, :string
-      field :class, Adventurer.Class.NameEnum
+      field(:name, :string)
+      field(:class, Adventurer.Class.NameEnum)
     end
 
     def changeset(adventurer, params \\ %{}) do
@@ -46,8 +46,8 @@ defmodule PointQuest.Quests.Commands.StartQuest do
 
   @primary_key false
   embedded_schema do
-    field :quest_id, :string
-    embeds_one :party_leaders_adventurer, PartyLeadersAdventurer
+    field(:quest_id, :string)
+    embeds_one(:party_leaders_adventurer, PartyLeadersAdventurer)
   end
 
   def changeset(start_quest, params) do
@@ -95,7 +95,7 @@ defmodule PointQuest.Quests.Commands.StartQuest do
   ```
   """
   def execute(%__MODULE__{} = start_quest_command, opts \\ []) do
-    repo = Keyword.get(opts, :quest_repo, PointQuest.quest_repo())
+    repo = Keyword.get(opts, :quest_repo, PointQuest.Behaviour.Quests.Repo)
     quest = Quests.Quest.init()
 
     Telemetrex.span event: Quests.Telemetry.quest_started(),

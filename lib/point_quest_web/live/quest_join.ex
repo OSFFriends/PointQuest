@@ -1,6 +1,7 @@
 defmodule PointQuestWeb.QuestJoinLive do
   use PointQuestWeb, :live_view
 
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Error
   alias PointQuest.Quests.Commands.GetAdventurer
   alias PointQuest.Quests.Commands.AddAdventurer
@@ -24,7 +25,7 @@ defmodule PointQuestWeb.QuestJoinLive do
 
   def mount(params, _session, socket) do
     socket =
-      with {:ok, quest} <- PointQuest.quest_repo().get_quest_by_id(params["id"]),
+      with {:ok, quest} <- QuestRepo.get_quest_by_id(params["id"]),
            {:in_quest?, false} <- check_actor_in_quest(quest, socket.assigns.actor) do
         changeset = get_changeset(%{quest_id: quest.id})
         classes = PointQuest.Quests.Adventurer.Class.NameEnum.valid_atoms()

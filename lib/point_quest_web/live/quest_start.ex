@@ -5,6 +5,7 @@ defmodule PointQuestWeb.QuestStartLive do
   use PointQuestWeb, :live_view
 
   alias PointQuest.Authentication
+  alias PointQuest.Behaviour.Quests.Repo, as: QuestRepo
   alias PointQuest.Quests.Commands.StartQuest
 
   def render(assigns) do
@@ -81,7 +82,7 @@ defmodule PointQuestWeb.QuestStartLive do
       |> StartQuest.new!()
       |> StartQuest.execute()
 
-    {:ok, quest} = PointQuest.quest_repo().get_quest_by_id(quest_started.quest_id)
+    {:ok, quest} = QuestRepo.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party.party_leader
@@ -101,7 +102,7 @@ defmodule PointQuestWeb.QuestStartLive do
       |> StartQuest.new!()
       |> StartQuest.execute()
 
-    {:ok, quest} = PointQuest.quest_repo().get_quest_by_id(quest_started.quest_id)
+    {:ok, quest} = QuestRepo.get_quest_by_id(quest_started.quest_id)
 
     token =
       quest.party.party_leader
